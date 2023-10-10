@@ -23,8 +23,17 @@ public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, G
 
 		// Configure GUID primary keys for user entities
 		builder.Entity<User>().Property(u => u.Id).ValueGeneratedOnAdd();
-		builder.Entity<Admin>().Property(a => a.Id).ValueGeneratedOnAdd();
-		builder.Entity<Client>().Property(c => c.Id).ValueGeneratedOnAdd();
-	}
+       
+        builder.Entity<Admin>()
+            .HasOne(a => a.User)
+            .WithOne()
+            .HasForeignKey<Admin>(a => a.Id);
+
+        builder.Entity<Client>()
+            .HasOne(c => c.User)
+            .WithOne()
+            .HasForeignKey<Client>(c => c.Id);
+
+    }
 }
 
