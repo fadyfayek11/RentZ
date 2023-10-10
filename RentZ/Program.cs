@@ -48,7 +48,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 var app = builder.Build();
