@@ -29,7 +29,7 @@ public class Client
     public Gender Gender { get; set; }
     public DateTime BirthDate { get; set; }
     public string ProfileImage { get; set; }
-    public string FavLang { get; set; }
+    public Lang FavLang { get; set; }
     public string Bio { get; set; }
     public int CityId { get; set; }
 

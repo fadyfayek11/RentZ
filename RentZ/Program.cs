@@ -1,6 +1,11 @@
+using System.Text;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RentZ.Application.Configurations;
 using RentZ.Domain.Entities;
 using RentZ.DTO.JWT;
 using RentZ.Infrastructure.Context;
@@ -50,6 +55,30 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthentication(options =>
+	{
+		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+		options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+	})
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters()
+		{
+			ValidateActor = true,
+			ValidateAudience = true,
+			ValidateLifetime = true,
+			ValidateIssuerSigningKey = true,
+			ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+			ValidAudience = builder.Configuration["JwtSettings:Audience"],
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
+		};
+	});
+
+builder.Services.ServiceConfiguration();
+builder.Services.AddFluentValidationRulesToSwagger();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -61,6 +90,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
