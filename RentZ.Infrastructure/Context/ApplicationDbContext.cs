@@ -7,16 +7,19 @@ using RentZ.Domain.Entities;
 
 namespace RentZ.Infrastructure.Context;
 
-public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, Guid>
+public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, Guid>
 {
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 		: base(options)
 	{
-	}
+        ChangeTracker.LazyLoadingEnabled = true;
+    }
 
 	public DbSet<Admin> Admins { get; set; }
 	public DbSet<OtpSetup> OtpSetups { get; set; }
 	public DbSet<Client> Clients { get; set; }
+	public DbSet<City> City { get; set; }
+	public DbSet<Governorate> Governorate { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{

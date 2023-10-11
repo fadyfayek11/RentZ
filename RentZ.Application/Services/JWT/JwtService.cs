@@ -22,9 +22,10 @@ public class JwtService : IJwtService
             new System.Security.Claims.Claim(JwtRegisteredClaimNames.Email, tokenRequest.UserEmail),
             new System.Security.Claims.Claim("PhoneNumber", tokenRequest.PhoneNumber),
             new System.Security.Claims.Claim("Gender", tokenRequest.Gender.ToString()),
-            new System.Security.Claims.Claim("Bio", tokenRequest.Bio),
+            new System.Security.Claims.Claim("Bio", tokenRequest.Bio ?? ""),
             new System.Security.Claims.Claim("FavLang", tokenRequest.FavLang.ToString()),
             new System.Security.Claims.Claim("City", tokenRequest.City),
+            new System.Security.Claims.Claim("IsOwner", tokenRequest.IsOwner.ToString()),
             new System.Security.Claims.Claim("IsActiveAcc", tokenRequest.IsActive.ToString()),
             new System.Security.Claims.Claim("OtpVerified", tokenRequest.IsOtpVerified.ToString()),
         };

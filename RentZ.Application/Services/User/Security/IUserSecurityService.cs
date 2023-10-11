@@ -7,7 +7,8 @@ namespace RentZ.Application.Services.User.Security
     public interface IUserSecurityService
     {
         Task<BaseResponse<GenerateTokenResponseDto>> Login(Login login);
-        Task<BaseResponse<bool>> VerifyOtp(string otpNumber);
-        Task<BaseResponse<string>> ResendOtp();
+        Task<BaseResponse<GenerateTokenResponseDto>> Registration(Registration register);
+        Task<BaseResponse<bool>> VerifyOtp(Guid userId, string otpNumber);
+        Task<BaseResponse<string>> ResendOtp(Guid userId);
     }
 }
