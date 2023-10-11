@@ -192,6 +192,25 @@ namespace RentZ.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OtpSetups",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OtpSetups", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OtpSetups_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "City",
                 columns: table => new
                 {
@@ -221,7 +240,7 @@ namespace RentZ.Infrastructure.Migrations
                     Gender = table.Column<int>(type: "int", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ProfileImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FavLang = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FavLang = table.Column<int>(type: "int", nullable: false),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CityId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -290,6 +309,11 @@ namespace RentZ.Infrastructure.Migrations
                 name: "IX_Clients_CityId",
                 table: "Clients",
                 column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OtpSetups_UserId",
+                table: "OtpSetups",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -317,13 +341,16 @@ namespace RentZ.Infrastructure.Migrations
                 name: "Clients");
 
             migrationBuilder.DropTable(
+                name: "OtpSetups");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "City");
 
             migrationBuilder.DropTable(
-                name: "City");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Governorate");

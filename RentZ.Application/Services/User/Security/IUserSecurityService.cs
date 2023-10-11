@@ -1,5 +1,5 @@
 ﻿using RentZ.DTO.JWT;
-using RentZ.DTO.Logging;
+using RentZ.DTO.Response;
 using RentZ.DTO.User.Security;
 
 namespace RentZ.Application.Services.User.Security

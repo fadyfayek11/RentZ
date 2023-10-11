@@ -12,7 +12,7 @@ using RentZ.Infrastructure.Context;
 namespace RentZ.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231010113051_InitMigration")]
+    [Migration("20231011092943_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -210,8 +210,8 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<int>("CityId")
                         .HasColumnType("int");
 
-                    b.Property<string>("FavLang")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("FavLang")
+                        .HasColumnType("int");
 
                     b.Property<int>("Gender")
                         .HasColumnType("int");
@@ -246,6 +246,28 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Governorate");
+                });
+
+            modelBuilder.Entity("RentZ.Domain.Entities.OtpSetup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OtpSetups");
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.User", b =>
@@ -411,6 +433,15 @@ namespace RentZ.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("City");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RentZ.Domain.Entities.OtpSetup", b =>
+                {
+                    b.HasOne("RentZ.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });

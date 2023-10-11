@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RentZ.Application.Services.JWT;
+using RentZ.Domain.Entities;
+using RentZ.DTO.Enums;
 using RentZ.DTO.JWT;
-using RentZ.DTO.Logging;
+using RentZ.DTO.Response;
 using RentZ.DTO.User.Security;
 using RentZ.Infrastructure.Context;
 
@@ -11,57 +14,42 @@ namespace RentZ.Application.Services.User.Security
     {
         private readonly ApplicationDbContext _context;
         private readonly IJwtService _jwtService;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-		public UserSecurityService(IJwtService jwtService, ApplicationDbContext context)
+        private readonly UserManager<Domain.Entities.User> _userManager;
+		public UserSecurityService(IJwtService jwtService, ApplicationDbContext context, UserManager<Domain.Entities.User> userManager)
         {
 	        _jwtService = jwtService;
 	        _context = context;
-
+            _userManager = userManager;
         }
 		public async Task<BaseResponse<GenerateTokenResponseDto>> Login(Login login)
         {
-            UserManager
-
-	        var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto());
-
-
-            
-            var validOtp = await SetOtp(userIqamaId, phoneNumber);
-
-            if (!validOtp)
-                return new LoginDto()
-                {
-                    ErrorCode = 4,
-                    Message = "Error while sending the otp",
-                };
-
-            var result = new LoginDto
+            var user = await _userManager.FindByNameAsync(login.UserName);
+            if (user == null)
             {
-                ErrorCode = 0,
-                Message = string.Empty,
-                LoginData = new UserLoginDto
-                {
-                    Token = accessToken,
-                    TokenExpirationDate = (DateTime)accessTokenExpiryDate!,
-                    RefreshToken = refreshToken,
-                    RefreshTokenExpirationDate = (DateTime)refreshTokenExpiryDate!,
-                    UserData = new UserData
-                    {
-                        UserId = userIqamaId,
-                        UserName = member.E_NAME,
-                        PhoneNumber = originalPhoneNumber,
-                    }
-                }
-            };
-            return result;
+                return new BaseResponse<GenerateTokenResponseDto>(){ Code = ErrorCode.BadRequest , Message = "User Name or pass may be wrong"};
+            }
+
+            var correctPass = await _userManager.CheckPasswordAsync(user, login.Password);
+            if (!correctPass)
+            {
+                return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.BadRequest, Message = "User Name or pass may be wrong" };
+            }
+            
+            var client = await _context.Clients.FirstOrDefaultAsync(x=>x.Id == user.Id);
+            if (client == null)
+            {
+                return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.BadRequest, Message = "User Name or pass may be wrong" };
+            }
+
+            var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.UserName, user.Email, user.PhoneNumber, client.Gender, client.Bio, client.FavLang, client.City.Name, user.IsActive, user.PhoneNumberConfirmed));
+
+            return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.FailOtp, Message = "Success Get Token but fail to send otp", Data = tokenResult};
         }
 
-		public async Task<BaseResponse<bool>> VerifyOtp(string uId, string otpNumber)
+        public Task<BaseResponse<bool>> VerifyOtp(string otpNumber)
         {
-            
+            throw new NotImplementedException();
         }
-       
         private static string GenerateCode(int length = 4)
         {
             var maxNumber = (int)Math.Pow(10, length) - 1;
@@ -71,14 +59,24 @@ namespace RentZ.Application.Services.User.Security
 
             return otpString;
         }
-        private async Task<bool> SetOtp(string IqamaNo,string MobileNo)
+        private async Task<bool> SetOtp(Guid userId)
         {
-            
+            var code = GenerateCode();
+            _context.OtpSetups.Update(new OtpSetup()
+            {
+                Id = userId,
+                Code = code,
+                ExpiryDate = DateTime.Now.AddMinutes(2)
+            });
+
+            return await _context.SaveChangesAsync() > 0;
         }
         public async Task<BaseResponse<string>> ResendOtp()
         {
+            throw new NotImplementedException();
+
         }
-      
+
 
     }
 }

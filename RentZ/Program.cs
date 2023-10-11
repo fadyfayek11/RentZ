@@ -76,7 +76,7 @@ builder.Services.AddAuthentication(options =>
 		};
 	});
 
-builder.Services.ServiceConfiguration();
+//builder.Services.ServiceConfiguration();
 builder.Services.AddFluentValidationRulesToSwagger();
 
 var app = builder.Build();

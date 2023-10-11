@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, G
 	}
 
 	public DbSet<Admin> Admins { get; set; }
+	public DbSet<OtpSetup> OtpSetups { get; set; }
 	public DbSet<Client> Clients { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder builder)
