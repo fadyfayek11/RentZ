@@ -12,7 +12,7 @@ using RentZ.Infrastructure.Context;
 namespace RentZ.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231011092943_InitMigration")]
+    [Migration("20231012070425_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -260,12 +260,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("OtpSetups");
                 });
@@ -433,15 +428,6 @@ namespace RentZ.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("City");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RentZ.Domain.Entities.OtpSetup", b =>
-                {
-                    b.HasOne("RentZ.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });

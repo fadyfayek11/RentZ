@@ -257,12 +257,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("OtpSetups");
                 });
@@ -430,15 +425,6 @@ namespace RentZ.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("City");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RentZ.Domain.Entities.OtpSetup", b =>
-                {
-                    b.HasOne("RentZ.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
