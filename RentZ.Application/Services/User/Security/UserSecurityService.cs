@@ -21,6 +21,7 @@ namespace RentZ.Application.Services.User.Security
 	        _context = context;
             _userManager = userManager;
         }
+		
 		public async Task<BaseResponse<GenerateTokenResponseDto>> Login(Login login)
         {
             //ToDo: Fluent Validation middleware
@@ -46,13 +47,6 @@ namespace RentZ.Application.Services.User.Security
             var tokenResult = GenerateToken(user, client);
 
             return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.Success, Message = "Success Get Token", Data = tokenResult};
-        }
-        private GenerateTokenResponseDto GenerateToken(Domain.Entities.User user, Client client)
-        {
-            var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.UserName,
-                user.Email, user.PhoneNumber, client.Gender, client.Bio, client.FavLang,
-                client.City?.Name ?? "", client.IsOwner, user.IsActive, user.PhoneNumberConfirmed));
-            return tokenResult;
         }
         public async Task<BaseResponse<GenerateTokenResponseDto>> Registration(Registration register)
         {
@@ -86,10 +80,10 @@ namespace RentZ.Application.Services.User.Security
             {
                 Id = newUser.Id,
                 IsOwner = register.IsOwner,
-                Gender = register.Gender,
+                Gender = (Gender)Enum.Parse(typeof(Gender),register.Gender),
                 BirthDate = register.BirthDate,
                 ProfileImage = null,
-                FavLang = register.FavLang,
+                FavLang = (Lang)Enum.Parse(typeof(Lang), register.FavLang),
                 Bio = null,
                 CityId = register.CityId,
                 User = newUser,
@@ -105,7 +99,14 @@ namespace RentZ.Application.Services.User.Security
             var tokenResult = GenerateToken(newUser, newClient);
 
             var successSetOtp = await SetOtp(newUser.Id);
-            return new BaseResponse<GenerateTokenResponseDto>() { Code = successSetOtp? ErrorCode.Success : ErrorCode.FailOtp, Message = "Success Get Token but can't set the otp", Data = tokenResult };
+            return new BaseResponse<GenerateTokenResponseDto>() { Code = successSetOtp? ErrorCode.Success : ErrorCode.FailOtp, Message = "Success Get Token", Data = tokenResult };
+        }
+        private GenerateTokenResponseDto GenerateToken(Domain.Entities.User user, Client client)
+        {
+            var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.UserName,
+                user.Email, user.PhoneNumber, client.Gender, client.Bio, client.FavLang,
+                client.City?.Name ?? "", client.IsOwner, user.IsActive, user.PhoneNumberConfirmed));
+            return tokenResult;
         }
         public async Task<BaseResponse<bool>> VerifyOtp(Guid userId, string otpNumber)
         {
@@ -120,6 +121,12 @@ namespace RentZ.Application.Services.User.Security
             if (userOtp.Code != otpNumber)
                 return new BaseResponse<bool>() { Code = ErrorCode.ValidationFailed, Message = "Wrong otp number", Data = false};
 
+            var user = await _context.Users.FirstOrDefaultAsync(x=>x.Id == userId);
+            user!.PhoneNumberConfirmed = true;
+            
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
             return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Verification done successfully", Data = true};
         }
         private static string GenerateCode(int length = 4)
@@ -133,21 +140,37 @@ namespace RentZ.Application.Services.User.Security
         }
         private async Task<bool> SetOtp(Guid userId)
         {
-            var code = GenerateCode();
-            await _context.OtpSetups.AddAsync(new OtpSetup()
+            var userOtp = await _context.OtpSetups.FirstOrDefaultAsync(x => x.Id == userId);
+			
+            //var code = GenerateCode();
+			var code = "1234";
+			if (userOtp == null)
             {
-                Id = userId,
-                Code = code,
-                ExpiryDate = DateTime.Now.AddMinutes(2)
-            });
 
-            //ToDo: making integration with orange to send otp sms
-            return await _context.SaveChangesAsync() > 0;
+	            await _context.OtpSetups.AddAsync(new OtpSetup()
+	            {
+		            Id = userId,
+		            Code = code,
+		            ExpiryDate = DateTime.Now.AddMinutes(2)
+	            });
+
+			}
+			else
+			{
+				userOtp.Code = code;
+				userOtp.ExpiryDate = DateTime.Now.AddMinutes(2);
+
+				_context.OtpSetups.Update(userOtp);
+			}
+
+			//ToDo: making integration with orange to send otp sms
+			return await _context.SaveChangesAsync() > 0;
         }
-        public Task<BaseResponse<string>> ResendOtp(Guid userId)
+        public async Task<BaseResponse<bool>> ResendOtp(Guid userId)
         {
-            throw new NotImplementedException();
+	        var successSetOtp = await SetOtp(userId);
+	        return new BaseResponse<bool>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success send otp" : "Fail to send otp", Data = successSetOtp };
 
-        }
-    }
+		}
+	}
 }

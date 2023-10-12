@@ -9,7 +9,5 @@ public class OtpSetup
     public Guid Id { get; set; }
     public string Code { get; set; }
     public DateTime ExpiryDate { get; set; }
-
-    public virtual User User { get; set; }
 }
 
