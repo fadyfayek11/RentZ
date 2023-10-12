@@ -7,6 +7,7 @@ using RentZ.DTO.Response;
 using RentZ.DTO.User.Security;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using RentZ.Application.Services.Validations;
 
 namespace RentZ.API.Controllers;
 
@@ -15,9 +16,11 @@ namespace RentZ.API.Controllers;
 public class UserController : Controller
 {
     private readonly IUserSecurityService _userSecurity;
-    public UserController(IUserSecurityService userSecurity)
+    private readonly IValidations _validations;
+    public UserController(IUserSecurityService userSecurity, IValidations validations)
     {
         _userSecurity = userSecurity;
+        _validations = validations;
     }
 
 	[HttpPost(nameof(Login))]
@@ -25,6 +28,28 @@ public class UserController : Controller
 	public async Task<IActionResult> Login([FromBody] Login login)
 	{
 		var response = await _userSecurity.Login(login);
+		if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+		if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+    
+    [HttpPost(nameof(ValidateUserName))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ValidateUserName([FromBody] string userName)
+	{
+		var response = await _validations.IsUserNameExist(userName);
+		if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+		if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+
+    [HttpPost(nameof(ValidatePhoneNumber))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ValidatePhoneNumber([FromBody] string phoneNumber)
+	{
+		var response = await _validations.IsPhoneNumberExist(phoneNumber);
 		if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
 		if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 
@@ -42,8 +67,6 @@ public class UserController : Controller
 		return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
 	}
 
-
-
     [Authorize]
     [HttpPost(nameof(VerifyOtp))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
@@ -56,16 +79,16 @@ public class UserController : Controller
 	    return new OkObjectResult(response);
     }
 
-    //[Authorize]
-    //[HttpPost(nameof(ResendOtp))]
-    //[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse))]
-    //public async Task<IActionResult> ResendOtp()
-    //{
-    //	var response = await _userService.ResendOtp();
-    //	if (response.ErrorCode == 2) return new NotFoundObjectResult(response);
-    //	if (response.ErrorCode == 4) return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+	[Authorize]
+	[HttpPost(nameof(ResendOtp))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ResendOtp()
+	{
+        var uId = HttpContext.User.FindFirstValue("UserId");
+        var response = await _userSecurity.ResendOtp(Guid.Parse(uId ?? ""));
 
-    //	return new OkObjectResult(response);
-    //}
+        if (response.Code is ErrorCode.BadRequest or ErrorCode.FailOtp) return new BadRequestObjectResult(response);
+        return new OkObjectResult(response);
+	}
 
 }

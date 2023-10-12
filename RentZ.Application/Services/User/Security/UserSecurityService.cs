@@ -170,7 +170,6 @@ namespace RentZ.Application.Services.User.Security
         {
 	        var successSetOtp = await SetOtp(userId);
 	        return new BaseResponse<bool>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success send otp" : "Fail to send otp", Data = successSetOtp };
-
-		}
+        }
 	}
 }

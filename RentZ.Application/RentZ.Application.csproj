@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DtoValidations\User\" />
     <Folder Include="Middleware\" />
   </ItemGroup>
 

@@ -7,7 +7,7 @@ using RentZ.Domain.Entities;
 
 namespace RentZ.Infrastructure.Context;
 
-public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, Guid>
+public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, Guid>
 {
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 		: base(options)
