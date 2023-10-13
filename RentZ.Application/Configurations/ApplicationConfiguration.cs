@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using RentZ.Application.Services.JWT;
+using RentZ.Application.Services.Lookups;
 using RentZ.Application.Services.User.Security;
 using RentZ.Application.Services.Validations;
 
@@ -11,6 +12,7 @@ public static class ApplicationConfiguration
 	{
 		services.AddScoped<IUserSecurityService, UserSecurityService>();
 		services.AddScoped<IValidations, Validations>();
+		services.AddScoped<ILookupService, LookupService>();
 		services.AddScoped<IJwtService, JwtService>();
 	}
 }
