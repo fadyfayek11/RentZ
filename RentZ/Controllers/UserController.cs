@@ -69,7 +69,7 @@ public class UserController : Controller
 
 	[Authorize]
 	[HttpPost(nameof(ResendOtp))]
-	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
 	public async Task<IActionResult> ResendOtp()
 	{
         var uId = HttpContext.User.FindFirstValue("UserId");
@@ -80,12 +80,25 @@ public class UserController : Controller
 	}
 
 	[HttpPost(nameof(ForgetPassword))]
-	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
 	public async Task<IActionResult> ForgetPassword(string phoneNumber)
 	{
 		var response = await _userSecurity.ForgetPasswordRequest(phoneNumber);
 
 		if (response.Code is ErrorCode.BadRequest or ErrorCode.FailOtp) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
+
+
+	[Authorize]
+	[HttpPost(nameof(Password))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
+	public async Task<IActionResult> Password(string password)
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.SetPassword(new SetPassword(uId, password));
+
+		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
 	}
 }
