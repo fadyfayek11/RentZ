@@ -33,28 +33,16 @@ public class UserController : Controller
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
-    
-    [HttpPost(nameof(ValidateUserName))]
-	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
-	public async Task<IActionResult> ValidateUserName([FromBody] string userName)
-	{
-		var response = await _validations.IsUserNameExist(userName);
-		if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
-		if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 
-        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
-    }
-
-    [HttpPost(nameof(ValidatePhoneNumber))]
+	[HttpPost(nameof(ValidatePhoneNumber))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
 	public async Task<IActionResult> ValidatePhoneNumber([FromBody] string phoneNumber)
 	{
 		var response = await _validations.IsPhoneNumberExist(phoneNumber);
-		if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
-		if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+		if (response) return new BadRequestObjectResult(response);
 
-        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
-    }
+		return new OkObjectResult(response);
+	}
 
 	[HttpPost(nameof(Register))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto>))]

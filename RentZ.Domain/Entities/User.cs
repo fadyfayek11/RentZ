@@ -7,8 +7,7 @@ namespace RentZ.Domain.Entities;
 
 public class User : IdentityUser<Guid>
 {
-	public string FirstName { get; set; }
-	public string LastName { get; set; }
+	public string DisplayNameName { get; set; }
 	public bool IsActive { get; set; } = false;
 }
 public class Admin

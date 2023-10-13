@@ -23,7 +23,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).UseLazyLoadingProxies().EnableSensitiveDataLogging().EnableDetailedErrors().EnableServiceProviderCaching());
 
-builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+	{
+		options.SignIn.RequireConfirmedAccount = true;
+		options.User.RequireUniqueEmail = true; 
+	})
 	.AddEntityFrameworkStores<ApplicationDbContext>()
 	.AddDefaultTokenProviders();
 

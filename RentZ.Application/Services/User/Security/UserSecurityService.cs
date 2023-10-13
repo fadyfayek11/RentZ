@@ -26,7 +26,7 @@ namespace RentZ.Application.Services.User.Security
         {
             //ToDo: Fluent Validation middleware
 
-            var user = await _userManager.FindByNameAsync(login.UserName);
+            var user = await _userManager.FindByNameAsync(login.PhoneNumber);
             if (user == null)
             {
                 return new BaseResponse<GenerateTokenResponseDto>(){ Code = ErrorCode.BadRequest , Message = "User Name or pass may be wrong"};
@@ -53,8 +53,8 @@ namespace RentZ.Application.Services.User.Security
             //ToDo: Fluent Validation middleware
             var newUser = new Domain.Entities.User
             {
-                UserName = register.UserName,
-                NormalizedUserName = register.UserName.ToUpper(),
+                UserName = register.PhoneNumber,
+                NormalizedUserName = register.PhoneNumber.ToUpper(),
                 Email = register.UserEmail,
                 NormalizedEmail = register.UserEmail.ToUpper(),
                 EmailConfirmed = false,
@@ -67,8 +67,7 @@ namespace RentZ.Application.Services.User.Security
                 LockoutEnd = null,
                 LockoutEnabled = false,
                 AccessFailedCount = 0,
-                FirstName = null,
-                LastName = null,
+                DisplayNameName = register.DisplayName,
                 IsActive = true
             };
            
@@ -76,7 +75,11 @@ namespace RentZ.Application.Services.User.Security
             if(!result.Succeeded)
                 return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.InternalServerError, Message = "Something went wrong while saving the data" };
 
-            var newClient = new Client
+            var userInRole = await _userManager.AddToRoleAsync(newUser, "Client");
+            if (!userInRole.Succeeded)
+	            return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.InternalServerError, Message = "Something went wrong while add user to role" };
+
+			var newClient = new Client
             {
                 Id = newUser.Id,
                 IsOwner = register.IsOwner,
@@ -105,7 +108,8 @@ namespace RentZ.Application.Services.User.Security
         {
             var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.UserName,
                 user.Email, user.PhoneNumber, client.Gender, client.Bio, client.FavLang,
-                client.City?.Name ?? "", client.IsOwner, user.IsActive, user.PhoneNumberConfirmed));
+                client.City?.Name ?? "", client.IsOwner, user.IsActive, 
+                user.PhoneNumberConfirmed,Roles.Client));
             return tokenResult;
         }
         public async Task<BaseResponse<bool>> VerifyOtp(Guid userId, string otpNumber)

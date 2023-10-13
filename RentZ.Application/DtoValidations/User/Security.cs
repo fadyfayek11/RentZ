@@ -11,8 +11,8 @@ public class RegistrationValidation : AbstractValidator<Registration>
     {
         _validations = validations;
 
-        RuleFor(registration => registration.UserName)
-            .NotEmpty().WithMessage("Username is required.");
+        RuleFor(registration => registration.DisplayName)
+            .NotEmpty().WithMessage("Your Display Name is required.");
 
         RuleFor(registration => registration.Password)
             .NotEmpty().WithMessage("Password is required.")
@@ -29,9 +29,10 @@ public class RegistrationValidation : AbstractValidator<Registration>
             .NotEmpty().WithMessage("Birthdate is required.");
 
         RuleFor(registration => registration.PhoneNumber)
-            .NotEmpty().WithMessage("Phone number is required.");
+            .NotEmpty().WithMessage("Phone number is required.")
+            .MustAsync(BeAValidNumber).WithMessage("This phone number registered before.");
 
-        RuleFor(registration => registration.Gender)
+		RuleFor(registration => registration.Gender)
             .IsInEnum().WithMessage("Invalid gender.");
 
         RuleFor(registration => registration.FavLang)
@@ -39,13 +40,14 @@ public class RegistrationValidation : AbstractValidator<Registration>
 
         RuleFor(registration => registration.CityId)
             .GreaterThan(0).WithMessage("City ID is required.")
-            .MustAsync(BeAValidCity).WithMessage("City ID does not exist in the database."); 
-
-        RuleFor(registration => registration.IsOwner)
-            .NotNull().WithMessage("IsOwner field is required.");
+            .MustAsync(BeAValidCity).WithMessage("City ID does not exist in the database.");
     }
     private async Task<bool> BeAValidCity(int cityId, CancellationToken cancellationToken)
     {
        return  await _validations.IsCityExist(cityId);
+    }
+    private async Task<bool> BeAValidNumber(string phoneNumber, CancellationToken cancellationToken)
+    {
+       return  await _validations.IsPhoneNumberExist(phoneNumber);
     }
 }
