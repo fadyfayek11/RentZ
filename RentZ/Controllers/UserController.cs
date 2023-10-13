@@ -79,4 +79,13 @@ public class UserController : Controller
         return new OkObjectResult(response);
 	}
 
+	[HttpPost(nameof(ForgetPassword))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ForgetPassword(string phoneNumber)
+	{
+		var response = await _userSecurity.ForgetPasswordRequest(phoneNumber);
+
+		if (response.Code is ErrorCode.BadRequest or ErrorCode.FailOtp) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
 }

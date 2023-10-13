@@ -175,5 +175,14 @@ namespace RentZ.Application.Services.User.Security
 	        var successSetOtp = await SetOtp(userId);
 	        return new BaseResponse<bool>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success send otp" : "Fail to send otp", Data = successSetOtp };
         }
+
+        public async Task<BaseResponse<bool>> ForgetPasswordRequest(string phoneNumber)
+        {
+	        var user =  await _userManager.FindByNameAsync(phoneNumber);
+	        if (user is null) return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Can't find the user", Data = false };
+
+			var successSetOtp = await SetOtp(user.Id);
+			return new BaseResponse<bool>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success send otp" : "Fail to send otp", Data = successSetOtp };
+        }
 	}
 }

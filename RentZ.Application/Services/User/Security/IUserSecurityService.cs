@@ -10,6 +10,7 @@ namespace RentZ.Application.Services.User.Security
         Task<BaseResponse<GenerateTokenResponseDto>> Registration(Registration register);
         Task<BaseResponse<bool>> VerifyOtp(Guid userId, string otpNumber);
 		Task<BaseResponse<bool>> ResendOtp(Guid userId);
+		Task<BaseResponse<bool>> ForgetPasswordRequest(string phoneNumber);
 
 	}
 }
