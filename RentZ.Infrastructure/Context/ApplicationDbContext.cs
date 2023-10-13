@@ -7,7 +7,7 @@ using RentZ.Domain.Entities;
 
 namespace RentZ.Infrastructure.Context;
 
-public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, Guid>
+public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, Guid>
 {
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 		: base(options)
@@ -24,7 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, G
 	protected override void OnModelCreating(ModelBuilder builder)
 	{
 		base.OnModelCreating(builder);
-
+		SeedRoles(builder);
 		// Configure GUID primary keys for user entities
 		builder.Entity<User>().Property(u => u.Id).ValueGeneratedOnAdd();
        
@@ -39,5 +39,13 @@ public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, G
             .HasForeignKey<Client>(c => c.Id);
 
     }
+	private void SeedRoles(ModelBuilder builder)
+	{
+		builder.Entity<IdentityRole>().HasData(
+			new IdentityRole() { Id = "9f4cbe69-c735-46d0-9634-4cf435c46184", Name = "Admin", ConcurrencyStamp = "2", NormalizedName = "Admin" },
+			new IdentityRole() { Id = "45ebc48e-b867-4847-a1e6-ba1f275fc406", Name = "RootAdmin", ConcurrencyStamp = "1", NormalizedName = "RootAdmin" },
+			new IdentityRole() { Id = "fb7f4a16-6f0b-4fa9-9f94-4db50b98014b", Name = "Client", ConcurrencyStamp = "3", NormalizedName = "Client" }
+		);
+	}
 }
 
