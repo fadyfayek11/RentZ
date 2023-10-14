@@ -91,12 +91,24 @@ public class UserController : Controller
 
 
 	[Authorize]
-	[HttpPost(nameof(Password))]
-	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
-	public async Task<IActionResult> Password(string password)
+	[HttpPost(nameof(ReSetPassword))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ReSetPassword(string password)
 	{
 		var uId = HttpContext.User.FindFirstValue("UserId");
 		var response = await _userSecurity.SetPassword(new SetPassword(uId, password));
+
+		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
+	
+	[Authorize]
+	[HttpPost(nameof(ChangePassword))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword)
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.ChangePassword(new ChangePassword(uId, oldPassword, newPassword));
 
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);

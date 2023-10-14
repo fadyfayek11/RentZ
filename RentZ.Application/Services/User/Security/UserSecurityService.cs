@@ -202,5 +202,16 @@ namespace RentZ.Application.Services.User.Security
 
             return new BaseResponse<bool>() { Code = result.Succeeded ? ErrorCode.Success : ErrorCode.BadRequest, Message = result.Succeeded ? "Success to set password" : "Fail to set password", Data = result.Succeeded };
         }
+
+        public async Task<BaseResponse<bool>> ChangePassword(ChangePassword password)
+        {
+	        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Guid.Parse(password.UserId));
+	        if (user is null)
+		        return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail change the password", Data = false };
+
+	        var result = await _userManager.ChangePasswordAsync(user, password.OldPassword, password.NewPassword);
+
+	        return new BaseResponse<bool>() { Code = result.Succeeded ? ErrorCode.Success : ErrorCode.BadRequest, Message = result.Succeeded ? "Success to change password" : "Fail to change password", Data = result.Succeeded };
+        }
 	}
 }
