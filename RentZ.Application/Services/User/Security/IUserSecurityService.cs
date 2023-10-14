@@ -13,6 +13,7 @@ namespace RentZ.Application.Services.User.Security
 		Task<BaseResponse<GenerateTokenResponseDto?>> ForgetPasswordRequest(string phoneNumber);
 		Task<BaseResponse<bool>> SetPassword(SetPassword password);
 		Task<BaseResponse<bool>> ChangePassword(ChangePassword password);
+		Task<BaseResponse<bool>> ChangeLanguage(SetLanguage lang);
 
 	}
 }

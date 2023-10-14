@@ -202,7 +202,6 @@ namespace RentZ.Application.Services.User.Security
 
             return new BaseResponse<bool>() { Code = result.Succeeded ? ErrorCode.Success : ErrorCode.BadRequest, Message = result.Succeeded ? "Success to set password" : "Fail to set password", Data = result.Succeeded };
         }
-
         public async Task<BaseResponse<bool>> ChangePassword(ChangePassword password)
         {
 	        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Guid.Parse(password.UserId));
@@ -212,6 +211,19 @@ namespace RentZ.Application.Services.User.Security
 	        var result = await _userManager.ChangePasswordAsync(user, password.OldPassword, password.NewPassword);
 
 	        return new BaseResponse<bool>() { Code = result.Succeeded ? ErrorCode.Success : ErrorCode.BadRequest, Message = result.Succeeded ? "Success to change password" : "Fail to change password", Data = result.Succeeded };
+        }
+
+        public async Task<BaseResponse<bool>> ChangeLanguage(SetLanguage lang)
+        {
+			var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(lang.UserId));
+			if (client is null)
+				return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail change the language", Data = false };
+			
+			client.FavLang = (Lang)Enum.Parse(typeof(Lang), lang.Lang);
+			_context.Clients.Update(client);
+			await _context.SaveChangesAsync();
+
+			return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Change the language done successfully", Data = true };
         }
 	}
 }

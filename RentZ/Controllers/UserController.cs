@@ -89,7 +89,6 @@ public class UserController : Controller
 		return new OkObjectResult(response);
 	}
 
-
 	[Authorize]
 	[HttpPost(nameof(ReSetPassword))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
@@ -109,6 +108,18 @@ public class UserController : Controller
 	{
 		var uId = HttpContext.User.FindFirstValue("UserId");
 		var response = await _userSecurity.ChangePassword(new ChangePassword(uId, oldPassword, newPassword));
+
+		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
+	
+	[Authorize]
+	[HttpPost(nameof(ChangeLanguage))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ChangeLanguage(string favLang)
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.ChangeLanguage(new SetLanguage(uId, favLang));
 
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
