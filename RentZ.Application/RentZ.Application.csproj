@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ExtCore.Data.Abstractions" Version="8.1.0" />
+    <PackageReference Include="ExtCore.FileStorage.FileSystem" Version="8.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.24.0" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 using System.Text;
+using ExtCore.FileStorage;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -84,6 +85,12 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.ServiceConfiguration();
 builder.Services.AddFluentValidationRulesToSwagger();
+
+builder.Services.Configure<FileStorageOptions>(options =>
+{
+    //options.RootPath = $"{builder.Environment.ContentRootPath}\\Documents\\"+DateTime.UtcNow.Year+"\\"+DateTime.UtcNow.Month+"\\"+DateTime.UtcNow.Day+"\\";
+    options.RootPath = $"{builder.Environment.ContentRootPath}\\Documents\\";
+});
 
 var app = builder.Build();
 

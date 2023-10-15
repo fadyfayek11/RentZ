@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ExtCore.FileStorage.Abstractions;
+using ExtCore.FileStorage.FileSystem;
+using Microsoft.Extensions.DependencyInjection;
+using RentZ.Application.Services.Files;
 using RentZ.Application.Services.JWT;
 using RentZ.Application.Services.Lookups;
 using RentZ.Application.Services.User.Security;
@@ -14,5 +17,8 @@ public static class ApplicationConfiguration
 		services.AddScoped<IValidations, Validations>();
 		services.AddScoped<ILookupService, LookupService>();
 		services.AddScoped<IJwtService, JwtService>();
-	}
+        services.AddTransient<IFileManager, FileManager>();
+        services.AddTransient<IFileStorage, FileStorage>();
+        services.AddTransient<IContentTypeProvider, FileExtensionContentTypeProvider>();
+    }
 }
