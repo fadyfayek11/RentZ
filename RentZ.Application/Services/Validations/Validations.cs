@@ -17,6 +17,11 @@ public class Validations : IValidations
 	    return await _context.Users.AnyAsync(x => x.PhoneNumber == phoneNumber);
     }
 
+    public async Task<bool> IsEmailExist(string email)
+    {
+        return await _context.Users.AnyAsync(x => x.Email == email);
+    }
+
     public async Task<bool> IsCityExist(int cityId)
     {
         return await _context.City.AnyAsync(x => x.Id == cityId);

@@ -43,6 +43,16 @@ public class UserController : Controller
 
 		return new OkObjectResult(response);
 	}
+    
+    [HttpPost(nameof(ValidateEmail))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ValidateEmail([FromBody] string email)
+	{
+		var response = await _validations.IsEmailExist(email);
+		if (response) return new BadRequestObjectResult(response);
+
+		return new OkObjectResult(response);
+	}
 
 	[HttpPost(nameof(Register))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto>))]
