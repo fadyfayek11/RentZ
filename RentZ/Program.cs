@@ -88,7 +88,6 @@ builder.Services.AddFluentValidationRulesToSwagger();
 
 builder.Services.Configure<FileStorageOptions>(options =>
 {
-    //options.RootPath = $"{builder.Environment.ContentRootPath}\\Documents\\"+DateTime.UtcNow.Year+"\\"+DateTime.UtcNow.Month+"\\"+DateTime.UtcNow.Day+"\\";
     options.RootPath = $"{builder.Environment.ContentRootPath}\\Documents\\";
 });
 
