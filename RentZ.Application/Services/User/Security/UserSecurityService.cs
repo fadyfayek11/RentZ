@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RentZ.Application.Services.Files;
 using RentZ.Application.Services.JWT;
 using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
@@ -15,12 +17,14 @@ namespace RentZ.Application.Services.User.Security
     {
         private readonly ApplicationDbContext _context;
         private readonly IJwtService _jwtService;
+        private readonly IFileManager _fileManager;
         private readonly UserManager<Domain.Entities.User> _userManager;
-		public UserSecurityService(IJwtService jwtService, ApplicationDbContext context, UserManager<Domain.Entities.User> userManager)
+		public UserSecurityService(IJwtService jwtService, ApplicationDbContext context, UserManager<Domain.Entities.User> userManager, IFileManager fileManager)
         {
 	        _jwtService = jwtService;
 	        _context = context;
             _userManager = userManager;
+            _fileManager = fileManager;
         }
 		
 		public async Task<BaseResponse<GenerateTokenResponseDto>> Login(Login login)
@@ -213,7 +217,6 @@ namespace RentZ.Application.Services.User.Security
 
 	        return new BaseResponse<bool>() { Code = result.Succeeded ? ErrorCode.Success : ErrorCode.BadRequest, Message = result.Succeeded ? "Success to change password" : "Fail to change password", Data = result.Succeeded };
         }
-
         public async Task<BaseResponse<bool>> ChangeLanguage(SetLanguage lang)
         {
 			var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(lang.UserId));
@@ -226,7 +229,6 @@ namespace RentZ.Application.Services.User.Security
 
 			return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Change the language done successfully", Data = true };
         }
-
         public async Task<BaseResponse<UserData?>> UserInformation(string userId)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
@@ -240,6 +242,15 @@ namespace RentZ.Application.Services.User.Security
                 client.Gender.ToString(), client.IsOwner, client.User.IsActive, client.User.PhoneNumberConfirmed);
            
             return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
+        }
+        public async Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image)
+        {
+            var saved = await _fileManager.SaveFileAsync<Domain.Entities.User>(image,
+                $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}", userId, "ProfileImages");
+            if (!saved)
+                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
+
+            return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Upload user profile pic done successfully", Data = true };
         }
     }
 }

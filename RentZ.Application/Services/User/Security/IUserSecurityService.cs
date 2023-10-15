@@ -1,4 +1,5 @@
-﻿using RentZ.DTO.JWT;
+﻿using Microsoft.AspNetCore.Http;
+using RentZ.DTO.JWT;
 using RentZ.DTO.Response;
 using RentZ.DTO.User.Security;
 
@@ -15,6 +16,7 @@ namespace RentZ.Application.Services.User.Security
 		Task<BaseResponse<bool>> ChangePassword(ChangePassword password);
 		Task<BaseResponse<bool>> ChangeLanguage(SetLanguage lang);
 		Task<BaseResponse<UserData?>> UserInformation(string userId);
+		Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image);
 
 	}
 }
