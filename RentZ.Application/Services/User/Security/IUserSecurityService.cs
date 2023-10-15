@@ -14,6 +14,7 @@ namespace RentZ.Application.Services.User.Security
 		Task<BaseResponse<bool>> SetPassword(SetPassword password);
 		Task<BaseResponse<bool>> ChangePassword(ChangePassword password);
 		Task<BaseResponse<bool>> ChangeLanguage(SetLanguage lang);
+		Task<BaseResponse<UserData?>> UserInformation(string userId);
 
 	}
 }

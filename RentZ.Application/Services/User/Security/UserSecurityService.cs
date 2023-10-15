@@ -4,6 +4,7 @@ using RentZ.Application.Services.JWT;
 using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
 using RentZ.DTO.JWT;
+using RentZ.DTO.Lookups;
 using RentZ.DTO.Response;
 using RentZ.DTO.User.Security;
 using RentZ.Infrastructure.Context;
@@ -67,7 +68,7 @@ namespace RentZ.Application.Services.User.Security
                 LockoutEnd = null,
                 LockoutEnabled = false,
                 AccessFailedCount = 0,
-                DisplayNameName = register.DisplayName,
+                DisplayName = register.DisplayName,
                 IsActive = true
             };
            
@@ -225,5 +226,20 @@ namespace RentZ.Application.Services.User.Security
 
 			return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Change the language done successfully", Data = true };
         }
-	}
+
+        public async Task<BaseResponse<UserData?>> UserInformation(string userId)
+        {
+            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            if (client is null)
+                return new BaseResponse<UserData?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user data", Data = null };
+
+            var userDataResponse = new UserData(client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
+                client.FavLang.ToString(),
+                new LookupResponse() { Id = client.CityId, Value = client.City.Name },
+                new LookupResponse() { Id = client.City.GovernorateId, Value = client.City.Governorate.Name },
+                client.Gender.ToString(), client.IsOwner, client.User.IsActive, client.User.PhoneNumberConfirmed);
+           
+            return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
+        }
+    }
 }
