@@ -111,8 +111,7 @@ namespace RentZ.Application.Services.User.Security
         private GenerateTokenResponseDto GenerateToken(Domain.Entities.User user, Client client)
         {
             var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.UserName,
-                user.Email, user.PhoneNumber, client.Gender, client.Bio, client.FavLang,
-                client.City?.Name ?? "", client.IsOwner, user.IsActive, 
+                user.Email, user.PhoneNumber, client.Gender,client.FavLang, client.IsOwner, user.IsActive, 
                 user.PhoneNumberConfirmed,Roles.Client));
             return tokenResult;
         }
@@ -245,10 +244,20 @@ namespace RentZ.Application.Services.User.Security
         }
         public async Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image)
         {
-            var saved = await _fileManager.SaveFileAsync<Domain.Entities.User>(image,
-                $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}", userId, "ProfileImages");
+            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            if (client is null)
+                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
+
+            var fileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
+            var saved = await _fileManager.SaveFileAsync<Domain.Entities.User>(image, fileName
+                , userId, "ProfileImages");
             if (!saved)
                 return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
+
+
+            client.ProfileImage = fileName;
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
 
             return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Upload user profile pic done successfully", Data = true };
         }
