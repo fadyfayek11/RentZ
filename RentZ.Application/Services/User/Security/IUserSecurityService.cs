@@ -16,6 +16,7 @@ namespace RentZ.Application.Services.User.Security
 		Task<BaseResponse<bool>> ChangePassword(ChangePassword password);
 		Task<BaseResponse<bool>> ChangeLanguage(SetLanguage lang);
 		Task<BaseResponse<UserData?>> UserInformation(string userId);
+		Task<BaseResponse<GenerateTokenResponseDto?>> EditUserInformation(string userId, EditUserData userDate);
 		Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image);
 
 	}

@@ -158,4 +158,16 @@ public class UserController : Controller
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
 	}
+    
+    [Authorize]
+	[HttpPut(nameof(UserInfo))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
+	public async Task<IActionResult> UserInfo(EditUserData userData)
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.EditUserInformation(uId, userData);
+
+		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
 }

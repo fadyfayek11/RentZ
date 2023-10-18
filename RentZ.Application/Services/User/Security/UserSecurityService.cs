@@ -134,7 +134,7 @@ namespace RentZ.Application.Services.User.Security
             if (client is null || user is null)
                 return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "Can't verify", Data = null };
 
-            user!.PhoneNumberConfirmed = true;
+            user.PhoneNumberConfirmed = true;
             
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
@@ -190,7 +190,7 @@ namespace RentZ.Application.Services.User.Security
 	            return new BaseResponse<bool>() { Code = ErrorCode.FailOtp, Message = "Fail to send otp", Data = false };
 
 
-			var (successSetOtp, token) = await SetOtp(user);
+			var (successSetOtp, _) = await SetOtp(user);
 	        return new BaseResponse<bool>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success send otp" : "Fail to send otp", Data = successSetOtp };
         }
         public async Task<BaseResponse<GenerateTokenResponseDto?>> ForgetPasswordRequest(string phoneNumber)
@@ -248,6 +248,44 @@ namespace RentZ.Application.Services.User.Security
            
             return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
         }
+
+        public async Task<BaseResponse<GenerateTokenResponseDto?>> EditUserInformation(string userId, EditUserData userDate)
+        {
+            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            if (client is null)
+                return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "Fail to edit user data", Data = null };
+            
+            var user = client.User;
+            if (user is null)
+                return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "Fail to edit user data", Data = null };
+
+            user.DisplayName = userDate.DisplayName ?? user.DisplayName;
+            user.Email = userDate.Email ?? user.Email;
+            client.CityId = userDate.CityId ?? client.CityId;
+            client.Gender = string.IsNullOrEmpty(userDate.Gender) ? client.Gender : (Gender)Enum.Parse(typeof(Gender),userDate.Gender);
+
+            bool successSetOtp;
+            GenerateTokenResponseDto tokenResult;
+            if (!string.IsNullOrEmpty(userDate.PhoneNumber))
+            {
+                user.PhoneNumberConfirmed = false;
+                user.PhoneNumber = userDate.PhoneNumber;
+                user.UserName = userDate.PhoneNumber;
+
+                (successSetOtp, tokenResult) = await SetOtp(user);
+            }
+            else
+            {
+                (successSetOtp, tokenResult) = await SetOtp(user);
+            }
+            
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
+
+            return new BaseResponse<GenerateTokenResponseDto?>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success to edit user data" : "Fail to edit user data", Data = tokenResult };
+
+        }
+
         public async Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
