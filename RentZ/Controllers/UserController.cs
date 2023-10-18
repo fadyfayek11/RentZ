@@ -67,7 +67,7 @@ public class UserController : Controller
 
     [Authorize]
     [HttpPost(nameof(VerifyOtp))]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
     public async Task<IActionResult> VerifyOtp([FromBody] string otpNumber)
     {
 	    var uId =  HttpContext.User.FindFirstValue("UserId");
@@ -79,7 +79,7 @@ public class UserController : Controller
 
 	[Authorize]
 	[HttpPost(nameof(ResendOtp))]
-	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
 	public async Task<IActionResult> ResendOtp()
 	{
         var uId = HttpContext.User.FindFirstValue("UserId");
