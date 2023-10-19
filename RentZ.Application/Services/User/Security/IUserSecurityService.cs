@@ -18,6 +18,8 @@ namespace RentZ.Application.Services.User.Security
 		Task<BaseResponse<UserData?>> UserInformation(string userId);
 		Task<BaseResponse<GenerateTokenResponseDto?>> EditUserInformation(string userId, EditUserData userDate);
 		Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image);
+		Task<BaseResponse<bool>> DeleteProfileImage(string userId);
+		Task<BaseResponse<bool>> UpdateProfileImage(string userId, IFormFile image);
 
-	}
+    }
 }

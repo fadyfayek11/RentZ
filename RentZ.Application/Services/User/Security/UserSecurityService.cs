@@ -248,7 +248,6 @@ namespace RentZ.Application.Services.User.Security
            
             return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
         }
-
         public async Task<BaseResponse<GenerateTokenResponseDto?>> EditUserInformation(string userId, EditUserData userDate)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
@@ -285,7 +284,6 @@ namespace RentZ.Application.Services.User.Security
             return new BaseResponse<GenerateTokenResponseDto?>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success to edit user data" : "Fail to edit user data", Data = tokenResult };
 
         }
-
         public async Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
@@ -304,6 +302,52 @@ namespace RentZ.Application.Services.User.Security
             await _context.SaveChangesAsync();
 
             return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Upload user profile pic done successfully", Data = true };
+        }
+        public async Task<BaseResponse<bool>> DeleteProfileImage(string userId)
+        {
+            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            if (client is null)
+                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to remove user profile pic", Data = false };
+           
+            client.ProfileImage = string.Empty;
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
+           
+            return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Removing your profile image done successfully", Data = true };
+        }
+        public async Task<BaseResponse<bool>> UpdateProfileImage(string userId, IFormFile image)
+        {
+            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            if (client is null)
+                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to update user profile pic", Data = false };
+
+            var newFileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
+
+            var saved = await _fileManager.UpdateFileAsync<Domain.Entities.User>(image, client.ProfileImage, newFileName, userId);
+            if (!saved)
+                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
+
+
+            client.ProfileImage = newFileName;
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
+
+            return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Update user profile pic done successfully", Data = true };
+        }
+        private string GetCurrentUrlWithPort(HttpContext context)
+        {
+            var request = context.Request;
+
+            // Get the scheme (http or https)
+            var scheme = request.Scheme;
+
+            // Get the host name (including the port if it's not the default)
+            var host = request.Host.Value;
+
+            // Combine the components to form the complete URL
+            var url = $"{scheme}://{host}";
+
+            return url;
         }
     }
 }
