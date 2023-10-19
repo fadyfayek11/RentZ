@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Lookups;
+using RentZ.DTO.Response;
 using RentZ.Infrastructure.Context;
 
 namespace RentZ.Application.Services.Lookups;
@@ -13,7 +14,7 @@ public class LookupService : ILookupService
 	    _context = context;
     }
 
-    public async Task<List<LookupResponse>> GetCities(int governorateId, LookupRequest lookup)
+    public async Task<BaseResponse<List<LookupResponse>>> GetCities(int governorateId, LookupRequest lookup)
     {
 		var cityQuery = _context.City.AsQueryable(); 
 
@@ -37,13 +38,13 @@ public class LookupService : ILookupService
 			{
 				Id = x.Id,
 				Value = (Lang)Enum.Parse(typeof(Lang), lookup.Lang) == Lang.En ? x.NameEn : x.Name,
-			})
-			.ToListAsync();
+            })
+        .ToListAsync();
 
-		return cities;
+        return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
     }
 
-	public async Task<List<LookupResponse>> GetGovernorates(LookupRequest lookup)
+    public async Task<BaseResponse<List<LookupResponse>>> GetGovernorates(LookupRequest lookup)
 	{
 		var governorateQuery = _context.Governorate.AsQueryable();
 
@@ -65,6 +66,6 @@ public class LookupService : ILookupService
 			})
 			.ToListAsync();
 
-		return governorate;
+		return new BaseResponse<List<LookupResponse>>(){Code = ErrorCode.Success, Data = governorate, Errors = null, Message = "Get all governorates" };
 	}
 }

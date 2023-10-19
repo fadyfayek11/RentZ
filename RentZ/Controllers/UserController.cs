@@ -160,6 +160,30 @@ public class UserController : Controller
 	}
     
     [Authorize]
+	[HttpDelete(nameof(ProfilePic))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> ProfilePic()
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.DeleteProfileImage(uId);
+
+		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
+    
+    [Authorize]
+	[HttpPut(nameof(UpdateProfilePic))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	public async Task<IActionResult> UpdateProfilePic(IFormFile image)
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.UpdateProfileImage(uId, image);
+
+		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
+    
+    [Authorize]
 	[HttpPut(nameof(UserInfo))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
 	public async Task<IActionResult> UserInfo(EditUserData userData)
@@ -170,4 +194,6 @@ public class UserController : Controller
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
 	}
+
+   
 }

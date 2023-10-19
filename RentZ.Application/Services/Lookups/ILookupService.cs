@@ -1,9 +1,10 @@
 ﻿using RentZ.DTO.Lookups;
+using RentZ.DTO.Response;
 
 namespace RentZ.Application.Services.Lookups;
 
 public interface ILookupService
 {
-	Task<List<LookupResponse>> GetCities(int governorateId, LookupRequest lookup);
-	Task<List<LookupResponse>> GetGovernorates(LookupRequest lookup);
+	Task<BaseResponse<List<LookupResponse>>> GetCities(int governorateId, LookupRequest lookup);
+	Task<BaseResponse<List<LookupResponse>>> GetGovernorates(LookupRequest lookup);
 }
