@@ -141,7 +141,7 @@ public class UserController : Controller
 	public async Task<IActionResult> UserInfo()
 	{
 		var uId = HttpContext.User.FindFirstValue("UserId");
-		var response = await _userSecurity.UserInformation(uId);
+        var response = await _userSecurity.UserInformation(uId, HttpContext);
 
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
@@ -186,7 +186,7 @@ public class UserController : Controller
     [Authorize]
 	[HttpPut(nameof(UserInfo))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
-	public async Task<IActionResult> UserInfo(EditUserData userData)
+    public async Task<IActionResult> UserInfo(EditUserData userData)
 	{
 		var uId = HttpContext.User.FindFirstValue("UserId");
 		var response = await _userSecurity.EditUserInformation(uId, userData);
@@ -194,6 +194,18 @@ public class UserController : Controller
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
 	}
+    
+    [Authorize]
+	[HttpGet(nameof(Profile))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(File))]
+    public async Task<IActionResult> Profile()
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.Profile(uId);
 
-   
+        if (response.Code is ErrorCode.BadRequest || response.Data is null) return new BadRequestObjectResult(response);
+        return File(await response.Data.ReadStreamAsync(), response.Message);
+	}
+
+
 }

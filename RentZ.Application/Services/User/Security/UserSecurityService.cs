@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ExtCore.FileStorage.Abstractions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RentZ.Application.Services.Files;
@@ -234,13 +235,13 @@ namespace RentZ.Application.Services.User.Security
 
 			return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Change the language done successfully", Data = true };
         }
-        public async Task<BaseResponse<UserData?>> UserInformation(string userId)
+        public async Task<BaseResponse<UserData?>> UserInformation(string userId, HttpContext context)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
             if (client is null)
                 return new BaseResponse<UserData?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user data", Data = null };
 
-            var userDataResponse = new UserData(client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
+            var userDataResponse = new UserData(GetProfileImageUrl(context), client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
                 client.FavLang.ToString(),
                 new LookupResponse() { Id = client.CityId, Value = client.City.Name },
                 new LookupResponse() { Id = client.City.GovernorateId, Value = client.City.Governorate.Name },
@@ -292,7 +293,7 @@ namespace RentZ.Application.Services.User.Security
 
             var fileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
             var saved = await _fileManager.SaveFileAsync<Domain.Entities.User>(image, fileName
-                , userId, "ProfileImages");
+                , userId);
             if (!saved)
                 return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
 
@@ -334,18 +335,26 @@ namespace RentZ.Application.Services.User.Security
 
             return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Update user profile pic done successfully", Data = true };
         }
-        private string GetCurrentUrlWithPort(HttpContext context)
+        public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
+        {
+
+            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            if (client is null)
+                return new BaseResponse<IFileProxy?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user profile pic", Data = null };
+
+            var fileImage = await _fileManager.FileProxy<Domain.Entities.User>(client.ProfileImage, userId);
+            var contentType = _fileManager.GetContentType(fileImage.Filename);
+            return new BaseResponse<IFileProxy?>() { Code = ErrorCode.Success, Message = contentType, Data = fileImage };
+        }
+        private string GetProfileImageUrl(HttpContext context)
         {
             var request = context.Request;
 
-            // Get the scheme (http or https)
             var scheme = request.Scheme;
 
-            // Get the host name (including the port if it's not the default)
             var host = request.Host.Value;
 
-            // Combine the components to form the complete URL
-            var url = $"{scheme}://{host}";
+            var url = $"{scheme}://{host}/api/User/Profile";
 
             return url;
         }
