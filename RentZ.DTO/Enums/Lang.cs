@@ -2,6 +2,6 @@
 
 public enum Lang
 {
-	En,
-	Ar
+	en,
+	ar
 }

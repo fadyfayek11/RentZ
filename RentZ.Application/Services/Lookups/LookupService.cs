@@ -33,11 +33,13 @@ public class LookupService : ILookupService
 			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
 		}
 
-		var cities = await cityQuery
+        var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
+
+        var cities = await cityQuery
 			.Select(x => new LookupResponse
 			{
 				Id = x.Id,
-				Value = (Lang)Enum.Parse(typeof(Lang), lookup.Lang) == Lang.En ? x.NameEn : x.Name,
+				Value = isEnum && langValue == Lang.en ? x.NameEn : x.Name,
             })
         .ToListAsync();
 
@@ -58,11 +60,13 @@ public class LookupService : ILookupService
 			governorateQuery = governorateQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
 		}
 
-		var governorate = await governorateQuery
+        var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
+        
+        var governorate = await governorateQuery
 			.Select(x => new LookupResponse
 			{
 				Id = x.Id,
-				Value = (Lang)Enum.Parse(typeof(Lang), lookup.Lang) == Lang.En ? x.NameEn : x.Name,
+				Value = isEnum && langValue  == Lang.en ? x.NameEn : x.Name,
 			})
 			.ToListAsync();
 
