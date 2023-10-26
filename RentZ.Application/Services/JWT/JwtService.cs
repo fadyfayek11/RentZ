@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RentZ.DTO.JWT;
@@ -11,11 +10,10 @@ namespace RentZ.Application.Services.JWT;
 public class JwtService : IJwtService
 {
     private readonly JwtSettings _jwtSettings;
-    private readonly UserManager<Domain.Entities.User> _userManager;
-    public JwtService(IOptions<JwtSettings> jwtSettings, UserManager<Domain.Entities.User> userManager)
+
+    public JwtService(IOptions<JwtSettings> jwtSettings)
     {
-	    _userManager = userManager;
-	    _jwtSettings = jwtSettings.Value;
+        _jwtSettings = jwtSettings.Value;
     }
     public GenerateTokenResponseDto GenerateToken(GenerateTokenRequestDto tokenRequest)
     {
@@ -31,6 +29,7 @@ public class JwtService : IJwtService
             new Claim("IsActiveAcc", tokenRequest.IsActive.ToString()),
             new Claim("OtpVerified", tokenRequest.IsOtpVerified.ToString()),
             new Claim("UserRole", tokenRequest.Role.ToString()),
+            new Claim("UserImage", string.Empty),
         };
 
 	    var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));

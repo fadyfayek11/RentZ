@@ -68,10 +68,10 @@ public class UserController : Controller
     [Authorize]
     [HttpPost(nameof(VerifyOtp))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
-    public async Task<IActionResult> VerifyOtp([FromBody] string otpNumber)
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtp otp)
     {
 	    var uId =  HttpContext.User.FindFirstValue("UserId");
-	    var response = await _userSecurity.VerifyOtp(Guid.Parse(uId ?? "") , otpNumber);
+	    var response = await _userSecurity.VerifyOtp(Guid.Parse(uId ?? "") , otp.OtpNumber);
        
 	    if (response.Code is ErrorCode.BadRequest or ErrorCode.ValidationFailed) return new BadRequestObjectResult(response);
 	    return new OkObjectResult(response);
@@ -149,11 +149,11 @@ public class UserController : Controller
     
     [Authorize]
 	[HttpPost(nameof(ProfilePic))]
-	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<string?>))]
 	public async Task<IActionResult> ProfilePic(IFormFile image)
 	{
 		var uId = HttpContext.User.FindFirstValue("UserId");
-		var response = await _userSecurity.ProfileImage(uId, image);
+		var response = await _userSecurity.ProfileImage(uId, image, HttpContext);
 
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
@@ -173,11 +173,11 @@ public class UserController : Controller
     
     [Authorize]
 	[HttpPut(nameof(UpdateProfilePic))]
-	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<string?>))]
 	public async Task<IActionResult> UpdateProfilePic(IFormFile image)
 	{
 		var uId = HttpContext.User.FindFirstValue("UserId");
-		var response = await _userSecurity.UpdateProfileImage(uId, image);
+		var response = await _userSecurity.UpdateProfileImage(uId, image, HttpContext);
 
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
@@ -195,13 +195,11 @@ public class UserController : Controller
 		return new OkObjectResult(response);
 	}
     
-    [Authorize]
 	[HttpGet(nameof(Profile))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(File))]
-    public async Task<IActionResult> Profile()
+    public async Task<IActionResult> Profile([FromQuery] Guid uId)
 	{
-		var uId = HttpContext.User.FindFirstValue("UserId");
-		var response = await _userSecurity.Profile(uId);
+        var response = await _userSecurity.Profile(uId.ToString());
 
         if (response.Code is ErrorCode.BadRequest || response.Data is null) return new BadRequestObjectResult(response);
         return File(await response.Data.ReadStreamAsync(), response.Message);

@@ -111,7 +111,7 @@ namespace RentZ.Application.Services.User.Security
         }
         private GenerateTokenResponseDto GenerateToken(Domain.Entities.User user, Client client)
         {
-            var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.UserName,
+            var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.DisplayName,
                 user.Email, user.PhoneNumber, client.Gender,client.FavLang, client.IsOwner, user.IsActive, 
                 user.PhoneNumberConfirmed,Roles.Client));
             return tokenResult;
@@ -241,10 +241,11 @@ namespace RentZ.Application.Services.User.Security
             if (client is null)
                 return new BaseResponse<UserData?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user data", Data = null };
 
-            var userDataResponse = new UserData(GetProfileImageUrl(context), client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
-                client.FavLang.ToString(),
-                new LookupResponse() { Id = client.CityId, Value = client.City.Name },
-                new LookupResponse() { Id = client.City.GovernorateId, Value = client.City.Governorate.Name },
+            var favLang = client.FavLang;
+            var userDataResponse = new UserData(!string.IsNullOrEmpty(client.ProfileImage) ?GetProfileImageUrl(userId, context) : null, client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
+                favLang.ToString(), client.BirthDate,
+                new LookupResponse() { Id = client.CityId, Value = favLang == Lang.en? client.City.NameEn : client.City.Name },
+                new LookupResponse() { Id = client.City.GovernorateId, Value = favLang == Lang.en ? client.City.Governorate.NameEn : client.City.Governorate.Name },
                 client.Gender.ToString(), client.IsOwner, client.User.IsActive, client.User.PhoneNumberConfirmed);
            
             return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
@@ -262,6 +263,7 @@ namespace RentZ.Application.Services.User.Security
             user.DisplayName = userDate.DisplayName ?? user.DisplayName;
             user.Email = userDate.Email ?? user.Email;
             client.CityId = userDate.CityId ?? client.CityId;
+            client.BirthDate = userDate.BirthDate ?? client.BirthDate;
             client.Gender = string.IsNullOrEmpty(userDate.Gender) ? client.Gender : (Gender)Enum.Parse(typeof(Gender),userDate.Gender);
 
             bool successSetOtp;
@@ -285,24 +287,23 @@ namespace RentZ.Application.Services.User.Security
             return new BaseResponse<GenerateTokenResponseDto?>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success to edit user data" : "Fail to edit user data", Data = tokenResult };
 
         }
-        public async Task<BaseResponse<bool>> ProfileImage(string userId, IFormFile image)
+        public async Task<BaseResponse<string?>> ProfileImage(string userId, IFormFile image, HttpContext context)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
             if (client is null)
-                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
+                return new BaseResponse<string?>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = null };
 
             var fileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
-            var saved = await _fileManager.SaveFileAsync<Domain.Entities.User>(image, fileName
-                , userId);
+            var saved = await _fileManager.SaveFileAsync<Domain.Entities.User>(image, fileName, userId);
             if (!saved)
-                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
+                return new BaseResponse<string?>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = null };
 
 
             client.ProfileImage = fileName;
             _context.Clients.Update(client);
             await _context.SaveChangesAsync();
 
-            return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Upload user profile pic done successfully", Data = true };
+            return new BaseResponse<string?>() { Code = ErrorCode.Success, Message = "Upload user profile pic done successfully", Data = GetProfileImageUrl(userId, context) };
         }
         public async Task<BaseResponse<bool>> DeleteProfileImage(string userId)
         {
@@ -316,24 +317,24 @@ namespace RentZ.Application.Services.User.Security
            
             return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Removing your profile image done successfully", Data = true };
         }
-        public async Task<BaseResponse<bool>> UpdateProfileImage(string userId, IFormFile image)
+        public async Task<BaseResponse<string?>> UpdateProfileImage(string userId, IFormFile image, HttpContext context)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
             if (client is null)
-                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to update user profile pic", Data = false };
+                return new BaseResponse<string?>() { Code = ErrorCode.BadRequest, Message = "Fail to update user profile pic", Data = null };
 
             var newFileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
 
             var saved = await _fileManager.UpdateFileAsync<Domain.Entities.User>(image, client.ProfileImage, newFileName, userId);
             if (!saved)
-                return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = false };
+                return new BaseResponse<string?>() { Code = ErrorCode.BadRequest, Message = "Fail to upload user profile pic", Data = null };
 
 
             client.ProfileImage = newFileName;
             _context.Clients.Update(client);
             await _context.SaveChangesAsync();
 
-            return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Update user profile pic done successfully", Data = true };
+            return new BaseResponse<string?>() { Code = ErrorCode.Success, Message = "Update user profile pic done successfully", Data = GetProfileImageUrl(userId, context) };
         }
         public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
         {
@@ -346,7 +347,7 @@ namespace RentZ.Application.Services.User.Security
             var contentType = _fileManager.GetContentType(fileImage.Filename);
             return new BaseResponse<IFileProxy?>() { Code = ErrorCode.Success, Message = contentType, Data = fileImage };
         }
-        private string GetProfileImageUrl(HttpContext context)
+        private string GetProfileImageUrl(string uId,HttpContext context)
         {
             var request = context.Request;
 
@@ -354,7 +355,7 @@ namespace RentZ.Application.Services.User.Security
 
             var host = request.Host.Value;
 
-            var url = $"{scheme}://{host}/api/User/Profile";
+            var url = $"{scheme}://{host}/api/User/Profile?uId={uId}";
 
             return url;
         }
