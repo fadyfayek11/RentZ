@@ -328,6 +328,8 @@ namespace RentZ.Application.Services.User.Security
         {
 	        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
 			if (user is null) return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "Can't find the user", Data = null };
+			
+			if (user.PhoneNumber == newNumber) return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "You entered the same number, please enter different one", Data = null };
 
             user.PhoneNumber = newNumber;
 			user.PhoneNumberConfirmed = false;
