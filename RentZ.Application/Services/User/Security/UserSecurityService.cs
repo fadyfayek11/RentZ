@@ -329,6 +329,7 @@ namespace RentZ.Application.Services.User.Security
 	        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
 			if (user is null) return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "Can't find the user", Data = null };
 
+            user.PhoneNumber = newNumber;
 			user.PhoneNumberConfirmed = false;
 
 			_context.Users.Update(user);
