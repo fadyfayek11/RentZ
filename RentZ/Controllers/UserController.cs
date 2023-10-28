@@ -213,7 +213,7 @@ public class UserController : Controller
     [Authorize]
     [HttpPatch(nameof(AccountActivity))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
-    public async Task<IActionResult> AccountActivity(ChangePhoneNumber number)
+    public async Task<IActionResult> AccountActivity()
     {
 	    var uId = HttpContext.User.FindFirstValue("UserId");
 	    var response = await _userSecurity.AccountActivity(uId);
