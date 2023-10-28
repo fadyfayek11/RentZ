@@ -354,7 +354,10 @@ namespace RentZ.Application.Services.User.Security
 		        return new BaseResponse<bool?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user data", Data = null };
 
 	        user.IsActive = !user.IsActive;
-	        return new BaseResponse<bool?>() { Code = ErrorCode.BadRequest, Message = user.IsActive? "Activate user account done" : "Deactivate user account done", Data = user.IsActive };
+	        _context.Users.Update(user);
+	        await _context.SaveChangesAsync();
+
+			return new BaseResponse<bool?>() { Code = ErrorCode.Success, Message = user.IsActive? "Activate user account done" : "Deactivate user account done", Data = user.IsActive };
         }
 
 		public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
