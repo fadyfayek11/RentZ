@@ -2,7 +2,7 @@
 
 namespace RentZ.DTO.JWT;
 
-public record GenerateTokenRequestDto(string UserId, string DisplayName, string UserEmail,
+public record GenerateTokenRequestDto(string UserId, string DisplayName, string UserEmail, string UserImage,
 	string PhoneNumber, Gender Gender, Lang FavLang, bool IsOwner, 
 	bool IsActive, bool IsOtpVerified, Roles Role);
 

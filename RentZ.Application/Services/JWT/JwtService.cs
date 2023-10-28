@@ -29,7 +29,7 @@ public class JwtService : IJwtService
             new Claim("IsActiveAcc", tokenRequest.IsActive.ToString()),
             new Claim("OtpVerified", tokenRequest.IsOtpVerified.ToString()),
             new Claim("UserRole", tokenRequest.Role.ToString()),
-            new Claim("UserImage", string.Empty),
+            new Claim("UserImage", tokenRequest.UserImage),
         };
 
 	    var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
