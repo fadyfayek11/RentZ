@@ -182,7 +182,7 @@ public class UserController : Controller
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
 	}
-    
+
     [Authorize]
 	[HttpPut(nameof(UserInfo))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
@@ -190,6 +190,18 @@ public class UserController : Controller
 	{
 		var uId = HttpContext.User.FindFirstValue("UserId");
 		var response = await _userSecurity.EditUserInformation(uId, userData);
+
+		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+		return new OkObjectResult(response);
+	}
+
+    [Authorize]
+	[HttpPatch(nameof(PhoneNumber))]
+	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GenerateTokenResponseDto?>))]
+    public async Task<IActionResult> PhoneNumber(ChangePhoneNumber number)
+	{
+		var uId = HttpContext.User.FindFirstValue("UserId");
+		var response = await _userSecurity.ChangePhoneNumber(uId, number.NewPhoneNumber);
 
 		if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 		return new OkObjectResult(response);
@@ -204,6 +216,5 @@ public class UserController : Controller
         if (response.Code is ErrorCode.BadRequest || response.Data is null) return new BadRequestObjectResult(response);
         return File(await response.Data.ReadStreamAsync(), response.Message);
 	}
-
 
 }

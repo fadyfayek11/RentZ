@@ -22,6 +22,7 @@ namespace RentZ.Application.Services.User.Security
         Task<BaseResponse<IFileProxy?>> Profile(string userId);
         Task<BaseResponse<bool>> DeleteProfileImage(string userId);
         Task<BaseResponse<string?>> UpdateProfileImage(string userId, IFormFile image, HttpContext context);
+        Task<BaseResponse<GenerateTokenResponseDto?>> ChangePhoneNumber(string userId, string newNumber);
 
     }
 }

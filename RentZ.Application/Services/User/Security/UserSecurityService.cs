@@ -27,7 +27,7 @@ namespace RentZ.Application.Services.User.Security
             _userManager = userManager;
             _fileManager = fileManager;
         }
-		
+
 		public async Task<BaseResponse<GenerateTokenResponseDto>> Login(Login login)
         {
             //ToDo: Fluent Validation middleware
@@ -266,22 +266,10 @@ namespace RentZ.Application.Services.User.Security
             client.BirthDate = userDate.BirthDate ?? client.BirthDate;
             client.Gender = string.IsNullOrEmpty(userDate.Gender) ? client.Gender : (Gender)Enum.Parse(typeof(Gender),userDate.Gender);
 
-            bool successSetOtp;
-            GenerateTokenResponseDto tokenResult;
-            if (!string.IsNullOrEmpty(userDate.PhoneNumber))
-            {
-                user.PhoneNumberConfirmed = false;
-                user.PhoneNumber = userDate.PhoneNumber;
-                user.UserName = userDate.PhoneNumber;
+			var tokenResult = GenerateToken(user, client);
+            bool successSetOtp = !string.IsNullOrEmpty(tokenResult.Token);
 
-                (successSetOtp, tokenResult) = await SetOtp(user);
-            }
-            else
-            {
-                (successSetOtp, tokenResult) = await SetOtp(user);
-            }
-            
-            _context.Clients.Update(client);
+			_context.Clients.Update(client);
             await _context.SaveChangesAsync();
 
             return new BaseResponse<GenerateTokenResponseDto?>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success to edit user data" : "Fail to edit user data", Data = tokenResult };
@@ -336,6 +324,19 @@ namespace RentZ.Application.Services.User.Security
 
             return new BaseResponse<string?>() { Code = ErrorCode.Success, Message = "Update user profile pic done successfully", Data = GetProfileImageUrl(userId, context) };
         }
+        public async Task<BaseResponse<GenerateTokenResponseDto?>> ChangePhoneNumber(string userId, string newNumber)
+        {
+	        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+			if (user is null) return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "Can't find the user", Data = null };
+
+			user.PhoneNumberConfirmed = false;
+
+			_context.Users.Update(user);
+			await _context.SaveChangesAsync();
+
+			var (successSetOtp, token) = await SetOtp(user);
+			return new BaseResponse<GenerateTokenResponseDto?>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success send otp" : "Fail to send otp", Data = token };
+		}
         public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
         {
 
