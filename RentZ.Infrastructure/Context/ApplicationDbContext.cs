@@ -15,6 +15,9 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
         ChangeTracker.LazyLoadingEnabled = true;
     }
 
+	public DbSet<Property> Properties { get; set; }
+	public DbSet<Media> Media { get; set; }
+	public DbSet<Utility> Utilities { get; set; }
 	public DbSet<Admin> Admins { get; set; }
 	public DbSet<OtpSetup> OtpSetups { get; set; }
 	public DbSet<Client> Clients { get; set; }
