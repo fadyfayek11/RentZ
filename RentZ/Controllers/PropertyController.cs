@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata;
 using RentZ.Application.Services.Property;
 using RentZ.DTO.Enums;
-using RentZ.DTO.JWT;
 using RentZ.DTO.Property;
 using RentZ.DTO.Response;
-using RentZ.DTO.User.Security;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace RentZ.API.Controllers;
@@ -27,6 +24,17 @@ public class PropertyController : Controller
     public async Task<IActionResult> Property([FromForm] AddingProperty property)
     {
         var response = await _propertyService.AddProperty(HttpContext, property);
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+    
+    [HttpGet]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GetPropertyDetails?>))]
+    public async Task<IActionResult> PropertyDetails([FromQuery]FindProperty propertyFilter)
+    {
+        var response = await _propertyService.GetProperty(propertyFilter);
         if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
         if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 

@@ -10,5 +10,10 @@ public class MappingProfile : Profile
     {
         CreateMap<AddingProperty, Property>()
             .ForMember(dest => dest.PropertyUtilities,src => src.Ignore());
+       
+        CreateMap<Property, GetPropertyDetails>()
+            .ForMember(dest => dest.PropertyUtilities, src => src.Ignore())
+            .ForMember(dest => dest.City, src => src.Ignore());
+
     }
 }

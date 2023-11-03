@@ -8,6 +8,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using RentZ.Application.Mapper;
 using RentZ.Application.Services.Files;
+using RentZ.DTO.Lookups;
 
 namespace RentZ.Application.Services.Property;
 
@@ -47,13 +48,53 @@ public class PropertyService : IPropertyService
         return new BaseResponse<int>() { Code = ErrorCode.Success, Message = "Post a property done successfully", Data = propEntity.Id };
     }
 
+    public async Task<BaseResponse<GetPropertyDetails?>> GetProperty(FindProperty filters)
+    {
+        var property = await _context.Properties.FirstOrDefaultAsync(x=>x.Id == filters.PropId);
+
+        if(property is null)
+            return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.BadRequest, Message = "Fail to find the property", Data = null };
+
+        var propDetails = Mapping.Mapper.Map<GetPropertyDetails>(property);
+        var isEnum = Enum.TryParse(filters.Lang, out Lang langValue);
+
+        propDetails.PropertyUtilities = property.PropertyUtilities?.Select(x=> new LookupResponse
+        {
+            Id = x.UtilityId,
+            Value = isEnum && langValue == Lang.en ? x.Utility.NameEn : x.Utility.Name,
+        }).ToList();
+        propDetails.City = new LookupResponse
+        {
+            Id = property.CityId,
+            Value = isEnum && langValue == Lang.en ? property.City.NameEn : property.City.Name,
+        };
+        propDetails.Governorate = new LookupResponse
+        {
+            Id = property.City.GovernorateId,
+            Value = isEnum && langValue == Lang.en ? property.City.Governorate.NameEn : property.City.Governorate.Name,
+        };
+        propDetails.ImagesUrls = property.PropertyMedia?.Select(x => new PropMedia
+        {
+            Url = x.Reference
+        }).ToList();
+        propDetails.Owner = new OwnerDetails
+        {
+            UId = property.Client.Id,
+            DisplayName = property.Client.User.DisplayName,
+            PhoneNumber = property.Client.User.PhoneNumber,
+            Email = property.Client.User.Email,
+        };
+
+
+        return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = propDetails };
+    }
     private async Task<List<Media>> AddMedia(List<IFormFile> images, string propId)
     {
         var result = new List<Media>();
         foreach (var image in images)
         {
             var fileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
-            await _fileManager.SaveFileAsync<Domain.Entities.User>(image, fileName, propId);
+            await _fileManager.SaveFileAsync<Domain.Entities.Property>(image, fileName, propId);
             
             result.Add(new Media(){Reference = fileName});
         }
