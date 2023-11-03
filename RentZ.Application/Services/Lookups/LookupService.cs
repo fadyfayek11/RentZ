@@ -72,4 +72,31 @@ public class LookupService : ILookupService
 
 		return new BaseResponse<List<LookupResponse>>(){Code = ErrorCode.Success, Data = governorate, Errors = null, Message = "Get all governorates" };
 	}
+
+    public async Task<BaseResponse<List<LookupResponse>>> GetPropertyUtilities(LookupRequest lookup)
+    {
+        var utilityQuery = _context.Utilities.AsQueryable();
+
+        if (lookup.Id != 0)
+        {
+            utilityQuery = utilityQuery.Where(x => x.Id == lookup.Id);
+        }
+
+        if (!string.IsNullOrEmpty(lookup.Name))
+        {
+            utilityQuery = utilityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
+        }
+
+        var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
+
+        var utilities = await utilityQuery
+            .Select(x => new LookupResponse
+            {
+                Id = x.Id,
+                Value = isEnum && langValue == Lang.en ? x.NameEn : x.Name,
+            })
+            .ToListAsync();
+
+        return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = utilities, Errors = null, Message = "Get all governorates" };
+    }
 }

@@ -31,7 +31,6 @@ public class PropertyService : IPropertyService
 
         var propEntity = Mapping.Mapper.Map<Domain.Entities.Property>(prop);
         propEntity.OwnerId = Guid.Parse(userId);
-        propEntity.IsActive = true;
         var propUtilities = prop.PropertyUtilities.Select(x => new PropertyUtility
         {
             UtilityId = x,

@@ -34,4 +34,12 @@ public class LookupsController : Controller
 	    var response = await _lookupService.GetGovernorates(lookup);
 	    return new OkObjectResult(response);
     }
+    
+    [HttpGet(nameof(Utilities))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponse>))]
+    public async Task<IActionResult> Utilities([FromQuery]LookupRequest lookup)
+    {
+	    var response = await _lookupService.GetPropertyUtilities(lookup);
+	    return new OkObjectResult(response);
+    }
 }

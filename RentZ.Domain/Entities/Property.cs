@@ -28,7 +28,7 @@ public class Property
     [ForeignKey(nameof(Admin))]
     public Guid? ApprovedBy { get; set; }
 
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
     public DateTime CreatedDate { get; set; } = DateTime.Now;
     public PropertyCategory Category { get; set; }
     public FurnishingType FurnishingType { get; set; }
