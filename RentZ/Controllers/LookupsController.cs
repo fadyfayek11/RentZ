@@ -1,10 +1,6 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RentZ.Application.Services.Lookups;
-using RentZ.Domain.Entities;
-using RentZ.DTO.Enums;
 using RentZ.DTO.Lookups;
-using RentZ.DTO.Response;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace RentZ.API.Controllers;
