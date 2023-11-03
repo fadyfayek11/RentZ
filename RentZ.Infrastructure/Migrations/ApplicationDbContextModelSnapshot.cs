@@ -342,6 +342,9 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<Guid?>("ApprovedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<double>("Area")
+                        .HasColumnType("float");
+
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
@@ -368,6 +371,9 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumOfBathRooms")
+                        .HasColumnType("int");
 
                     b.Property<int>("NumOfBeds")
                         .HasColumnType("int");

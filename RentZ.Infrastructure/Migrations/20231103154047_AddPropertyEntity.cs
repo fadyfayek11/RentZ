@@ -21,9 +21,11 @@ namespace RentZ.Infrastructure.Migrations
                     CityId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<double>(type: "float", nullable: false),
+                    Area = table.Column<double>(type: "float", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NumOfRooms = table.Column<int>(type: "int", nullable: false),
                     NumOfBeds = table.Column<int>(type: "int", nullable: false),
+                    NumOfBathRooms = table.Column<int>(type: "int", nullable: false),
                     Smoking = table.Column<bool>(type: "bit", nullable: false),
                     Pet = table.Column<bool>(type: "bit", nullable: false),
                     ForRent = table.Column<bool>(type: "bit", nullable: false),
@@ -118,6 +120,7 @@ namespace RentZ.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+          
             migrationBuilder.CreateIndex(
                 name: "IX_Media_PropertyId",
                 table: "Media",

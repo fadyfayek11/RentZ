@@ -12,7 +12,7 @@ using RentZ.Infrastructure.Context;
 namespace RentZ.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231102191416_AddPropertyEntity")]
+    [Migration("20231103154047_AddPropertyEntity")]
     partial class AddPropertyEntity
     {
         /// <inheritdoc />
@@ -345,6 +345,9 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<Guid?>("ApprovedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<double>("Area")
+                        .HasColumnType("float");
+
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
@@ -371,6 +374,9 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumOfBathRooms")
+                        .HasColumnType("int");
 
                     b.Property<int>("NumOfBeds")
                         .HasColumnType("int");

@@ -5,6 +5,7 @@ using RentZ.DTO.Property;
 using RentZ.DTO.Response;
 using RentZ.Infrastructure.Context;
 using System.Security.Claims;
+using ExtCore.FileStorage.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using RentZ.Application.Mapper;
 using RentZ.Application.Services.Files;
@@ -47,8 +48,7 @@ public class PropertyService : IPropertyService
 
         return new BaseResponse<int>() { Code = ErrorCode.Success, Message = "Post a property done successfully", Data = propEntity.Id };
     }
-
-    public async Task<BaseResponse<GetPropertyDetails?>> GetProperty(FindProperty filters)
+    public async Task<BaseResponse<GetPropertyDetails?>> GetProperty(HttpContext context, FindProperty filters)
     {
         var property = await _context.Properties.FirstOrDefaultAsync(x=>x.Id == filters.PropId);
 
@@ -75,7 +75,8 @@ public class PropertyService : IPropertyService
         };
         propDetails.ImagesUrls = property.PropertyMedia?.Select(x => new PropMedia
         {
-            Url = x.Reference
+            Id = x.Id,
+            Url = GetImageUrl(property.Id.ToString(), x.Id.ToString(), context)
         }).ToList();
         propDetails.Owner = new OwnerDetails
         {
@@ -85,8 +86,33 @@ public class PropertyService : IPropertyService
             Email = property.Client.User.Email,
         };
 
-
         return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = propDetails };
+    }
+    public async Task<BaseResponse<IFileProxy?>> PropertyImage(PropImage image)
+    {
+        var property = await _context.Properties.FirstOrDefaultAsync(x => x.Id == image.PropId);
+        if (property is null)
+            return new BaseResponse<IFileProxy?>() { Code = ErrorCode.BadRequest, Message = "Fail to get property pic", Data = null };
+
+        var imageRef = property.PropertyMedia?.Where(x => x.Id == image.ImageId).Select(x => x.Reference).FirstOrDefault();
+        if (string.IsNullOrEmpty(imageRef))
+            return new BaseResponse<IFileProxy?>() { Code = ErrorCode.InternalServerError, Message = "Property hadn't set a pic yet", Data = null };
+
+        var fileImage = await _fileManager.FileProxy<Domain.Entities.Property>(imageRef, image.PropId.ToString());
+        var contentType = _fileManager.GetContentType(fileImage.Filename);
+        return new BaseResponse<IFileProxy?>() { Code = ErrorCode.Success, Message = contentType, Data = fileImage };
+    }
+    private string GetImageUrl(string propId,string imageId, HttpContext context)
+    {
+        var request = context.Request;
+
+        var scheme = request.Scheme;
+
+        var host = request.Host.Value;
+
+        var url = $"{scheme}://{host}/api/Property/Image?PropId={propId}&ImageId={imageId}";
+
+        return url;
     }
     private async Task<List<Media>> AddMedia(List<IFormFile> images, string propId)
     {

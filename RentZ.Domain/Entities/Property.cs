@@ -13,11 +13,13 @@ public class Property
     public Guid OwnerId { get; set; }
 
     public int CityId { get; set; }
-    public string? Name { get; set; } 
+    public string? Name { get; set; }
     public double Price { get; set; }
+    public double Area { get; set; }
     public string? Description { get; set; }
     public int NumOfRooms { get; set; }
     public int NumOfBeds { get; set; }
+    public int NumOfBathRooms { get; set; }
     public bool Smoking { get; set; }
     public bool Pet { get; set; }
     public bool ForRent { get; set; }

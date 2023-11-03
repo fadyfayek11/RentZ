@@ -34,10 +34,22 @@ public class PropertyController : Controller
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GetPropertyDetails?>))]
     public async Task<IActionResult> PropertyDetails([FromQuery]FindProperty propertyFilter)
     {
-        var response = await _propertyService.GetProperty(propertyFilter);
+        var response = await _propertyService.GetProperty(HttpContext, propertyFilter);
         if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
         if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+
+    [HttpGet(nameof(Image))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(File))]
+    public async Task<IActionResult> Image([FromQuery] PropImage image)
+    {
+        var response = await _propertyService.PropertyImage(image);
+
+        if (response.Code is ErrorCode.InternalServerError) return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+        if (response.Code is ErrorCode.BadRequest || response.Data is null) return new BadRequestObjectResult(response);
+
+        return File(await response.Data.ReadStreamAsync(), response.Message);
     }
 }

@@ -362,7 +362,6 @@ namespace RentZ.Application.Services.User.Security
 
 		public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
         {
-
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
             if (client is null)
                 return new BaseResponse<IFileProxy?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user profile pic", Data = null };

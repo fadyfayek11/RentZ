@@ -9,10 +9,12 @@ public class AddingProperty
     public string Name { get; set; }
     public PropertyCategory Category { get; set; }
     public double Price { get; set; }
+    public double Area { get; set; }
     public int CityId { get; set; }
     public string Description { get; set; }
     public int NumOfRooms { get; set; }
     public int NumOfBeds { get; set; }
+    public int NumOfBathRooms { get; set; }
     public FurnishingType FurnishingType { get; set; }
     public bool Smoking { get; set; }
     public bool Pet { get; set; }
