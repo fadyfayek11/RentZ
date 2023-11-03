@@ -15,7 +15,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.PropertyUtilities, src => src.Ignore())
             .ForMember(dest => dest.City, src => src.Ignore());
 
-      //  CreateMap<GetProperties, Property>();
         CreateMap<Property, GetProperties>();
 
     }
