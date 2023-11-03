@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="ExtCore.Data.Abstractions" Version="8.1.0" />
     <PackageReference Include="ExtCore.FileStorage.FileSystem" Version="8.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
@@ -21,6 +22,8 @@
   <ItemGroup>
     <Folder Include="DtoValidations\User\" />
     <Folder Include="Middleware\" />
+    <Folder Include="Mapper\" />
+    <Folder Include="Services\Property\" />
   </ItemGroup>
 
 </Project>

@@ -18,7 +18,6 @@ namespace RentZ.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
                     CityId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<double>(type: "float", nullable: false),
@@ -31,20 +30,18 @@ namespace RentZ.Infrastructure.Migrations
                     ForExchange = table.Column<bool>(type: "bit", nullable: false),
                     Views = table.Column<int>(type: "int", nullable: false),
                     Approved = table.Column<bool>(type: "bit", nullable: false),
-                    ApprovedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApprovedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Category = table.Column<int>(type: "int", nullable: false),
-                    FurnishingType = table.Column<int>(type: "int", nullable: false),
-                    ClientId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    AdminId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    FurnishingType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Properties", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Properties_Admins_AdminId",
-                        column: x => x.AdminId,
+                        name: "FK_Properties_Admins_ApprovedBy",
+                        column: x => x.ApprovedBy,
                         principalTable: "Admins",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -54,30 +51,11 @@ namespace RentZ.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Properties_Clients_ClientId",
-                        column: x => x.ClientId,
+                        name: "FK_Properties_Clients_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "Clients",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Media",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Reference = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    PropertyId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Media", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Media_Properties_PropertyId",
-                        column: x => x.PropertyId,
-                        principalTable: "Properties",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,17 +66,56 @@ namespace RentZ.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NameEn = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    PropertyId = table.Column<int>(type: "int", nullable: true)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Utilities", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Media",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Reference = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    PropertyId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Media", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Utilities_Properties_PropertyId",
+                        name: "FK_Media_Properties_PropertyId",
                         column: x => x.PropertyId,
                         principalTable: "Properties",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PropertyUtilities",
+                columns: table => new
+                {
+                    PropertyId = table.Column<int>(type: "int", nullable: false),
+                    UtilityId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PropertyUtilities", x => new { x.PropertyId, x.UtilityId });
+                    table.ForeignKey(
+                        name: "FK_PropertyUtilities_Properties_PropertyId",
+                        column: x => x.PropertyId,
+                        principalTable: "Properties",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PropertyUtilities_Utilities_UtilityId",
+                        column: x => x.UtilityId,
+                        principalTable: "Utilities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -107,9 +124,9 @@ namespace RentZ.Infrastructure.Migrations
                 column: "PropertyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Properties_AdminId",
+                name: "IX_Properties_ApprovedBy",
                 table: "Properties",
-                column: "AdminId");
+                column: "ApprovedBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Properties_CityId",
@@ -117,14 +134,14 @@ namespace RentZ.Infrastructure.Migrations
                 column: "CityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Properties_ClientId",
+                name: "IX_Properties_OwnerId",
                 table: "Properties",
-                column: "ClientId");
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Utilities_PropertyId",
-                table: "Utilities",
-                column: "PropertyId");
+                name: "IX_PropertyUtilities_UtilityId",
+                table: "PropertyUtilities",
+                column: "UtilityId");
         }
 
         /// <inheritdoc />
@@ -134,10 +151,13 @@ namespace RentZ.Infrastructure.Migrations
                 name: "Media");
 
             migrationBuilder.DropTable(
-                name: "Utilities");
+                name: "PropertyUtilities");
 
             migrationBuilder.DropTable(
                 name: "Properties");
+
+            migrationBuilder.DropTable(
+                name: "Utilities");
 
         }
     }

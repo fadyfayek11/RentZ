@@ -1,9 +1,11 @@
 ﻿using ExtCore.FileStorage.Abstractions;
 using ExtCore.FileStorage.FileSystem;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using RentZ.Application.Services.Files;
 using RentZ.Application.Services.JWT;
 using RentZ.Application.Services.Lookups;
+using RentZ.Application.Services.Property;
 using RentZ.Application.Services.User.Security;
 using RentZ.Application.Services.Validations;
 
@@ -14,6 +16,7 @@ public static class ApplicationConfiguration
 	public static void ServiceConfiguration(this IServiceCollection services)
 	{
 		services.AddScoped<IUserSecurityService, UserSecurityService>();
+		services.AddScoped<IPropertyService, PropertyService>();
 		services.AddScoped<IValidations, Validations>();
 		services.AddScoped<ILookupService, LookupService>();
 		services.AddScoped<IJwtService, JwtService>();

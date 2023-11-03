@@ -14,4 +14,8 @@
     <ProjectReference Include="..\RentZ.DTO\RentZ.DTO.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Enums\" />
+  </ItemGroup>
+
 </Project>

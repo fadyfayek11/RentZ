@@ -32,6 +32,8 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 	.AddEntityFrameworkStores<ApplicationDbContext>()
 	.AddDefaultTokenProviders();
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();

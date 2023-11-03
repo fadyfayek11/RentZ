@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RentZ.Domain.Entities;
+using System.Reflection.Emit;
 
 namespace RentZ.Infrastructure.Context;
 
@@ -16,6 +17,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
     }
 
 	public DbSet<Property> Properties { get; set; }
+	public DbSet<PropertyUtility> PropertyUtilities { get; set; }
 	public DbSet<Media> Media { get; set; }
 	public DbSet<Utility> Utilities { get; set; }
 	public DbSet<Admin> Admins { get; set; }
@@ -28,9 +30,10 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
 	{
 		base.OnModelCreating(builder);
 		SeedRoles(builder);
+
 		// Configure GUID primary keys for user entities
 		builder.Entity<User>().Property(u => u.Id).ValueGeneratedOnAdd();
-       
+
         builder.Entity<Admin>()
             .HasOne(a => a.User)
             .WithOne()
@@ -41,6 +44,18 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
             .WithOne()
             .HasForeignKey<Client>(c => c.Id);
 
+        builder.Entity<PropertyUtility>()
+            .HasKey(sc => new { sc.PropertyId, sc.UtilityId });
+
+        builder.Entity<PropertyUtility>()
+            .HasOne(sc => sc.Property)
+            .WithMany(s => s.PropertyUtilities)
+            .HasForeignKey(sc => sc.PropertyId);
+
+        builder.Entity<PropertyUtility>()
+            .HasOne(sc => sc.Utility)
+            .WithMany(c => c.PropertyUtilities)
+            .HasForeignKey(sc => sc.UtilityId);
     }
 	private void SeedRoles(ModelBuilder builder)
 	{
@@ -51,4 +66,3 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
 		);
 	}
 }
-

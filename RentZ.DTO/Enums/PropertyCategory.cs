@@ -1,5 +1,5 @@
 ﻿
-namespace RentZ.Domain.Enums;
+namespace RentZ.DTO.Enums;
 
 public enum PropertyCategory
 {

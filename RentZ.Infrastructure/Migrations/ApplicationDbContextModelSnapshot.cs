@@ -298,7 +298,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("PropertyId")
+                    b.Property<int>("PropertyId")
                         .HasColumnType("int");
 
                     b.Property<string>("Reference")
@@ -336,26 +336,17 @@ namespace RentZ.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid?>("AdminId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("Approved")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("ApprovedBy")
+                    b.Property<Guid?>("ApprovedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<int>("CityId")
                         .HasColumnType("int");
-
-                    b.Property<Guid?>("ClientId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -401,13 +392,28 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdminId");
+                    b.HasIndex("ApprovedBy");
 
                     b.HasIndex("CityId");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Properties");
+                });
+
+            modelBuilder.Entity("RentZ.Domain.Entities.PropertyUtility", b =>
+                {
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UtilityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PropertyId", "UtilityId");
+
+                    b.HasIndex("UtilityId");
+
+                    b.ToTable("PropertyUtilities");
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.User", b =>
@@ -499,12 +505,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<string>("NameEn")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PropertyId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("PropertyId");
 
                     b.ToTable("Utilities");
                 });
@@ -603,16 +604,20 @@ namespace RentZ.Infrastructure.Migrations
 
             modelBuilder.Entity("RentZ.Domain.Entities.Media", b =>
                 {
-                    b.HasOne("RentZ.Domain.Entities.Property", null)
+                    b.HasOne("RentZ.Domain.Entities.Property", "Property")
                         .WithMany("PropertyMedia")
-                        .HasForeignKey("PropertyId");
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Property", b =>
                 {
                     b.HasOne("RentZ.Domain.Entities.Admin", "Admin")
                         .WithMany()
-                        .HasForeignKey("AdminId");
+                        .HasForeignKey("ApprovedBy");
 
                     b.HasOne("RentZ.Domain.Entities.City", "City")
                         .WithMany()
@@ -622,7 +627,9 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasOne("RentZ.Domain.Entities.Client", "Client")
                         .WithMany()
-                        .HasForeignKey("ClientId");
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Admin");
 
@@ -631,17 +638,34 @@ namespace RentZ.Infrastructure.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("RentZ.Domain.Entities.Utility", b =>
+            modelBuilder.Entity("RentZ.Domain.Entities.PropertyUtility", b =>
                 {
-                    b.HasOne("RentZ.Domain.Entities.Property", null)
+                    b.HasOne("RentZ.Domain.Entities.Property", "Property")
                         .WithMany("PropertyUtilities")
-                        .HasForeignKey("PropertyId");
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RentZ.Domain.Entities.Utility", "Utility")
+                        .WithMany("PropertyUtilities")
+                        .HasForeignKey("UtilityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+
+                    b.Navigation("Utility");
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Property", b =>
                 {
                     b.Navigation("PropertyMedia");
 
+                    b.Navigation("PropertyUtilities");
+                });
+
+            modelBuilder.Entity("RentZ.Domain.Entities.Utility", b =>
+                {
                     b.Navigation("PropertyUtilities");
                 });
 #pragma warning restore 612, 618

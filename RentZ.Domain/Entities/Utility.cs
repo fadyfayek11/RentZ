@@ -10,4 +10,5 @@ public class Utility
     public string Name { get; set; }
     public string NameEn { get; set; }
     public bool IsActive { get; set; }
+    public virtual ICollection<PropertyUtility> PropertyUtilities { get; set; }
 }
