@@ -51,5 +51,17 @@ public class PropertyController : Controller
         if (response.Code is ErrorCode.BadRequest || response.Data is null) return new BadRequestObjectResult(response);
 
         return File(await response.Data.ReadStreamAsync(), response.Message);
+    } 
+    
+    [HttpGet(nameof(Properties))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<GetProperties?>>))]
+    public async Task<IActionResult> Properties([FromQuery] PropertyFilter filter)
+    {
+        var response = await _propertyService.GetProperties(HttpContext,filter);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
 }

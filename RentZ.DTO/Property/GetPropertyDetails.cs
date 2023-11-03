@@ -45,8 +45,10 @@ public class PropertyFilter
     public double? Price { get; set; }
     public double? Area { get; set; }
     public int? NumOfBeds { get; set; }
-    public int NumOfBathRooms { get; set; }
-    public FurnishingType FurnishingType { get; set; }
+    public int? NumOfBathRooms { get; set; }
+    public FurnishingType? FurnishingType { get; set; }
+    public int PageIndex { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
 }
 
 public class FindProperty
@@ -65,4 +67,30 @@ public class PropImage
 {
     public int PropId { get; set; }
     public int ImageId { get; set; }
+}
+
+public class PagedResult<T>
+{
+    public List<GetProperties> Items { get; set; }
+    public int TotalCount { get; set; }
+}
+
+public class GetProperties
+{
+    public string Name { get; set; }
+    public PropertyCategory Category { get; set; }
+    public double Price { get; set; }
+    public double Area { get; set; }
+    public string Description { get; set; }
+    public int NumOfRooms { get; set; }
+    public int NumOfBeds { get; set; }
+    public int NumOfBathRooms { get; set; }
+    public FurnishingType FurnishingType { get; set; }
+    public bool ForRent { get; set; }
+    public bool ForExchange { get; set; }
+    public int Views { get; set; }
+    public bool IsApproved { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public string CoverImageUrl { get; set; }
 }

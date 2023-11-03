@@ -88,6 +88,27 @@ public class PropertyService : IPropertyService
 
         return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = propDetails };
     }
+
+    public async Task<BaseResponse<PagedResult<GetProperties?>>> GetProperties(HttpContext context, PropertyFilter filters)
+    {
+        var properties = _context.Properties.AsQueryable();
+
+        properties = properties.Where(p =>
+            (!filters.Category.HasValue || p.Category == filters.Category) &&
+            (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
+            (!filters.Price.HasValue || p.Price <= filters.Price) &&
+            (!filters.Area.HasValue || p.Area <= filters.Area) &&
+            (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
+            (!filters.NumOfBathRooms.HasValue || p.NumOfBathRooms == filters.NumOfBathRooms) &&
+            (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
+        );
+
+        var propertiesList = await properties.Skip((filters.PageIndex-1) * filters.PageSize).Take(filters.PageSize).ToListAsync();
+        var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
+
+        return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = new PagedResult<GetProperties?>(){Items = propertiesResult ?? new List<GetProperties>(), TotalCount = properties.Count()} };
+    }
+
     public async Task<BaseResponse<IFileProxy?>> PropertyImage(PropImage image)
     {
         var property = await _context.Properties.FirstOrDefaultAsync(x => x.Id == image.PropId);
@@ -126,4 +147,5 @@ public class PropertyService : IPropertyService
         }
         return result;
     }
+
 }
