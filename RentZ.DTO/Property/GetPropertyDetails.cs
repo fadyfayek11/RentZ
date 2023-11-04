@@ -41,6 +41,7 @@ public class OwnerDetails
 public class PropertyFilter
 {
     public PropertyCategory? Category { get; set; }
+    public bool IsActive { get; set; } = true;
     public int? NumOfRooms { get; set; }
     public double? Price { get; set; }
     public double? Area { get; set; }

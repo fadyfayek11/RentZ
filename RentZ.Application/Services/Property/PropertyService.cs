@@ -48,6 +48,25 @@ public class PropertyService : IPropertyService
 
         return new BaseResponse<int>() { Code = ErrorCode.Success, Message = "Post a property done successfully", Data = propEntity.Id };
     }
+
+    public async Task<BaseResponse<bool>> DeleteProperty(string uId, FindProperty filter)
+    {
+
+        var property = await _context.Properties.FirstOrDefaultAsync(x => x.Id == filter.PropId);
+
+        if (property is null)
+            return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to find the property", Data = false };
+        
+        if (property.OwnerId != Guid.Parse(uId))
+            return new BaseResponse<bool>() { Code = ErrorCode.Unauthorized, Message = "Fail to find the property", Data = false };
+
+        property.IsActive = false;
+        _context.Properties.Update(property);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Deleting the property done successfully", Data = true };
+    }
+
     public async Task<BaseResponse<GetPropertyDetails?>> GetProperty(HttpContext context, FindProperty filters)
     {
         var property = await _context.Properties.FirstOrDefaultAsync(x=>x.Id == filters.PropId);
@@ -88,11 +107,12 @@ public class PropertyService : IPropertyService
 
         return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = propDetails };
     }
+
     public async Task<BaseResponse<PagedResult<GetProperties?>>> GetProperties(HttpContext context, PropertyFilter filters)
     {
         var properties = _context.Properties.AsQueryable();
 
-        properties = properties.Where(p =>
+        properties = properties.Where(p => p.IsActive == filters.IsActive &&
             (!filters.Category.HasValue || p.Category == filters.Category) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
             (!filters.Price.HasValue || p.Price <= filters.Price) &&
@@ -113,6 +133,7 @@ public class PropertyService : IPropertyService
         }).ToList();
         return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = new PagedResult<GetProperties?>(){Items = propertiesResult, TotalCount = properties.Count()} };
     }
+
     public async Task<BaseResponse<IFileProxy?>> PropertyImage(PropImage image)
     {
         var property = await _context.Properties.FirstOrDefaultAsync(x => x.Id == image.PropId);
@@ -127,6 +148,7 @@ public class PropertyService : IPropertyService
         var contentType = _fileManager.GetContentType(fileImage.Filename);
         return new BaseResponse<IFileProxy?>() { Code = ErrorCode.Success, Message = contentType, Data = fileImage };
     }
+
     private string GetImageUrl(string propId,string imageId, HttpContext context)
     {
         var request = context.Request;
@@ -139,6 +161,7 @@ public class PropertyService : IPropertyService
 
         return url;
     }
+
     private async Task<List<Media>> AddMedia(List<IFormFile> images, string propId)
     {
         var result = new List<Media>();

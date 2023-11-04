@@ -5,6 +5,7 @@ using RentZ.DTO.Enums;
 using RentZ.DTO.Property;
 using RentZ.DTO.Response;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 
 namespace RentZ.API.Controllers;
 
@@ -60,6 +61,22 @@ public class PropertyController : Controller
         var response = await _propertyService.GetProperties(HttpContext,filter);
 
         if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+    
+    [HttpPatch]
+    [Authorize]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<bool>>))]
+    public async Task<IActionResult> Property([FromQuery] FindProperty filter)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+
+        var response = await _propertyService.DeleteProperty(uId, filter);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.Unauthorized) return new UnauthorizedObjectResult(response);
         if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
