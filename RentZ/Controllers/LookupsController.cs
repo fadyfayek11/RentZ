@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RentZ.Application.Services.Lookups;
 using RentZ.DTO.Lookups;
 using Swashbuckle.AspNetCore.Annotations;

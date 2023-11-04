@@ -1,9 +1,12 @@
 using System.Text;
+using System.Threading.RateLimiting;
+using AspNetCoreRateLimit;
 using ExtCore.FileStorage;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,6 +14,7 @@ using RentZ.Application.Configurations;
 using RentZ.Domain.Entities;
 using RentZ.DTO.JWT;
 using RentZ.Infrastructure.Context;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +68,24 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
+builder.Services.AddMemoryCache();
+builder.Services.AddOptions();
+
+
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    rateLimiterOptions.AddPolicy("fixed", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+        factory: _ => new FixedWindowRateLimiterOptions()
+        {
+            PermitLimit = 1,
+            Window = TimeSpan.FromHours(1),
+
+        }));
+    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(options =>
@@ -104,6 +126,8 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

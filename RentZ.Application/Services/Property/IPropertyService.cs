@@ -7,6 +7,7 @@ namespace RentZ.Application.Services.Property;
 
 public interface IPropertyService
 {
+    Task<BaseResponse<int>> ViewProperty(FindProperty filter);
     Task<BaseResponse<int>> AddProperty(HttpContext context, AddingProperty prop);
     Task<BaseResponse<bool>> DeleteProperty(string uId, FindProperty filter);
     Task<BaseResponse<GetPropertyDetails?>> GetProperty(HttpContext context, FindProperty filters);

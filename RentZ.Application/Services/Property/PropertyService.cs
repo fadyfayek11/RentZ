@@ -23,6 +23,13 @@ public class PropertyService : IPropertyService
         _context = context;
         _fileManager = fileManager;
     }
+
+    public async Task<BaseResponse<int>> ViewProperty(FindProperty filter)
+    {
+
+        throw new NotImplementedException();
+    }
+
     public async Task<BaseResponse<int>> AddProperty(HttpContext context, AddingProperty prop)
     {
         var userId = context.User.FindFirstValue("UserId");
