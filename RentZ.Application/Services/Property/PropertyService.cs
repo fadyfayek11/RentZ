@@ -88,7 +88,6 @@ public class PropertyService : IPropertyService
 
         return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = propDetails };
     }
-
     public async Task<BaseResponse<PagedResult<GetProperties?>>> GetProperties(HttpContext context, PropertyFilter filters)
     {
         var properties = _context.Properties.AsQueryable();
@@ -103,12 +102,17 @@ public class PropertyService : IPropertyService
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
         );
 
-        var propertiesList = await properties.Skip((filters.PageIndex-1) * filters.PageSize).Take(filters.PageSize).ToListAsync();
+        var propertiesList = await properties.Skip((filters.PageIndex-1) * filters.PageSize).Take(filters.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
+        var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
-        return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = new PagedResult<GetProperties?>(){Items = propertiesResult ?? new List<GetProperties>(), TotalCount = properties.Count()} };
+        propertiesResult = propertiesResult.Select(x =>
+        {
+            x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(),coverId.ToString()!, context) : string.Empty;
+            return x;
+        }).ToList();
+        return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = new PagedResult<GetProperties?>(){Items = propertiesResult, TotalCount = properties.Count()} };
     }
-
     public async Task<BaseResponse<IFileProxy?>> PropertyImage(PropImage image)
     {
         var property = await _context.Properties.FirstOrDefaultAsync(x => x.Id == image.PropId);

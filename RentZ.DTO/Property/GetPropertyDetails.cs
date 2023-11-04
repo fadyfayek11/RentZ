@@ -77,6 +77,7 @@ public class PagedResult<T>
 
 public class GetProperties
 {
+    public int Id { get; set; }
     public string Name { get; set; }
     public PropertyCategory Category { get; set; }
     public double Price { get; set; }
