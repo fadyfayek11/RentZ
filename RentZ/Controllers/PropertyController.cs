@@ -6,6 +6,7 @@ using RentZ.DTO.Property;
 using RentZ.DTO.Response;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace RentZ.API.Controllers;
 
@@ -14,9 +15,11 @@ namespace RentZ.API.Controllers;
 public class PropertyController : Controller
 {
     private readonly IPropertyService _propertyService;
-    public PropertyController(IPropertyService propertyService)
+    private readonly ILogger<PropertyController> _logger;
+    public PropertyController(IPropertyService propertyService, ILogger<PropertyController> logger)
     {
         _propertyService = propertyService;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -30,7 +33,7 @@ public class PropertyController : Controller
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
-    
+
     [HttpGet]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<GetPropertyDetails?>))]
     public async Task<IActionResult> PropertyDetails([FromQuery]FindProperty propertyFilter)
@@ -52,8 +55,8 @@ public class PropertyController : Controller
         if (response.Code is ErrorCode.BadRequest || response.Data is null) return new BadRequestObjectResult(response);
 
         return File(await response.Data.ReadStreamAsync(), response.Message);
-    } 
-    
+    }
+
     [HttpGet(nameof(Properties))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<GetProperties?>>))]
     public async Task<IActionResult> Properties([FromQuery] PropertyFilter filter)
@@ -65,10 +68,10 @@ public class PropertyController : Controller
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
-    
-    [HttpPatch]
+
+    [HttpDelete]
     [Authorize]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<bool>>))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
     public async Task<IActionResult> Property([FromQuery] FindProperty filter)
     {
         var uId = HttpContext.User.FindFirstValue("UserId");
@@ -77,6 +80,19 @@ public class PropertyController : Controller
 
         if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
         if (response.Code == ErrorCode.Unauthorized) return new UnauthorizedObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+
+    [EnableRateLimiting("fixed")]
+    [HttpPatch(nameof(View))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<int>))]
+    public async Task<IActionResult> View([FromQuery] FindProperty filter)
+    {
+        var response = await _propertyService.ViewProperty(filter);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
         if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };

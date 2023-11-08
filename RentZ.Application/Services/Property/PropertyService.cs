@@ -26,8 +26,16 @@ public class PropertyService : IPropertyService
 
     public async Task<BaseResponse<int>> ViewProperty(FindProperty filter)
     {
+        var property = await _context.Properties.FirstOrDefaultAsync(x => x.Id == filter.PropId);
 
-        throw new NotImplementedException();
+        if (property is null)
+            return new BaseResponse<int>() { Code = ErrorCode.BadRequest, Message = "Fail to find the property", Data = 0 };
+
+        property.Views++;
+
+        _context.Properties.Update(property);
+        await _context.SaveChangesAsync();
+        return new BaseResponse<int>() { Code = ErrorCode.Success, Message = "New view happened", Data = property.Views };
     }
 
     public async Task<BaseResponse<int>> AddProperty(HttpContext context, AddingProperty prop)
@@ -119,16 +127,27 @@ public class PropertyService : IPropertyService
     {
         var properties = _context.Properties.AsQueryable();
 
-        properties = properties.Where(p => p.IsActive == filters.IsActive &&
-            (!filters.Category.HasValue || p.Category == filters.Category) &&
+        properties = properties.Where(p => p.IsActive == filters.IsActive && p.ForExchange == filters.ForExchange && p.Balcony == filters.Balcony && p.Pet == filters.Pet &&
+            (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
+            (!filters.PeriodType.HasValue || p.PeriodType == filters.PeriodType) &&
+            (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
+            (!filters.StayType.HasValue || p.StayType == filters.StayType) &&
+            (!filters.AgeFrom.HasValue || p.AgeFrom == filters.AgeFrom) &&
+            (!filters.AgeTo.HasValue || p.AgeTo == filters.AgeTo) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
             (!filters.Price.HasValue || p.Price <= filters.Price) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
+            (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.AvailableDate <= filters.AvailableDateTo && p.AvailableDate >= filters.AvailableDateFrom)) &&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
             (!filters.NumOfBathRooms.HasValue || p.NumOfBathRooms == filters.NumOfBathRooms) &&
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
         );
 
+        if (filters.PropertyUtilities is { Count: > 0 })
+        {
+            properties = properties.Where(property => property.PropertyUtilities != null && property.PropertyUtilities.Any(util => filters.PropertyUtilities.Contains(util.PropertyId))
+            );
+        }
         var propertiesList = await properties.Skip((filters.PageIndex-1) * filters.PageSize).Take(filters.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
         var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);

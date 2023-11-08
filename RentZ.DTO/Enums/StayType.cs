@@ -2,5 +2,5 @@
 
 public enum StayType
 {
-    
+    stay,
 }
