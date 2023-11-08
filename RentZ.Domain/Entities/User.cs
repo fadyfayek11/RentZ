@@ -30,9 +30,9 @@ public class Client
     public string ProfileImage { get; set; }
     public Lang FavLang { get; set; }
     public string Bio { get; set; }
-    public int CityId { get; set; }
+    public int? CityId { get; set; }
 
-    public virtual City City { get; set; }
+    public virtual City? City { get; set; }
     public virtual User User { get; set; }
 
 }

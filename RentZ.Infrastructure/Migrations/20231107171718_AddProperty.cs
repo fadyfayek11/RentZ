@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RentZ.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddPropertyEntity : Migration
+    public partial class AddProperty : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,17 +25,23 @@ namespace RentZ.Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NumOfRooms = table.Column<int>(type: "int", nullable: false),
                     NumOfBeds = table.Column<int>(type: "int", nullable: false),
-                    NumOfBathRooms = table.Column<int>(type: "int", nullable: false),
-                    Smoking = table.Column<bool>(type: "bit", nullable: false),
+                    NumOfBathRooms = table.Column<int>(type: "int", nullable: true),
+                    Balcony = table.Column<bool>(type: "bit", nullable: false),
                     Pet = table.Column<bool>(type: "bit", nullable: false),
                     ForRent = table.Column<bool>(type: "bit", nullable: false),
                     ForExchange = table.Column<bool>(type: "bit", nullable: false),
                     Views = table.Column<int>(type: "int", nullable: false),
                     Approved = table.Column<bool>(type: "bit", nullable: false),
+                    AvailableDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ApprovedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Category = table.Column<int>(type: "int", nullable: false),
+                    PeriodType = table.Column<int>(type: "int", nullable: false),
+                    Gender = table.Column<int>(type: "int", nullable: true),
+                    StayType = table.Column<int>(type: "int", nullable: true),
+                    AgeFrom = table.Column<int>(type: "int", nullable: true),
+                    AgeTo = table.Column<int>(type: "int", nullable: true),
                     FurnishingType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -120,7 +126,6 @@ namespace RentZ.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-          
             migrationBuilder.CreateIndex(
                 name: "IX_Media_PropertyId",
                 table: "Media",
@@ -161,7 +166,6 @@ namespace RentZ.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Utilities");
-
         }
     }
 }

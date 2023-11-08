@@ -38,14 +38,11 @@ public class RegistrationValidation : AbstractValidator<Registration>
         RuleFor(registration => registration.FavLang)
             .IsInEnum().WithMessage("Invalid favorite language.");
 
-        RuleFor(registration => registration.CityId)
-            .GreaterThan(0).WithMessage("City ID is required.")
-            .MustAsync(BeAValidCity).WithMessage("City ID does not exist in the database.");
     }
-    private async Task<bool> BeAValidCity(int cityId, CancellationToken cancellationToken)
-    {
-       return  await _validations.IsCityExist(cityId);
-    }
+    //private async Task<bool> BeAValidCity(int cityId, CancellationToken cancellationToken)
+    //{
+    //   return  await _validations.IsCityExist(cityId);
+    //}
     private async Task<bool> BeAValidNumber(string phoneNumber, CancellationToken cancellationToken)
     {
        return  await _validations.IsPhoneNumberExist(phoneNumber);

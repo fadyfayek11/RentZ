@@ -12,8 +12,8 @@ using RentZ.Infrastructure.Context;
 namespace RentZ.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231103154047_AddPropertyEntity")]
-    partial class AddPropertyEntity
+    [Migration("20231107172921_NullableCityForClient")]
+    partial class NullableCityForClient
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -249,7 +249,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CityId")
+                    b.Property<int?>("CityId")
                         .HasColumnType("int");
 
                     b.Property<int>("FavLang")
@@ -339,6 +339,12 @@ namespace RentZ.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AgeFrom")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AgeTo")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Approved")
                         .HasColumnType("bit");
 
@@ -347,6 +353,12 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.Property<double>("Area")
                         .HasColumnType("float");
+
+                    b.Property<DateTime>("AvailableDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Balcony")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Category")
                         .HasColumnType("int");
@@ -369,13 +381,16 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<int>("FurnishingType")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Gender")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("NumOfBathRooms")
+                    b.Property<int?>("NumOfBathRooms")
                         .HasColumnType("int");
 
                     b.Property<int>("NumOfBeds")
@@ -387,14 +402,17 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("PeriodType")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Pet")
                         .HasColumnType("bit");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<bool>("Smoking")
-                        .HasColumnType("bit");
+                    b.Property<int?>("StayType")
+                        .HasColumnType("int");
 
                     b.Property<int>("Views")
                         .HasColumnType("int");
@@ -596,9 +614,7 @@ namespace RentZ.Infrastructure.Migrations
                 {
                     b.HasOne("RentZ.Domain.Entities.City", "City")
                         .WithMany()
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CityId");
 
                     b.HasOne("RentZ.Domain.Entities.User", "User")
                         .WithOne()

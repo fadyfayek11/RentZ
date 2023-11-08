@@ -249,9 +249,9 @@ namespace RentZ.Application.Services.User.Security
             var favLang = client.FavLang;
             var userDataResponse = new UserData(userId,!string.IsNullOrEmpty(client.ProfileImage) ?GetProfileImageUrl(userId, context) : null, client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
                 favLang.ToString(), client.BirthDate,
-                new LookupResponse() { Id = client.CityId, Value = favLang == Lang.en? client.City.NameEn : client.City.Name },
-                new LookupResponse() { Id = client.City.GovernorateId, Value = favLang == Lang.en ? client.City.Governorate.NameEn : client.City.Governorate.Name },
-                client.Gender.ToString(), client.IsOwner, client.User.IsActive, client.User.PhoneNumberConfirmed);
+                new LookupResponse() { Id = client.CityId, Value = favLang == Lang.en? client?.City?.NameEn : client?.City?.Name },
+                new LookupResponse() { Id = client?.City?.GovernorateId, Value = favLang == Lang.en ? client?.City?.Governorate.NameEn : client?.City?.Governorate.Name },
+                client?.Gender.ToString(), client.IsOwner, client.User.IsActive, client.User.PhoneNumberConfirmed);
            
             return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
         }
