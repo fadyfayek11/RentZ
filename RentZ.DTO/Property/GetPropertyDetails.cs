@@ -6,6 +6,7 @@ namespace RentZ.DTO.Property;
 
 public class GetPropertyDetails
 {
+    public int Id { get; set; }
     public string Name { get; set; }
     public PropertyCategory Category { get; set; }
     public double Price { get; set; }
@@ -17,7 +18,8 @@ public class GetPropertyDetails
     public int NumOfBeds { get; set; }
     public int NumOfBathRooms { get; set; }
     public FurnishingType FurnishingType { get; set; }
-    public bool Smoking { get; set; }
+    public PeriodType PeriodType { get; set; }
+    public bool Balcony { get; set; }
     public bool Pet { get; set; }
     public bool ForRent { get; set; }
     public bool ForExchange { get; set; }
@@ -43,16 +45,15 @@ public class PropertyFilter
     public PropertyCategory? Category { get; set; }
     public bool IsActive { get; set; } = true;
     public int? NumOfRooms { get; set; }
-    public double? Price { get; set; }
+    public double? PriceFrom { get; set; }
+    public double? PriceTo{ get; set; }
     public double? Area { get; set; }
     public int? NumOfBeds { get; set; }
     public int? NumOfBathRooms { get; set; }
     public int? CityId { get; set; }
     public PeriodType? PeriodType { get; set; }
     public Gender? Gender { get; set; }
-    public StayType? StayType { get; set; }
-    public int? AgeFrom { get; set; }
-    public int? AgeTo { get; set; }
+    public int? Age { get; set; }
     public bool ForExchange { get; set; }
     public bool Balcony { get; set; }
     public bool Pet { get; set; }
@@ -93,6 +94,7 @@ public class GetProperties
     public int Id { get; set; }
     public string Name { get; set; }
     public PropertyCategory Category { get; set; }
+    public PeriodType PeriodType { get; set; }
     public double Price { get; set; }
     public double Area { get; set; }
     public string Description { get; set; }

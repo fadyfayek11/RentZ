@@ -22,7 +22,6 @@ public class AddingProperty
     public bool ForExchange { get; set; }
     public PeriodType PeriodType { get; set; }
     public Gender? Gender { get; set; }
-    public StayType? StayType { get; set; }
     public int? AgeFrom { get; set; }
     public int? AgeTo { get; set; }
     public DateTime AvailableDate { get; set; }

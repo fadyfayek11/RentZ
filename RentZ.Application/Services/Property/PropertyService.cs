@@ -38,13 +38,13 @@ public class PropertyService : IPropertyService
         return new BaseResponse<int>() { Code = ErrorCode.Success, Message = "New view happened", Data = property.Views };
     }
 
-    public async Task<BaseResponse<int>> AddProperty(HttpContext context, AddingProperty prop)
+    public async Task<BaseResponse<GetPropertyDetails?>> AddProperty(HttpContext context, AddingProperty prop)
     {
         var userId = context.User.FindFirstValue("UserId");
 
         var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
         if (client is null)
-            return new BaseResponse<int>() { Code = ErrorCode.BadRequest, Message = "Fail to post a property", Data = 0 };
+            return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.BadRequest, Message = "Fail to post a property", Data = null };
 
         var propEntity = Mapping.Mapper.Map<Domain.Entities.Property>(prop);
         propEntity.OwnerId = Guid.Parse(userId);
@@ -61,7 +61,7 @@ public class PropertyService : IPropertyService
         _context.Update(propEntity);
         await _context.SaveChangesAsync();
 
-        return new BaseResponse<int>() { Code = ErrorCode.Success, Message = "Post a property done successfully", Data = propEntity.Id };
+        return await GetProperty(context,new FindProperty(){PropId = propEntity.Id,Lang = propEntity.Client.FavLang.ToString()});
     }
 
     public async Task<BaseResponse<bool>> DeleteProperty(string uId, FindProperty filter)
@@ -84,7 +84,11 @@ public class PropertyService : IPropertyService
 
     public async Task<BaseResponse<GetPropertyDetails?>> GetProperty(HttpContext context, FindProperty filters)
     {
-        var property = await _context.Properties.FirstOrDefaultAsync(x=>x.Id == filters.PropId);
+        var property = await _context.Properties.Include(property => property.Client).ThenInclude(client => client.User)
+            .Include(property => property.PropertyMedia).Include(property => property.PropertyUtilities)!
+            .ThenInclude(propertyUtility => propertyUtility.Utility).Include(property => property.City)
+            .ThenInclude(city => city.Governorate)
+            .FirstOrDefaultAsync(x=>x.Id == filters.PropId);
 
         if(property is null)
             return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.BadRequest, Message = "Fail to find the property", Data = null };
@@ -131,11 +135,9 @@ public class PropertyService : IPropertyService
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
             (!filters.PeriodType.HasValue || p.PeriodType == filters.PeriodType) &&
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
-            (!filters.StayType.HasValue || p.StayType == filters.StayType) &&
-            (!filters.AgeFrom.HasValue || p.AgeFrom == filters.AgeFrom) &&
-            (!filters.AgeTo.HasValue || p.AgeTo == filters.AgeTo) &&
+            (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
-            (!filters.Price.HasValue || p.Price <= filters.Price) &&
+            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.Price >= filters.PriceFrom && p.Price <= filters.PriceTo)) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
             (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.AvailableDate <= filters.AvailableDateTo && p.AvailableDate >= filters.AvailableDateFrom)) &&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
@@ -162,7 +164,7 @@ public class PropertyService : IPropertyService
 
     public async Task<BaseResponse<IFileProxy?>> PropertyImage(PropImage image)
     {
-        var property = await _context.Properties.FirstOrDefaultAsync(x => x.Id == image.PropId);
+        var property = await _context.Properties.Include(property => property.PropertyMedia).FirstOrDefaultAsync(x => x.Id == image.PropId);
         if (property is null)
             return new BaseResponse<IFileProxy?>() { Code = ErrorCode.BadRequest, Message = "Fail to get property pic", Data = null };
 

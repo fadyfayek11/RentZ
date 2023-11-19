@@ -3,6 +3,6 @@
 public enum FurnishingType
 {
     FullyFurniture,
-    Furniture,
+    HalfFurniture,
     NonFurniture
 }
