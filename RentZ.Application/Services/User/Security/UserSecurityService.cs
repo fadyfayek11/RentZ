@@ -242,7 +242,8 @@ namespace RentZ.Application.Services.User.Security
         }
         public async Task<BaseResponse<UserData?>> UserInformation(string userId, HttpContext context)
         {
-            var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            var client = await _context.Clients.Include(client => client.User).Include(client => client.City)
+                .ThenInclude(city => city.Governorate).FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
             if (client is null)
                 return new BaseResponse<UserData?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user data", Data = null };
 

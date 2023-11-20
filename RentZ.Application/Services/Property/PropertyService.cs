@@ -122,6 +122,7 @@ public class PropertyService : IPropertyService
             DisplayName = property.Client.User.DisplayName,
             PhoneNumber = property.Client.User.PhoneNumber,
             Email = property.Client.User.Email,
+            ImageUrl = GetUserImageUrl(property.Client.Id.ToString(), context)
         };
 
         return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = propDetails };
@@ -186,6 +187,18 @@ public class PropertyService : IPropertyService
         var host = request.Host.Value;
 
         var url = $"{scheme}://{host}/api/Property/Image?PropId={propId}&ImageId={imageId}";
+
+        return url;
+    }
+    private string GetUserImageUrl(string uId, HttpContext context)
+    {
+        var request = context.Request;
+
+        var scheme = request.Scheme;
+
+        var host = request.Host.Value;
+
+        var url = $"{scheme}://{host}/api/User/Profile?uId={uId}";
 
         return url;
     }
