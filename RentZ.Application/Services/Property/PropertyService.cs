@@ -87,7 +87,7 @@ public class PropertyService : IPropertyService
         var property = await _context.Properties.Include(property => property.Client).ThenInclude(client => client.User)
             .Include(property => property.PropertyMedia).Include(property => property.PropertyUtilities)!
             .ThenInclude(propertyUtility => propertyUtility.Utility).Include(property => property.City)
-            .ThenInclude(city => city.Governorate)
+            .ThenInclude(city => city.Governorate).Include(property => property.FavProperties)
             .FirstOrDefaultAsync(x=>x.Id == filters.PropId);
 
         if(property is null)
@@ -96,6 +96,10 @@ public class PropertyService : IPropertyService
         var propDetails = Mapping.Mapper.Map<GetPropertyDetails>(property);
         var isEnum = Enum.TryParse(filters.Lang, out Lang langValue);
 
+        var userId = context.User.FindFirstValue("UserId") ?? "";
+        var isLogInUser = !string.IsNullOrEmpty(userId);
+
+        propDetails.IsFav = isLogInUser ? (bool)property.FavProperties?.Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == y.PropertyId).Select(x=>x.IsActive).FirstOrDefault() : false;
         propDetails.PropertyUtilities = property.PropertyUtilities?.Select(x=> new LookupResponse
         {
             Id = x.UtilityId,
@@ -155,11 +159,16 @@ public class PropertyService : IPropertyService
         var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
+        var userId = context.User.FindFirstValue("UserId") ?? "";
+        var isLogInUser = !string.IsNullOrEmpty(userId);
+
         propertiesResult = propertiesResult.Select(x =>
         {
             x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(),coverId.ToString()!, context) : string.Empty;
+            x.IsFav = isLogInUser ? (bool) propertiesList.Select(z => z.FavProperties?.Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == x.Id).Select(c=>c.IsActive).FirstOrDefault()).FirstOrDefault() : false; 
             return x;
         }).ToList();
+
         return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = new PagedResult<GetProperties?>(){Items = propertiesResult, TotalCount = properties.Count()} };
     }
 

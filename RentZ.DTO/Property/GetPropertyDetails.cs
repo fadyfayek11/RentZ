@@ -22,6 +22,7 @@ public class GetPropertyDetails
     public bool Balcony { get; set; }
     public bool Pet { get; set; }
     public bool ForRent { get; set; }
+    public bool IsFav { get; set; }
     public bool ForExchange { get; set; }
     public int Views { get; set; }
     public bool IsApproved { get; set; }
@@ -108,6 +109,7 @@ public class GetProperties
     public bool ForExchange { get; set; }
     public int Views { get; set; }
     public bool IsApproved { get; set; }
+    public bool IsFav { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedDate { get; set; }
     public string CoverImageUrl { get; set; }

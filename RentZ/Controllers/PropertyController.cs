@@ -83,8 +83,7 @@ public class PropertyController : Controller
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
-    
-    
+
     [HttpPost(nameof(FavProperty))]
     [Authorize]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
