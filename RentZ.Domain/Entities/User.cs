@@ -32,6 +32,9 @@ public class Client
     public string Bio { get; set; }
     public int? CityId { get; set; }
 
+
+    public virtual ICollection<Property>? Properties { get; set; }
+    public virtual ICollection<FavProperty>? FavProperties { get; set; }
     public virtual City? City { get; set; }
     public virtual User User { get; set; }
 

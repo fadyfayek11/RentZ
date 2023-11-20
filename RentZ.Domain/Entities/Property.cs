@@ -40,6 +40,7 @@ public class Property
     public FurnishingType FurnishingType { get; set; }
     public virtual ICollection<PropertyUtility>? PropertyUtilities { get; set; }
     public virtual ICollection<Media>? PropertyMedia { get; set; }
+    public virtual ICollection<FavProperty>? FavProperties { get; set; }
     public virtual City City { get; set; } = null!;
     public virtual Client Client { get; set; } = null!;
     public virtual Admin? Admin { get; set; }

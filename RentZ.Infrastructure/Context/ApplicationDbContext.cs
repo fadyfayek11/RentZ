@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RentZ.Domain.Entities;
-using System.Reflection.Emit;
 
 namespace RentZ.Infrastructure.Context;
 
@@ -18,6 +17,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
 
 	public DbSet<Property> Properties { get; set; }
 	public DbSet<PropertyUtility> PropertyUtilities { get; set; }
+	public DbSet<FavProperty> FavProperties { get; set; }
 	public DbSet<Media> Media { get; set; }
 	public DbSet<Utility> Utilities { get; set; }
 	public DbSet<Admin> Admins { get; set; }
