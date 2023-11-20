@@ -136,8 +136,11 @@ public class PropertyService : IPropertyService
     {
         var properties = _context.Properties.AsQueryable();
 
-        properties = properties.Where(p => p.IsActive == filters.IsActive && p.ForExchange == filters.ForExchange && p.Balcony == filters.Balcony && p.Pet == filters.Pet &&
+        properties = properties.Where(p => p.IsActive == filters.IsActive &&
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
+            (!filters.ForExchange.HasValue || p.ForExchange == filters.ForExchange) &&
+            (!filters.Pet.HasValue || p.Pet == filters.Pet) &&
+            (!filters.Balcony.HasValue || p.Balcony == filters.Balcony) &&
             (!filters.PeriodType.HasValue || p.PeriodType == filters.PeriodType) &&
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
@@ -155,7 +158,7 @@ public class PropertyService : IPropertyService
             properties = properties.Where(property => property.PropertyUtilities != null && property.PropertyUtilities.Any(util => filters.PropertyUtilities.Contains(util.PropertyId))
             );
         }
-        var propertiesList = await properties.Skip((filters.PageIndex-1) * filters.PageSize).Take(filters.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
+        var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
         var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
@@ -199,6 +202,7 @@ public class PropertyService : IPropertyService
                 IsActive = true,
                 PropertyId = propId
             });
+            await _context.SaveChangesAsync();
 
             return new BaseResponse<bool>()
                 { Code = ErrorCode.Success, Message = "Adding property to fav", Data = true };
@@ -211,6 +215,31 @@ public class PropertyService : IPropertyService
 
         return new BaseResponse<bool>()
             { Code = ErrorCode.Success, Message = property.IsActive ? "Adding property to fav" : "Removing then property from user favorite", Data = property.IsActive };
+    }
+
+    public async Task<BaseResponse<PagedResult<GetProperties?>?>> GetUserFavoriteProperties(string uId, HttpContext context, Pagination pagination)
+    {
+        var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(uId));
+
+        if (client is null)
+            return new BaseResponse<PagedResult<GetProperties?>?>()
+                { Code = ErrorCode.Unauthorized, Message = "Un-Auth user", Data = null };
+
+
+        var propertiesList = client.FavProperties?.Where(x=>x.IsActive).Select(x => x.Property).Skip((pagination.PageIndex - 1) * pagination.PageSize).Take(pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToList();
+        var totalCount = client.FavProperties?.Count();
+
+        var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
+        var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
+
+        propertiesResult = propertiesResult.Select(x =>
+        {
+            x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(), coverId.ToString()!, context) : string.Empty;
+            x.IsFav = true;
+            return x;
+        }).ToList();
+
+        return new BaseResponse<PagedResult<GetProperties?>?> { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = new PagedResult<GetProperties?>() { Items = propertiesResult, TotalCount = totalCount ?? 0} };
     }
 
     private string GetImageUrl(string propId,string imageId, HttpContext context)

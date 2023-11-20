@@ -68,6 +68,21 @@ public class PropertyController : Controller
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
 
+    [Authorize]
+    [HttpGet(nameof(FavoriteProperties))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<GetProperties?>>))]
+    public async Task<IActionResult> FavoriteProperties([FromQuery] Pagination filter)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+
+        var response = await _propertyService.GetUserFavoriteProperties(uId, HttpContext, filter);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.Unauthorized) return new UnauthorizedObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+
     [HttpDelete]
     [Authorize]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]

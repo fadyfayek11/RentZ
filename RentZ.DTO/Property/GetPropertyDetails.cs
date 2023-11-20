@@ -57,13 +57,19 @@ public class PropertyFilter
     public PeriodType? PeriodType { get; set; }
     public Gender? Gender { get; set; }
     public int? Age { get; set; }
-    public bool ForExchange { get; set; }
-    public bool Balcony { get; set; }
-    public bool Pet { get; set; }
+    public bool? ForExchange { get; set; }
+    public bool? Balcony { get; set; }
+    public bool? Pet { get; set; }
     public DateTime? AvailableDateFrom { get; set; }
     public DateTime? AvailableDateTo { get; set; }
     public FurnishingType? FurnishingType { get; set; }
     public List<int> PropertyUtilities { get; set; }
+    public Pagination Pagination { get; set; } = new Pagination();
+   
+}
+
+public class Pagination
+{
     public int PageIndex { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 }
