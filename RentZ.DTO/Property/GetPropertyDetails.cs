@@ -26,6 +26,7 @@ public class GetPropertyDetails
     public int Views { get; set; }
     public bool IsApproved { get; set; }
     public bool IsActive { get; set; }
+    public DateTime AvailableDate { get; set; }
     public DateTime CreatedDate { get; set; }
     public List<LookupResponse> PropertyUtilities { get; set; }
     public List<PropMedia> ImagesUrls { get; set; }
