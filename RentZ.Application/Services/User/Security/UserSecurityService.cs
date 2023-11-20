@@ -117,7 +117,7 @@ namespace RentZ.Application.Services.User.Security
         private GenerateTokenResponseDto GenerateToken(Domain.Entities.User user, Client client, HttpContext context)
         {
             var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.DisplayName,
-                user.Email, !string.IsNullOrEmpty(client.ProfileImage) ? GetProfileImageUrl(user.Id.ToString(), context) : "", user.PhoneNumber, client.Gender,client.FavLang, client.IsOwner, user.IsActive, 
+                user.Email, GetProfileImageUrl(user.Id.ToString(), context), user.PhoneNumber, client.Gender,client.FavLang, client.IsOwner, user.IsActive, 
                 user.PhoneNumberConfirmed,Roles.Client));
             return tokenResult;
         }
