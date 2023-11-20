@@ -19,15 +19,13 @@ namespace RentZ.Infrastructure.Migrations
                 name: "FavProperties",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     PropertyId = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FavProperties", x => x.Id);
+                    table.PrimaryKey("PK_FavProperties", x => new { x.PropertyId, x.ClientId });
                     table.ForeignKey(
                         name: "FK_FavProperties_Clients_ClientId",
                         column: x => x.ClientId,
@@ -46,11 +44,6 @@ namespace RentZ.Infrastructure.Migrations
                 name: "IX_FavProperties_ClientId",
                 table: "FavProperties",
                 column: "ClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FavProperties_PropertyId",
-                table: "FavProperties",
-                column: "PropertyId");
         }
 
         /// <inheritdoc />

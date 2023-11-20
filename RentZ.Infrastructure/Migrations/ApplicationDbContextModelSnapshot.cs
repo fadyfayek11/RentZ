@@ -270,11 +270,8 @@ namespace RentZ.Infrastructure.Migrations
 
             modelBuilder.Entity("RentZ.Domain.Entities.FavProperty", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("PropertyId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uniqueidentifier");
@@ -282,14 +279,9 @@ namespace RentZ.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("PropertyId", "ClientId");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("PropertyId");
 
                     b.ToTable("FavProperties");
                 });

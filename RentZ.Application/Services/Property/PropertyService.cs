@@ -178,6 +178,32 @@ public class PropertyService : IPropertyService
         return new BaseResponse<IFileProxy?>() { Code = ErrorCode.Success, Message = contentType, Data = fileImage };
     }
 
+    public async Task<BaseResponse<bool>> FavoriteProperty(string uId, int propId)
+    {
+        var property = await _context.FavProperties.FirstOrDefaultAsync(x => x.ClientId == Guid.Parse(uId) && x.PropertyId == propId);
+
+        if (property is null)
+        {
+            await _context.FavProperties.AddAsync(new FavProperty()
+            {
+                ClientId = Guid.Parse(uId),
+                IsActive = true,
+                PropertyId = propId
+            });
+
+            return new BaseResponse<bool>()
+                { Code = ErrorCode.Success, Message = "Adding property to fav", Data = true };
+        }
+
+        property.IsActive = !property.IsActive;
+
+        _context.FavProperties.Update(property);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool>()
+            { Code = ErrorCode.Success, Message = property.IsActive ? "Adding property to fav" : "Removing then property from user favorite", Data = property.IsActive };
+    }
+
     private string GetImageUrl(string propId,string imageId, HttpContext context)
     {
         var request = context.Request;
@@ -202,7 +228,6 @@ public class PropertyService : IPropertyService
 
         return url;
     }
-
     private async Task<List<Media>> AddMedia(List<IFormFile> images, string propId)
     {
         var result = new List<Media>();

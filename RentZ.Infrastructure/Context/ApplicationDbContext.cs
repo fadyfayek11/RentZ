@@ -56,8 +56,11 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
             .HasOne(sc => sc.Utility)
             .WithMany(c => c.PropertyUtilities)
             .HasForeignKey(sc => sc.UtilityId);
+
+        builder.Entity<FavProperty>()
+            .HasKey(fp => new { fp.PropertyId, fp.ClientId });
     }
-	private void SeedRoles(ModelBuilder builder)
+    private void SeedRoles(ModelBuilder builder)
 	{
 		builder.Entity<IdentityRole>().HasData(
 			new IdentityRole() { Id = "9f4cbe69-c735-46d0-9634-4cf435c46184", Name = "Admin", ConcurrencyStamp = "2", NormalizedName = "Admin" },

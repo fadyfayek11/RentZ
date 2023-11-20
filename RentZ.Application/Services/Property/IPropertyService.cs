@@ -13,5 +13,6 @@ public interface IPropertyService
     Task<BaseResponse<GetPropertyDetails?>> GetProperty(HttpContext context, FindProperty filters);
     Task<BaseResponse<PagedResult<GetProperties?>>> GetProperties(HttpContext context, PropertyFilter filters);
     Task<BaseResponse<IFileProxy?>> PropertyImage(PropImage image);
+    Task<BaseResponse<bool>> FavoriteProperty(string uId,int propId);
 
 }

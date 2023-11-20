@@ -15,11 +15,10 @@ namespace RentZ.API.Controllers;
 public class PropertyController : Controller
 {
     private readonly IPropertyService _propertyService;
-    private readonly ILogger<PropertyController> _logger;
-    public PropertyController(IPropertyService propertyService, ILogger<PropertyController> logger)
+
+    public PropertyController(IPropertyService propertyService)
     {
         _propertyService = propertyService;
-        _logger = logger;
     }
 
     [HttpPost]
@@ -76,11 +75,26 @@ public class PropertyController : Controller
     {
         var uId = HttpContext.User.FindFirstValue("UserId");
 
-        var response = await _propertyService.DeleteProperty(uId, filter);
+        var response = await _propertyService.DeleteProperty(uId ?? "", filter);
 
         if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
         if (response.Code == ErrorCode.Unauthorized) return new UnauthorizedObjectResult(response);
         if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+    
+    
+    [HttpPost(nameof(FavProperty))]
+    [Authorize]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+    public async Task<IActionResult> FavProperty([FromQuery] int propId)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+
+        var response = await _propertyService.FavoriteProperty(uId ?? "", propId);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
 
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
