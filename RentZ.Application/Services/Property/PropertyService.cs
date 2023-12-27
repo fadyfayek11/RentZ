@@ -154,6 +154,11 @@ public class PropertyService : IPropertyService
             properties = properties.Where(property => property.PropertyUtilities != null && property.PropertyUtilities.Any(util => filters.PropertyUtilities.Contains(util.PropertyId))
             );
         }
+        
+        if (filters.PropertyCategories is { Count: > 0 })
+        {
+            properties = properties.Where(property =>  filters.PropertyCategories.Contains(property.PropertyCategory));
+        }
 
         var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
         var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;

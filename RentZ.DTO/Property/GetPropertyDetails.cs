@@ -62,7 +62,7 @@ public class PropertyFilter
     public DateTime? AvailableDateTo { get; set; }
     public FurnishingType? FurnishingType { get; set; }
     public List<int> PropertyUtilities { get; set; }
-    public List<int> PropertyCategories { get; set; }
+    public List<PropertyCategory> PropertyCategories { get; set; }
     public Pagination Pagination { get; set; } = new Pagination();
    
 }
