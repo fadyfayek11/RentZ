@@ -110,11 +110,7 @@ public class PropertyService : IPropertyService
             Id = property.CityId,
             Value = isEnum && langValue == Lang.en ? property.City.NameEn : property.City.Name,
         };
-        propDetails.Governorate = new LookupResponse
-        {
-            Id = property.City.GovernorateId,
-            Value = isEnum && langValue == Lang.en ? property.City.Governorate.NameEn : property.City.Governorate.Name,
-        };
+       
         propDetails.ImagesUrls = property.PropertyMedia?.Select(x => new PropMedia
         {
             Id = x.Id,
@@ -145,7 +141,7 @@ public class PropertyService : IPropertyService
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
-            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.Price >= filters.PriceFrom && p.Price <= filters.PriceTo)) &&
+            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.PriceFrom >= filters.PriceFrom && p.PriceTo <= filters.PriceTo)) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
             (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.AvailableDate <= filters.AvailableDateTo && p.AvailableDate >= filters.AvailableDateFrom)) &&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
@@ -158,6 +154,7 @@ public class PropertyService : IPropertyService
             properties = properties.Where(property => property.PropertyUtilities != null && property.PropertyUtilities.Any(util => filters.PropertyUtilities.Contains(util.PropertyId))
             );
         }
+
         var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
         var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
