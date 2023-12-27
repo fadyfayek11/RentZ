@@ -12,7 +12,6 @@ public class GetPropertyDetails
     public double Price { get; set; }
     public double Area { get; set; }
     public LookupResponse City { get; set; }
-    public LookupResponse Governorate { get; set; }
     public string Description { get; set; }
     public int NumOfRooms { get; set; }
     public int NumOfBeds { get; set; }
@@ -45,7 +44,6 @@ public class OwnerDetails
 
 public class PropertyFilter
 {
-    public PropertyCategory? Category { get; set; }
     public bool IsActive { get; set; } = true;
     public int? NumOfRooms { get; set; }
     public double? PriceFrom { get; set; }
@@ -64,6 +62,7 @@ public class PropertyFilter
     public DateTime? AvailableDateTo { get; set; }
     public FurnishingType? FurnishingType { get; set; }
     public List<int> PropertyUtilities { get; set; }
+    public List<int> PropertyCategories { get; set; }
     public Pagination Pagination { get; set; } = new Pagination();
    
 }
