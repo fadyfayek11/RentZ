@@ -9,7 +9,9 @@ public class GetPropertyDetails
     public int Id { get; set; }
     public string Name { get; set; }
     public PropertyCategory Category { get; set; }
-    public double Price { get; set; }
+    public PropertyType PropertyType { get; set; }
+    public double PriceFrom { get; set; }
+    public double PriceTo { get; set; }
     public double Area { get; set; }
     public LookupResponse City { get; set; }
     public string Description { get; set; }
@@ -22,7 +24,6 @@ public class GetPropertyDetails
     public bool Pet { get; set; }
     public bool ForRent { get; set; }
     public bool IsFav { get; set; }
-    public bool ForExchange { get; set; }
     public int Views { get; set; }
     public bool IsApproved { get; set; }
     public bool IsActive { get; set; }
@@ -44,7 +45,10 @@ public class OwnerDetails
 
 public class PropertyFilter
 {
+    public PropertyType PropertyType { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool? IsApproved { get; set; }
+    public Guid? OwnerId { get; set; }
     public int? NumOfRooms { get; set; }
     public double? PriceFrom { get; set; }
     public double? PriceTo{ get; set; }
@@ -55,7 +59,6 @@ public class PropertyFilter
     public PeriodType? PeriodType { get; set; }
     public Gender? Gender { get; set; }
     public int? Age { get; set; }
-    public bool? ForExchange { get; set; }
     public bool? Balcony { get; set; }
     public bool? Pet { get; set; }
     public DateTime? AvailableDateFrom { get; set; }
@@ -103,7 +106,8 @@ public class GetProperties
     public string Name { get; set; }
     public PropertyCategory Category { get; set; }
     public PeriodType PeriodType { get; set; }
-    public double Price { get; set; }
+    public double PriceFrom { get; set; }
+    public double PriceTo { get; set; }
     public double Area { get; set; }
     public string Description { get; set; }
     public int NumOfRooms { get; set; }
@@ -111,7 +115,6 @@ public class GetProperties
     public int NumOfBathRooms { get; set; }
     public FurnishingType FurnishingType { get; set; }
     public bool ForRent { get; set; }
-    public bool ForExchange { get; set; }
     public int Views { get; set; }
     public bool IsApproved { get; set; }
     public bool IsFav { get; set; }

@@ -41,7 +41,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IdentityRole");
+                    b.ToTable("IdentityRole", (string)null);
 
                     b.HasData(
                         new
@@ -208,7 +208,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Admins");
+                    b.ToTable("Admins", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.City", b =>
@@ -238,7 +238,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasIndex("GovernorateId");
 
-                    b.ToTable("City");
+                    b.ToTable("City", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Client", b =>
@@ -271,7 +271,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasIndex("CityId");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.FavProperty", b =>
@@ -289,7 +289,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("FavProperties");
+                    b.ToTable("FavProperties", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Governorate", b =>
@@ -308,7 +308,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Governorate");
+                    b.ToTable("Governorate", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Media", b =>
@@ -332,7 +332,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasIndex("PropertyId");
 
-                    b.ToTable("Media");
+                    b.ToTable("Media", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.OtpSetup", b =>
@@ -349,7 +349,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OtpSetups");
+                    b.ToTable("OtpSetups", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Property", b =>
@@ -449,7 +449,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Properties");
+                    b.ToTable("Properties", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.PropertyUtility", b =>
@@ -464,7 +464,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasIndex("UtilityId");
 
-                    b.ToTable("PropertyUtilities");
+                    b.ToTable("PropertyUtilities", (string)null);
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.User", b =>
@@ -558,7 +558,7 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Utilities");
+                    b.ToTable("Utilities", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

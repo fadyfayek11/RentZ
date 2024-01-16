@@ -99,7 +99,7 @@ public class PropertyService : IPropertyService
         var userId = context.User.FindFirstValue("UserId") ?? "";
         var isLogInUser = !string.IsNullOrEmpty(userId);
 
-        propDetails.IsFav = isLogInUser ? (bool)property.FavProperties?.Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == y.PropertyId).Select(x=>x.IsActive).FirstOrDefault() : false;
+        propDetails.IsFav = isLogInUser && (bool)property.FavProperties?.Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == property.Id).Select(x=>x.IsActive).FirstOrDefault();
         propDetails.PropertyUtilities = property.PropertyUtilities?.Select(x=> new LookupResponse
         {
             Id = x.UtilityId,
@@ -132,9 +132,10 @@ public class PropertyService : IPropertyService
     {
         var properties = _context.Properties.AsQueryable();
 
-        properties = properties.Where(p => p.IsActive == filters.IsActive &&
+        properties = properties.Where(p => p.IsActive == filters.IsActive && p.PropertyType == filters.PropertyType &&
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
-            (!filters.ForExchange.HasValue || p.ForExchange == filters.ForExchange) &&
+            (!filters.OwnerId.HasValue || p.OwnerId == filters.OwnerId) &&
+            (!filters.IsApproved.HasValue || p.Approved == filters.IsApproved) &&
             (!filters.Pet.HasValue || p.Pet == filters.Pet) &&
             (!filters.Balcony.HasValue || p.Balcony == filters.Balcony) &&
             (!filters.PeriodType.HasValue || p.PeriodType == filters.PeriodType) &&
@@ -231,7 +232,7 @@ public class PropertyService : IPropertyService
         var propertiesList = client.FavProperties?.Where(x=>x.IsActive).Select(x => x.Property).Skip((pagination.PageIndex - 1) * pagination.PageSize).Take(pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToList();
         var totalCount = client.FavProperties?.Count();
 
-        var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
+        var coverId = propertiesList?.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
         propertiesResult = propertiesResult.Select(x =>
