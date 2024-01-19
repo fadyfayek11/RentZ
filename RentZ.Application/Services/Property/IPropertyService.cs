@@ -12,6 +12,7 @@ public interface IPropertyService
     Task<BaseResponse<bool>> DeleteProperty(string uId, FindProperty filter);
     Task<BaseResponse<GetPropertyDetails?>> GetProperty(HttpContext context, FindProperty filters);
     Task<BaseResponse<PagedResult<GetProperties?>>> GetProperties(HttpContext context, PropertyFilter filters);
+    Task<BaseResponse<PagedResult<GetProperties?>>> GetGuestProperties(HttpContext context, GuestPropertyFilter filters);
     Task<BaseResponse<IFileProxy?>> PropertyImage(PropImage image);
     Task<BaseResponse<bool>> FavoriteProperty(string uId,int propId);
     Task<BaseResponse<PagedResult<GetProperties?>?>> GetUserFavoriteProperties(string uId, HttpContext context, Pagination pagination);

@@ -18,6 +18,7 @@ public class GetPropertyDetails
     public int NumOfRooms { get; set; }
     public int NumOfBeds { get; set; }
     public int NumOfBathRooms { get; set; }
+    public int NumberOfPeople { get; set; }
     public FurnishingType FurnishingType { get; set; }
     public PeriodType PeriodType { get; set; }
     public bool Balcony { get; set; }
@@ -45,7 +46,7 @@ public class OwnerDetails
 
 public class PropertyFilter
 {
-    public PropertyType PropertyType { get; set; }
+    public PropertyType? PropertyType { get; set; }
     public bool IsActive { get; set; } = true;
     public bool? IsApproved { get; set; }
     public Guid? OwnerId { get; set; }
@@ -59,6 +60,33 @@ public class PropertyFilter
     public PeriodType? PeriodType { get; set; }
     public Gender? Gender { get; set; }
     public int? Age { get; set; }
+    public int? NumberOfPeople { get; set; }
+    public bool? Balcony { get; set; }
+    public bool? Pet { get; set; }
+    public bool? ForRent { get; set; }
+    public DateTime? AvailableDateFrom { get; set; }
+    public DateTime? AvailableDateTo { get; set; }
+    public FurnishingType? FurnishingType { get; set; }
+    public List<int> PropertyUtilities { get; set; }
+    public List<PropertyCategory> PropertyCategories { get; set; }
+    public Pagination Pagination { get; set; } = new Pagination();
+   
+}
+public class GuestPropertyFilter
+{
+    public bool IsActive { get; set; } = true;
+    public bool? IsApproved { get; set; }
+    public int? NumOfRooms { get; set; }
+    public double? PriceFrom { get; set; }
+    public double? PriceTo{ get; set; }
+    public double? Area { get; set; }
+    public int? NumOfBeds { get; set; }
+    public int? NumOfBathRooms { get; set; }
+    public int? CityId { get; set; }
+    public PeriodType? PeriodType { get; set; }
+    public Gender? Gender { get; set; }
+    public int? Age { get; set; }
+    public int? NumberOfPeople { get; set; }
     public bool? Balcony { get; set; }
     public bool? Pet { get; set; }
     public DateTime? AvailableDateFrom { get; set; }
@@ -69,6 +97,7 @@ public class PropertyFilter
     public Pagination Pagination { get; set; } = new Pagination();
    
 }
+
 
 public class Pagination
 {
@@ -114,6 +143,7 @@ public class GetProperties
     public int NumOfRooms { get; set; }
     public int NumOfBeds { get; set; }
     public int NumOfBathRooms { get; set; }
+    public int NumberOfPeople { get; set; }
     public FurnishingType FurnishingType { get; set; }
     public bool ForRent { get; set; }
     public int Views { get; set; }

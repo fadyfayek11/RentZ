@@ -17,6 +17,7 @@ public class AddingProperty
     public int NumOfRooms { get; set; }
     public int NumOfBeds { get; set; }
     public int NumOfBathRooms { get; set; }
+    public int NumberOfPeople { get; set; }
     public FurnishingType FurnishingType { get; set; }
     public bool Balcony { get; set; }
     public bool Pet { get; set; }
@@ -25,7 +26,8 @@ public class AddingProperty
     public Gender? Gender { get; set; }
     public int? AgeFrom { get; set; }
     public int? AgeTo { get; set; }
-    public DateTime AvailableDate { get; set; }
-    public List<int> PropertyUtilities { get; set; }
+    public DateTime DateFrom { get; set; }
+    public DateTime DateTo { get; set; }
+    public List<int>? PropertyUtilities { get; set; }
     public List<IFormFile> Images { get; set; }
 }

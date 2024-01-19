@@ -24,13 +24,14 @@ public class Property
     public bool Balcony { get; set; }
     public bool Pet { get; set; }
     public bool ForRent { get; set; }
-    public bool ForExchange { get; set; }
 
     public int Views { get; set; }
+    public int NumberOfPeople { get; set; }
     public bool Approved { get; set; }
     public PropertyType PropertyType { get; set; }
     public PropertyCategory PropertyCategory { get; set; }
-    public DateTime AvailableDate { get; set; }
+    public DateTime DateFrom { get; set; }
+    public DateTime DateTo { get; set; }
 
     [ForeignKey(nameof(Admin))]
     public Guid? ApprovedBy { get; set; }

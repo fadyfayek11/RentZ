@@ -48,11 +48,12 @@ public class PropertyService : IPropertyService
 
         var propEntity = Mapping.Mapper.Map<Domain.Entities.Property>(prop);
         propEntity.OwnerId = Guid.Parse(userId);
-        var propUtilities = prop.PropertyUtilities.Select(x => new PropertyUtility
+        var propUtilities = prop.PropertyUtilities?.Select(x => new PropertyUtility
         {
             UtilityId = x,
         }).ToList();
         propEntity.PropertyUtilities = propUtilities;
+        propEntity.Approved = prop.PropertyType == PropertyType.Request;
 
         await _context.Properties.AddAsync(propEntity);
         await _context.SaveChangesAsync();
@@ -132,7 +133,10 @@ public class PropertyService : IPropertyService
     {
         var properties = _context.Properties.AsQueryable();
 
-        properties = properties.Where(p => p.IsActive == filters.IsActive && p.PropertyType == filters.PropertyType &&
+        properties = properties.Where(p => p.IsActive == filters.IsActive && 
+            (!filters.PropertyType.HasValue || p.PropertyType == filters.PropertyType) &&
+            (!filters.NumberOfPeople.HasValue || p.NumberOfPeople == filters.NumberOfPeople) &&
+            (!filters.ForRent.HasValue || p.ForRent == filters.ForRent) &&
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
             (!filters.OwnerId.HasValue || p.OwnerId == filters.OwnerId) &&
             (!filters.IsApproved.HasValue || p.Approved == filters.IsApproved) &&
@@ -144,7 +148,7 @@ public class PropertyService : IPropertyService
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
             (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.PriceFrom >= filters.PriceFrom && p.PriceTo <= filters.PriceTo)) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
-            (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.AvailableDate <= filters.AvailableDateTo && p.AvailableDate >= filters.AvailableDateFrom)) &&
+            (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.DateTo <= filters.AvailableDateTo && p.DateFrom >= filters.AvailableDateFrom)) &&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
             (!filters.NumOfBathRooms.HasValue || p.NumOfBathRooms == filters.NumOfBathRooms) &&
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
@@ -166,12 +170,60 @@ public class PropertyService : IPropertyService
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
         var userId = context.User.FindFirstValue("UserId") ?? "";
-        var isLogInUser = !string.IsNullOrEmpty(userId);
 
         propertiesResult = propertiesResult.Select(x =>
         {
             x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(),coverId.ToString()!, context) : string.Empty;
-            x.IsFav = isLogInUser ? (bool) propertiesList.Select(z => z.FavProperties?.Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == x.Id).Select(c=>c.IsActive).FirstOrDefault()).FirstOrDefault() : false; 
+            x.IsFav = (bool) propertiesList.Select(z => z.FavProperties?
+                    .Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == x.Id)
+                    .Select(c=> c.IsActive).FirstOrDefault())
+                    .FirstOrDefault(); 
+            return x;
+        }).ToList();
+
+        return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.Success, Message = "Get the property details done successfully", Data = new PagedResult<GetProperties?>(){Items = propertiesResult, TotalCount = properties.Count()} };
+    }
+    
+    public async Task<BaseResponse<PagedResult<GetProperties?>>> GetGuestProperties(HttpContext context, GuestPropertyFilter filters)
+    {
+        var properties = _context.Properties.AsQueryable();
+
+        properties = properties.Where(p => p.IsActive == filters.IsActive && p.PropertyType == PropertyType.Advertising &&
+            (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
+            (!filters.NumberOfPeople.HasValue || p.NumberOfPeople == filters.NumberOfPeople) &&
+            (!filters.IsApproved.HasValue || p.Approved == filters.IsApproved) &&
+            (!filters.Pet.HasValue || p.Pet == filters.Pet) &&
+            (!filters.Balcony.HasValue || p.Balcony == filters.Balcony) &&
+            (!filters.PeriodType.HasValue || p.PeriodType == filters.PeriodType) &&
+            (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
+            (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
+            (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
+            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.PriceFrom >= filters.PriceFrom && p.PriceTo <= filters.PriceTo)) &&
+            (!filters.Area.HasValue || p.Area <= filters.Area) &&
+            (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.DateTo <= filters.AvailableDateTo && p.DateFrom >= filters.AvailableDateFrom)) &&
+            (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
+            (!filters.NumOfBathRooms.HasValue || p.NumOfBathRooms == filters.NumOfBathRooms) &&
+            (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
+        );
+
+        if (filters.PropertyUtilities is { Count: > 0 })
+        {
+            properties = properties.Where(property => property.PropertyUtilities != null && property.PropertyUtilities.Any(util => filters.PropertyUtilities.Contains(util.PropertyId))
+            );
+        }
+        
+        if (filters.PropertyCategories is { Count: > 0 })
+        {
+            properties = properties.Where(property =>  filters.PropertyCategories.Contains(property.PropertyCategory));
+        }
+
+        var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
+        var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
+        var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
+
+        propertiesResult = propertiesResult.Select(x =>
+        {
+            x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(),coverId.ToString()!, context) : string.Empty;
             return x;
         }).ToList();
 
