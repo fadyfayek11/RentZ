@@ -150,6 +150,8 @@ public class GetProperties
     public bool IsApproved { get; set; }
     public bool IsFav { get; set; }
     public bool IsActive { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
     public DateTime CreatedDate { get; set; }
     public string CoverImageUrl { get; set; }
 }
