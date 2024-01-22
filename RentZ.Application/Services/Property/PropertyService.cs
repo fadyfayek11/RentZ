@@ -170,6 +170,7 @@ public class PropertyService : IPropertyService
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
         var userId = context.User.FindFirstValue("UserId") ?? "";
+        var client = await _context.Clients.Where(x => x.Id == Guid.Parse(userId)).FirstOrDefaultAsync();
 
         propertiesResult = propertiesResult.Select(x =>
         {
@@ -177,7 +178,12 @@ public class PropertyService : IPropertyService
             x.IsFav = (bool) propertiesList.Select(z => z.FavProperties?
                     .Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == x.Id)
                     .Select(c=> c.IsActive).FirstOrDefault())
-                    .FirstOrDefault(); 
+                    .FirstOrDefault();
+            x.City = propertiesList?.Select(c => new LookupResponse()
+            {
+                Id = c.CityId,
+                Value = client?.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
+            }).ToList();
             return x;
         }).ToList();
 
@@ -291,6 +297,11 @@ public class PropertyService : IPropertyService
         {
             x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(), coverId.ToString()!, context) : string.Empty;
             x.IsFav = true;
+            x.City = propertiesList?.Select(c=>new LookupResponse()
+            {
+                Id = c.CityId,
+                Value = client.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
+            }).ToList();
             return x;
         }).ToList();
 

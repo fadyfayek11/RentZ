@@ -153,5 +153,6 @@ public class GetProperties
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
     public DateTime CreatedDate { get; set; }
+    public List<LookupResponse> City { get; set; }
     public string CoverImageUrl { get; set; }
 }
