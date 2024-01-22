@@ -16,7 +16,9 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.City, src => src.Ignore());
 
         CreateMap<Property, GetProperties>()
+            .ForMember(dest => dest.City, src => src.Ignore())
             .ForMember(dest => dest.CoverImageUrl, src => src.Ignore());
-
+       
+       
     }
 }
