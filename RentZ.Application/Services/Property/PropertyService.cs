@@ -338,16 +338,18 @@ public class PropertyService : IPropertyService
 
         return url;
     }
-    private async Task<List<Media>> AddMedia(List<IFormFile> images, string propId)
+    private async Task<List<Media>> AddMedia(List<IFormFile>? images, string propId)
     {
         var result = new List<Media>();
-        foreach (var image in images)
-        {
-            var fileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
-            await _fileManager.SaveFileAsync<Domain.Entities.Property>(image, fileName, propId);
-            
-            result.Add(new Media(){Reference = fileName});
-        }
+        if (images != null)
+            foreach (var image in images)
+            {
+                var fileName = $"{Guid.NewGuid()}-{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
+                await _fileManager.SaveFileAsync<Domain.Entities.Property>(image, fileName, propId);
+
+                result.Add(new Media() { Reference = fileName });
+            }
+
         return result;
     }
 
