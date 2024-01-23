@@ -166,7 +166,6 @@ public class PropertyService : IPropertyService
         }
 
         var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
-        var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
         var userId = context.User.FindFirstValue("UserId") ?? "";
@@ -174,13 +173,16 @@ public class PropertyService : IPropertyService
 
         propertiesResult = propertiesResult.Select(x =>
         {
+            var coverId = propertiesList.FirstOrDefault(c => c.Id == x.Id)?.PropertyMedia?.FirstOrDefault()?.Id;
+
             x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(),coverId.ToString()!, context) : string.Empty;
+            
             x.IsFav = (bool) propertiesList.Select(z => z.FavProperties?
                     .Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == x.Id)
                     .Select(c=> c.IsActive).FirstOrDefault())
                     .FirstOrDefault();
 
-            x.City = propertiesList?.Select(c => new LookupResponse()
+            x.City = propertiesList?.Where(c => c.Id == x.Id).Select(c => new LookupResponse()
             {
                 Id = c.CityId,
                 Value = client?.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
@@ -225,13 +227,15 @@ public class PropertyService : IPropertyService
         }
 
         var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).Include(x=> x.City).ToListAsync();
-        var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
+
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
         propertiesResult = propertiesResult.Select(x =>
         {
+            var coverId = propertiesList?.FirstOrDefault(c => c.Id == x.Id)?.PropertyMedia?.FirstOrDefault()?.Id;
+
             x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(),coverId.ToString()!, context) : string.Empty;
-            x.City = propertiesList?.Select(c => new LookupResponse()
+            x.City = propertiesList?.Where(c => c.Id == x.Id).Select(c => new LookupResponse()
             {
                 Id = c.CityId,
                 Value = filters.Lang == Lang.ar.ToString() ? c.City.Name : c.City.NameEn,
@@ -286,7 +290,8 @@ public class PropertyService : IPropertyService
 
     public async Task<BaseResponse<PagedResult<GetProperties?>?>> GetUserFavoriteProperties(string uId, HttpContext context, Pagination pagination)
     {
-        var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(uId));
+        var client = await _context.Clients.Include(client => client.FavProperties)
+            .ThenInclude(favProperty => favProperty.Property).FirstOrDefaultAsync(x => x.Id == Guid.Parse(uId));
 
         if (client is null)
             return new BaseResponse<PagedResult<GetProperties?>?>()
@@ -296,17 +301,19 @@ public class PropertyService : IPropertyService
         var propertiesList = client.FavProperties?.Where(x=>x.IsActive).Select(x => x.Property).Skip((pagination.PageIndex - 1) * pagination.PageSize).Take(pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToList();
         var totalCount = client.FavProperties?.Count();
 
-        var coverId = propertiesList?.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
         propertiesResult = propertiesResult.Select(x =>
         {
+            var coverId = propertiesList?.FirstOrDefault(c => c.Id == x.Id)?.PropertyMedia?.FirstOrDefault()?.Id;
+
             x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(), coverId.ToString()!, context) : string.Empty;
             x.IsFav = true;
-            x.City = propertiesList?.Select(c=>new LookupResponse()
+
+            x.City = propertiesList?.Where(c => c.Id == x.Id).Select(c => new LookupResponse()
             {
                 Id = c.CityId,
-                Value = client.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
+                Value = client?.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
             }).FirstOrDefault();
             return x;
         }).ToList();
