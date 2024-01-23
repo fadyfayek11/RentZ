@@ -184,7 +184,7 @@ public class PropertyService : IPropertyService
             {
                 Id = c.CityId,
                 Value = client?.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
-            }).ToList();
+            }).FirstOrDefault();
             return x;
         }).ToList();
 
@@ -235,7 +235,7 @@ public class PropertyService : IPropertyService
             {
                 Id = c.CityId,
                 Value = filters.Lang == Lang.ar.ToString() ? c.City.Name : c.City.NameEn,
-            }).ToList();
+            }).FirstOrDefault();
             return x;
         }).ToList();
 
@@ -307,7 +307,7 @@ public class PropertyService : IPropertyService
             {
                 Id = c.CityId,
                 Value = client.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
-            }).ToList();
+            }).FirstOrDefault();
             return x;
         }).ToList();
 
