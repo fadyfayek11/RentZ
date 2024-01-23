@@ -156,5 +156,6 @@ public class GetProperties
     public DateTime? DateTo { get; set; }
     public DateTime CreatedDate { get; set; }
     public LookupResponse City { get; set; }
+    public Gender? Gender { get; set; }
     public string CoverImageUrl { get; set; }
 }
