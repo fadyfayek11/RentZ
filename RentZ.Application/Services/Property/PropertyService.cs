@@ -179,6 +179,7 @@ public class PropertyService : IPropertyService
                     .Where(y => y.ClientId == Guid.Parse(userId) && y.PropertyId == x.Id)
                     .Select(c=> c.IsActive).FirstOrDefault())
                     .FirstOrDefault();
+
             x.City = propertiesList?.Select(c => new LookupResponse()
             {
                 Id = c.CityId,
@@ -223,13 +224,18 @@ public class PropertyService : IPropertyService
             properties = properties.Where(property =>  filters.PropertyCategories.Contains(property.PropertyCategory));
         }
 
-        var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
+        var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).Include(x=> x.City).ToListAsync();
         var coverId = propertiesList.FirstOrDefault()?.PropertyMedia?.FirstOrDefault()?.Id;
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
         propertiesResult = propertiesResult.Select(x =>
         {
             x.CoverImageUrl = coverId is not null && coverId != 0 ? GetImageUrl(x.Id.ToString(),coverId.ToString()!, context) : string.Empty;
+            x.City = propertiesList?.Select(c => new LookupResponse()
+            {
+                Id = c.CityId,
+                Value = filters.Lang == Lang.ar.ToString() ? c.City.Name : c.City.NameEn,
+            }).ToList();
             return x;
         }).ToList();
 

@@ -74,6 +74,7 @@ public class PropertyFilter
 }
 public class GuestPropertyFilter
 {
+    public string Lang { get; set; } = "en";
     public bool IsActive { get; set; } = true;
     public bool? IsApproved { get; set; }
     public int? NumOfRooms { get; set; }
