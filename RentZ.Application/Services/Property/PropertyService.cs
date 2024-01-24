@@ -135,7 +135,6 @@ public class PropertyService : IPropertyService
 
         properties = properties.Where(p => p.IsActive == filters.IsActive && 
             (!filters.PropertyType.HasValue || p.PropertyType == filters.PropertyType) &&
-            (!filters.PropertyType.HasValue && (p.PropertyType == PropertyType.Advertising || p.PropertyType == PropertyType.Exchange)) &&
             (!filters.NumberOfPeople.HasValue || p.NumberOfPeople == filters.NumberOfPeople) &&
             (!filters.ForRent.HasValue || p.ForRent == filters.ForRent) &&
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
@@ -155,6 +154,11 @@ public class PropertyService : IPropertyService
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
         );
 
+        if (filters.PropertyType is null)
+        {
+            properties = properties.Where(property => property.PropertyType == PropertyType.Advertising || property.PropertyType == PropertyType.Exchange);
+        }
+
         if (filters.PropertyUtilities is { Count: > 0 })
         {
             properties = properties.Where(property => property.PropertyUtilities != null && property.PropertyUtilities.Any(util => filters.PropertyUtilities.Contains(util.PropertyId))
@@ -165,6 +169,8 @@ public class PropertyService : IPropertyService
         {
             properties = properties.Where(property =>  filters.PropertyCategories.Contains(property.PropertyCategory));
         }
+        
+       
 
         var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
