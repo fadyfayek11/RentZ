@@ -8,7 +8,7 @@ public class GetPropertyDetails
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public PropertyCategory Category { get; set; }
+    public PropertyCategory PropertyCategory { get; set; }
     public PropertyType PropertyType { get; set; }
     public double PriceFrom { get; set; }
     public double PriceTo { get; set; }
@@ -135,7 +135,7 @@ public class GetProperties
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public PropertyCategory Category { get; set; }
+    public PropertyCategory PropertyCategory { get; set; }
     public PropertyType PropertyType { get; set; }
     public PeriodType PeriodType { get; set; }
     public double PriceFrom { get; set; }
