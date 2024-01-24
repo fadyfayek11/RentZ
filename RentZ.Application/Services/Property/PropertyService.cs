@@ -135,6 +135,7 @@ public class PropertyService : IPropertyService
 
         properties = properties.Where(p => p.IsActive == filters.IsActive && 
             (!filters.PropertyType.HasValue || p.PropertyType == filters.PropertyType) &&
+            (!filters.PropertyType.HasValue && (p.PropertyType == PropertyType.Advertising || p.PropertyType == PropertyType.Exchange)) &&
             (!filters.NumberOfPeople.HasValue || p.NumberOfPeople == filters.NumberOfPeople) &&
             (!filters.ForRent.HasValue || p.ForRent == filters.ForRent) &&
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
