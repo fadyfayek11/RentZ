@@ -32,7 +32,7 @@ namespace RentZ.Application.Services.User.Security
         {
             //ToDo: Fluent Validation middleware
 
-            var user = await _userManager.FindByNameAsync(login.PhoneNumber);
+            var user = await _context.Users.FirstOrDefaultAsync(x=>x.PhoneNumber == login.PhoneNumber);
             if (user == null)
             {
                 return new BaseResponse<GenerateTokenResponseDto>(){ Code = ErrorCode.BadRequest , Message = "User Name or pass may be wrong"};
@@ -201,7 +201,7 @@ namespace RentZ.Application.Services.User.Security
         }
         public async Task<BaseResponse<GenerateTokenResponseDto?>> ForgetPasswordRequest(string phoneNumber, HttpContext context)
         {
-	        var user =  await _userManager.FindByNameAsync(phoneNumber);
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
 	        if (user is null) return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.BadRequest, Message = "Can't find the user", Data = null };
 
 			var (successSetOtp, token) = await SetOtp(user, context);
