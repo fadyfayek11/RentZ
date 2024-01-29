@@ -131,6 +131,19 @@ public class PropertyService : IPropertyService
 
     public async Task<BaseResponse<PagedResult<GetProperties?>>> GetProperties(HttpContext context, PropertyFilter filters)
     {
+        var userId = context.User.FindFirstValue("UserId") ?? "";
+        var client = await _context.Clients.Where(x => x.Id == Guid.Parse(userId)).FirstOrDefaultAsync();
+
+        if (filters.PropertyType == PropertyType.Exchange)
+        {
+            var clientHasProp = client?.Properties?.FirstOrDefault(x => x.PropertyType == PropertyType.Advertising && x.IsActive);
+            if (clientHasProp is null)
+            {
+                return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.BadRequest, Message = "User hasn't any property yet", Data = new PagedResult<GetProperties?>() { Items = new List<GetProperties>(), TotalCount = 0 } };
+            }
+        }
+
+
         var properties = _context.Properties.AsQueryable();
 
         properties = properties.Where(p => p.IsActive == filters.IsActive && 
@@ -175,8 +188,6 @@ public class PropertyService : IPropertyService
         var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
-        var userId = context.User.FindFirstValue("UserId") ?? "";
-        var client = await _context.Clients.Where(x => x.Id == Guid.Parse(userId)).FirstOrDefaultAsync();
 
         propertiesResult = propertiesResult.Select(x =>
         {
