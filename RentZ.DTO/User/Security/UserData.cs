@@ -1,8 +1,9 @@
-﻿using RentZ.DTO.Lookups;
+﻿using RentZ.DTO.Enums;
+using RentZ.DTO.Lookups;
 
 namespace RentZ.DTO.User.Security;
 public record UserData(string UserId, string? ProfileImage,string DisplayName, string Email, string PhoneNumber, string FavLanguage, DateTime BirthDate,
-    LookupResponse? City, string? Gender, bool IsOwner, bool IsActive, bool IsOtpVerified);
+    LookupResponse? City, Gender? Gender, bool IsOwner, bool IsActive, bool IsOtpVerified);
 
 public record EditUserData(string? DisplayName, DateTime? BirthDate, string? Email, int? CityId,  string? Gender);
 public record Number(string PhoneNumber);

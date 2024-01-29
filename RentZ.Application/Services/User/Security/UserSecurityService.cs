@@ -251,7 +251,7 @@ namespace RentZ.Application.Services.User.Security
             var userDataResponse = new UserData(userId,!string.IsNullOrEmpty(client.ProfileImage) ?GetProfileImageUrl(userId, context) : null, client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
                 favLang.ToString(), client.BirthDate,
                 new LookupResponse() { Id = client.CityId, Value = favLang == Lang.en? client.City?.NameEn : client.City?.Name },
-                client.Gender.ToString(), client is { IsOwner: true }, client.User.IsActive, client.User.PhoneNumberConfirmed);
+                client.Gender, client is { IsOwner: true }, client.User.IsActive, client.User.PhoneNumberConfirmed);
            
             return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
         }
