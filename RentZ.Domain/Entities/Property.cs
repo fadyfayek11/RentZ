@@ -27,7 +27,7 @@ public class Property
 
     public int Views { get; set; }
     public int NumberOfPeople { get; set; }
-    public bool Approved { get; set; }
+    public PropertyStatus Status { get; set; }
     public PropertyType PropertyType { get; set; }
     public PropertyCategory PropertyCategory { get; set; }
     public DateTime DateFrom { get; set; }

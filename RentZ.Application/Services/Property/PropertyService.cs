@@ -53,7 +53,7 @@ public class PropertyService : IPropertyService
             UtilityId = x,
         }).ToList();
         propEntity.PropertyUtilities = propUtilities;
-        propEntity.Approved = prop.PropertyType == PropertyType.Request;
+        propEntity.Status = prop.PropertyType == PropertyType.Request ? PropertyStatus.Approved : PropertyStatus.Pending;
 
         await _context.Properties.AddAsync(propEntity);
         await _context.SaveChangesAsync();
@@ -152,7 +152,7 @@ public class PropertyService : IPropertyService
             (!filters.ForRent.HasValue || p.ForRent == filters.ForRent) &&
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
             (!filters.OwnerId.HasValue || p.OwnerId == filters.OwnerId) &&
-            (!filters.IsApproved.HasValue || p.Approved == filters.IsApproved) &&
+            (!filters.Status.HasValue || p.Status == filters.Status) &&
             (!filters.Pet.HasValue || p.Pet == filters.Pet) &&
             (!filters.Balcony.HasValue || p.Balcony == filters.Balcony) &&
             (!filters.PeriodType.HasValue || p.PeriodType == filters.PeriodType) &&
@@ -218,7 +218,7 @@ public class PropertyService : IPropertyService
         properties = properties.Where(p => p.IsActive == filters.IsActive && p.PropertyType == PropertyType.Advertising &&
             (!filters.CityId.HasValue || p.CityId == filters.CityId) &&
             (!filters.NumberOfPeople.HasValue || p.NumberOfPeople == filters.NumberOfPeople) &&
-            (!filters.IsApproved.HasValue || p.Approved == filters.IsApproved) &&
+            (!filters.Status.HasValue || p.Status == filters.Status) &&
             (!filters.Pet.HasValue || p.Pet == filters.Pet) &&
             (!filters.Balcony.HasValue || p.Balcony == filters.Balcony) &&
             (!filters.PeriodType.HasValue || p.PeriodType == filters.PeriodType) &&

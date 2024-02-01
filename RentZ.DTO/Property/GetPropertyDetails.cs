@@ -26,7 +26,7 @@ public class GetPropertyDetails
     public bool ForRent { get; set; }
     public bool IsFav { get; set; }
     public int Views { get; set; }
-    public bool IsApproved { get; set; }
+    public PropertyStatus Status { get; set; }
     public bool IsActive { get; set; }
     public DateTime DateFrom { get; set; }
     public DateTime DateTo { get; set; }
@@ -49,7 +49,7 @@ public class PropertyFilter
 {
     public PropertyType? PropertyType { get; set; }
     public bool IsActive { get; set; } = true;
-    public bool? IsApproved { get; set; }
+    public PropertyStatus? Status { get; set; }
     public Guid? OwnerId { get; set; }
     public int? NumOfRooms { get; set; }
     public double? PriceFrom { get; set; }
@@ -77,7 +77,7 @@ public class GuestPropertyFilter
 {
     public string Lang { get; set; } = "en";
     public bool IsActive { get; set; } = true;
-    public bool? IsApproved { get; set; }
+    public PropertyStatus? Status { get; set; }
     public int? NumOfRooms { get; set; }
     public double? PriceFrom { get; set; }
     public double? PriceTo{ get; set; }
@@ -149,7 +149,7 @@ public class GetProperties
     public FurnishingType FurnishingType { get; set; }
     public bool ForRent { get; set; }
     public int Views { get; set; }
-    public bool IsApproved { get; set; }
+    public PropertyStatus Status { get; set; }
     public bool IsFav { get; set; }
     public bool IsActive { get; set; }
     public DateTime? DateFrom { get; set; }
