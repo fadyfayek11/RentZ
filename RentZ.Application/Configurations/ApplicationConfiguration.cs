@@ -2,6 +2,7 @@
 using ExtCore.FileStorage.FileSystem;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
+using RentZ.Application.Services.Feedback;
 using RentZ.Application.Services.Files;
 using RentZ.Application.Services.JWT;
 using RentZ.Application.Services.Lookups;
@@ -23,5 +24,6 @@ public static class ApplicationConfiguration
         services.AddTransient<IFileManager, FileManager>();
         services.AddTransient<IFileStorage, FileStorage>();
         services.AddTransient<IContentTypeProvider, FileExtensionContentTypeProvider>();
+        services.AddTransient<IFeedbackServices, FeedbackServices>();
     }
 }

@@ -23,6 +23,7 @@
     <Folder Include="DtoValidations\User\" />
     <Folder Include="Middleware\" />
     <Folder Include="Mapper\" />
+    <Folder Include="Services\Feedback\" />
     <Folder Include="Services\Property\" />
   </ItemGroup>
 
