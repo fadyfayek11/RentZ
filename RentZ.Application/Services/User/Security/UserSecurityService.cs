@@ -32,7 +32,7 @@ namespace RentZ.Application.Services.User.Security
         {
             //ToDo: Fluent Validation middleware
 
-            var user = await _context.Users.FirstOrDefaultAsync(x=>x.PhoneNumber == login.PhoneNumber);
+            var user = await _context.Users.FirstOrDefaultAsync(x=> x.PhoneNumber == login.PhoneNumber || x.UserName == login.PhoneNumber);
             if (user == null)
             {
                 return new BaseResponse<GenerateTokenResponseDto>(){ Code = ErrorCode.BadRequest , Message = "User Name or pass may be wrong"};
@@ -49,11 +49,7 @@ namespace RentZ.Application.Services.User.Security
                 return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.BadRequest, Message = "User Name or pass may be wrong" };
             }
             
-            var client = await _context.Clients.FirstOrDefaultAsync(x=>x.Id == user.Id);
-            if (client == null)
-            {
-                return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.BadRequest, Message = "User Name or pass may be wrong" };
-            }
+            var client = await _context.Clients.FirstOrDefaultAsync(x=>x.Id == user.Id) ?? new Client();
 
             var tokenResult = GenerateToken(user, client, context);
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RentZ.Application.Services.Feedback;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Feedback;
@@ -21,7 +22,8 @@ public class FeedbackController : Controller
     }
 
     [HttpPost]
-    [Authorize]
+    [EnableRateLimiting("limitDay")]
+    [Authorize(Roles = "Client")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
     public async Task<IActionResult> Property([FromForm] AddingFeedback feedback)
     {

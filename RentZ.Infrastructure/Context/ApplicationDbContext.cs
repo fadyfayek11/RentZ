@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RentZ.Domain.Entities;
+using System.Reflection.Emit;
 
 namespace RentZ.Infrastructure.Context;
 
 public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<Guid>, Guid>
 {
-	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 		: base(options)
 	{
         ChangeTracker.LazyLoadingEnabled = true;
@@ -65,8 +66,39 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
             .HasKey(fp => new { fp.PropertyId, fp.ClientId });
     }
     private void SeedRoles(ModelBuilder builder)
-	{
-		builder.Entity<IdentityRole>().HasData(
+    {
+        var adminId = Guid.NewGuid();
+
+        builder.Entity<User>().HasData(
+            new User()
+            {
+                Id = adminId,
+                UserName = "admin@rentz.com",
+                NormalizedUserName = "ADMIN@RENTZ.COM",
+                Email = "admin@rentz.com",
+                NormalizedEmail = "ADMIN@RENTZ.COM",
+                EmailConfirmed = true,
+                IsActive = true,
+                PasswordHash = new PasswordHasher<User>().HashPassword(null, "P@ssw0rd123") 
+            }
+        );
+        
+        builder.Entity<Admin>().HasData(
+            new Admin()
+            {
+                Id = adminId,
+                IsRoot = true
+            }
+        );
+
+        builder.Entity<IdentityUserRole<Guid>>().HasData(
+            new IdentityUserRole<Guid>
+            {
+                RoleId = Guid.Parse("45ebc48e-b867-4847-a1e6-ba1f275fc406"),
+                UserId = adminId
+            }
+        );
+        builder.Entity<IdentityRole>().HasData(
 			new IdentityRole() { Id = "9f4cbe69-c735-46d0-9634-4cf435c46184", Name = "Admin", ConcurrencyStamp = "2", NormalizedName = "Admin" },
 			new IdentityRole() { Id = "45ebc48e-b867-4847-a1e6-ba1f275fc406", Name = "RootAdmin", ConcurrencyStamp = "1", NormalizedName = "RootAdmin" },
 			new IdentityRole() { Id = "fb7f4a16-6f0b-4fa9-9f94-4db50b98014b", Name = "Client", ConcurrencyStamp = "3", NormalizedName = "Client" }

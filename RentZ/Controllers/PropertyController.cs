@@ -22,7 +22,7 @@ public class PropertyController : Controller
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Client")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<int>))]
     public async Task<IActionResult> Property([FromForm] AddingProperty property)
     {
@@ -81,7 +81,7 @@ public class PropertyController : Controller
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
 
-    [Authorize]
+    [Authorize(Roles = "Client")]
     [HttpGet(nameof(FavoriteProperties))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<GetProperties?>>))]
     public async Task<IActionResult> FavoriteProperties([FromQuery] Pagination filter)
@@ -97,7 +97,7 @@ public class PropertyController : Controller
     }
 
     [HttpDelete]
-    [Authorize]
+    [Authorize(Roles = "Client")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
     public async Task<IActionResult> Property([FromQuery] FindProperty filter)
     {
@@ -113,7 +113,7 @@ public class PropertyController : Controller
     }
 
     [HttpPost(nameof(FavProperty))]
-    [Authorize]
+    [Authorize(Roles = "Client")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
     public async Task<IActionResult> FavProperty([FromQuery] int propId)
     {

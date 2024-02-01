@@ -83,11 +83,27 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
             Window = TimeSpan.FromHours(1),
 
         }));
+    
+    rateLimiterOptions.AddPolicy("limitDay", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.Id,
+        factory: _ => new FixedWindowRateLimiterOptions()
+        {
+            PermitLimit = 1,
+            Window = TimeSpan.FromDays(1),
+
+        }));
     rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RootAdminOnly", policy => policy.RequireRole("RootAdmin"));
+    options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client"));
+});
 builder.Services.AddAuthentication(options =>
 	{
 		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
