@@ -24,6 +24,7 @@
     <Folder Include="Middleware\" />
     <Folder Include="Mapper\" />
     <Folder Include="Services\Feedback\" />
+    <Folder Include="Services\Admin\" />
     <Folder Include="Services\Property\" />
   </ItemGroup>
 

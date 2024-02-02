@@ -5,5 +5,5 @@ public enum NotificationTypes
     Message,
     Approved,
     Declined,
-    System
+    Informative
 }

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.RateLimiting;
 using RentZ.Application.Services.Feedback;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Feedback;
-using RentZ.DTO.Property;
 using RentZ.DTO.Response;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
@@ -25,7 +24,7 @@ public class FeedbackController : Controller
     [EnableRateLimiting("limitDay")]
     [Authorize(Roles = "Client")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
-    public async Task<IActionResult> Property([FromForm] AddingFeedback feedback)
+    public async Task<IActionResult> FeedBack([FromForm] AddingFeedback feedback)
     {
         var uId = HttpContext.User.FindFirstValue("UserId");
 
