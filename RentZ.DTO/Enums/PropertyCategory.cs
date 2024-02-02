@@ -5,5 +5,10 @@ public enum PropertyCategory
 {
   Flat,
   Villa,
-  SharedRoom
+  SharedRoom,
+  Room,
+  Studio,
+  Chalet,
+  TwinHouse,
+  Duplex
 }

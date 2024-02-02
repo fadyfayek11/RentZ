@@ -48,6 +48,6 @@ public class AdminServices : IAdminServices
             OwnerEmail = x.Client.User.Email,
             OwnerPhoneNumber = x.Client.User.PhoneNumber,
         }).ToList();
-        return new BaseResponse<PagedResult<GettingFeedback?>>() { Code = ErrorCode.Success, Message = "Property status changes successfully", Data = new PagedResult<GettingFeedback?>(){ Items = response, TotalCount = totalCount } };
+        return new BaseResponse<PagedResult<GettingFeedback?>>() { Code = ErrorCode.Success, Message = "Getting list of feedback", Data = new PagedResult<GettingFeedback?>(){ Items = response, TotalCount = totalCount } };
     }
 }
