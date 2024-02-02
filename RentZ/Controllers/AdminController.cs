@@ -37,7 +37,7 @@ public class AdminController : Controller
     
     [HttpGet(nameof(FeedBack))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<GettingFeedback?>>))]
-    public async Task<IActionResult> FeedBack(Pagination request)
+    public async Task<IActionResult> FeedBack([FromQuery]Pagination request)
     {
 
         var response = await _adminServices.FeedBacks(request);

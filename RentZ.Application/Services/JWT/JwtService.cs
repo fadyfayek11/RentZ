@@ -38,7 +38,7 @@ public class JwtService : IJwtService
             new Claim("IsOwner", tokenRequest.IsOwner.ToString() ?? ""),
             new Claim("IsActiveAcc", tokenRequest.IsActive.ToString() ?? ""),
             new Claim("OtpVerified", tokenRequest.IsOtpVerified.ToString() ?? ""),
-            new Claim("UserRole", role ?? ""),
+            new Claim(ClaimTypes.Role, role ?? ""),
             new Claim("UserImage", tokenRequest.UserImage ?? ""),
         };
 
