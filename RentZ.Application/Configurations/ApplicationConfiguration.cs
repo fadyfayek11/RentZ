@@ -6,6 +6,7 @@ using RentZ.Application.Services.Feedback;
 using RentZ.Application.Services.Files;
 using RentZ.Application.Services.JWT;
 using RentZ.Application.Services.Lookups;
+using RentZ.Application.Services.Notification;
 using RentZ.Application.Services.Property;
 using RentZ.Application.Services.User.Security;
 using RentZ.Application.Services.Validations;
@@ -26,5 +27,6 @@ public static class ApplicationConfiguration
         services.AddTransient<IContentTypeProvider, FileExtensionContentTypeProvider>();
         services.AddTransient<IFeedbackServices, FeedbackServices>();
         services.AddTransient<IAdminServices, AdminServices>();
+        services.AddTransient<INotificationService, NotificationService>();
     }
 }

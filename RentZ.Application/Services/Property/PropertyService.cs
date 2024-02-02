@@ -136,7 +136,7 @@ public class PropertyService : IPropertyService
 
         if (filters.PropertyType == PropertyType.Exchange)
         {
-            var clientHasProp = client?.Properties?.FirstOrDefault(x => x.PropertyType == PropertyType.Advertising && x.IsActive);
+            var clientHasProp = client?.Properties?.FirstOrDefault(x => (x.PropertyType is PropertyType.Exchange or PropertyType.Advertising) && x.IsActive);
             if (clientHasProp is null)
             {
                 return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.BadRequest, Message = "User hasn't any property yet", Data = new PagedResult<GetProperties?>() { Items = new List<GetProperties>(), TotalCount = 0 } };

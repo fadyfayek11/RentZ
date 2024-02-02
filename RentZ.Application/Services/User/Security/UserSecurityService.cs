@@ -342,7 +342,6 @@ namespace RentZ.Application.Services.User.Security
 			var (successSetOtp, token) = await SetOtp(user, context);
 			return new BaseResponse<GenerateTokenResponseDto?>() { Code = successSetOtp ? ErrorCode.Success : ErrorCode.FailOtp, Message = successSetOtp ? "Success send otp" : "Fail to send otp", Data = token };
 		}
-
         public async Task<BaseResponse<bool?>> AccountActivity(string userId)
         {
 	        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
@@ -355,8 +354,7 @@ namespace RentZ.Application.Services.User.Security
 
 			return new BaseResponse<bool?>() { Code = ErrorCode.Success, Message = user.IsActive? "Activate user account done" : "Deactivate user account done", Data = user.IsActive };
         }
-
-		public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
+        public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
         {
             var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
             if (client is null)

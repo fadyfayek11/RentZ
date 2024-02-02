@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="JWT\" />
     <Folder Include="Lookups\" />
+    <Folder Include="Notification\" />
     <Folder Include="Property\" />
     <Folder Include="User\Security\" />
   </ItemGroup>
