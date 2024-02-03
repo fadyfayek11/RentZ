@@ -5,6 +5,9 @@ using RentZ.DTO.Response;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using RentZ.Application.Services.Notification;
+using RentZ.DTO.Property;
+using RentZ.DTO.Feedback;
+using RentZ.DTO.Notification;
 
 namespace RentZ.API.Controllers;
 
@@ -25,6 +28,30 @@ public class NotificationController : Controller
     {
         var uId = HttpContext.User.FindFirstValue("UserId");
         var response = await _notificationService.NotificationCount(uId);
+
+        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+        return new OkObjectResult(response);
+    }
+    
+    [Authorize(Roles = "Client")]
+    [HttpPatch(nameof(Read))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
+    public async Task<IActionResult> Read([FromQuery] int id)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+        var response = await _notificationService.ReadNotification(id, uId);
+
+        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+        return new OkObjectResult(response);
+    }
+    
+    [Authorize(Roles = "Client")]
+    [HttpGet]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<GetNotifications?>>))]
+    public async Task<IActionResult> Notifications([FromQuery] Pagination pagination)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+        var response = await _notificationService.NotificationsList(pagination, uId);
 
         if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
         return new OkObjectResult(response);

@@ -185,7 +185,8 @@ public class PropertyService : IPropertyService
         
        
 
-        var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
+        var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize)
+            .Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).ToListAsync();
         var propertiesResult = Mapping.Mapper.Map<List<GetProperties>>(propertiesList);
 
 

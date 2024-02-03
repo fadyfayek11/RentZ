@@ -35,7 +35,7 @@ public class AdminServices : IAdminServices
     {
         var feedback = await _context.FeedBack.Include(x => x.Client)
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
-            .Take(pagination.PageSize).ToListAsync();
+            .Take(pagination.PageSize).OrderByDescending(x => x.CreationDate).ToListAsync();
 
         var totalCount = await _context.FeedBack.CountAsync();
 
