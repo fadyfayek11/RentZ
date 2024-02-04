@@ -56,7 +56,7 @@ public class MessagesService : IMessagesService
                     SenderName = x.Conversation.Sender.User.DisplayName,
                     ReceiverId = x.Conversation.ReceiverId.ToString(),
                     ReceiverName = x.Conversation.Receiver.User.DisplayName,
-                }).Skip((pageIndex - 1) * pageSize).Take(pageSize).OrderByDescending(x => x.SendAt).ToList()
+                }).Skip((pageIndex - 1) * pageSize).Take(pageSize).OrderBy(x => x.SendAt).ToList()
             ).FirstOrDefaultAsync();
        
         var totalCount = await _context.Conversations.Where(y => y.Id == conversationId)
@@ -80,23 +80,32 @@ public class MessagesService : IMessagesService
     }
     public async Task<bool> SaveMessages(string uId)
     {
-        if (_memoryCache.TryGetValue(uId, out List<Message>? cachedList))
+        if (_memoryCache.TryGetValue(uId, out List<MessageDto>? cachedList))
         {
             if (cachedList == null) return true;
+            
+            var messagesEntity = cachedList.Select(x => new Message
+            {
+                ConversationId = x.ConversationId,
+                Content = x.Content,
+                SentAt = DateTime.Now,
+            }).ToList();
 
-            await _context.Messages.AddRangeAsync(cachedList);
+            await _context.Messages.AddRangeAsync(messagesEntity);
+
             var conversation = await _context.Conversations.FirstOrDefaultAsync(x => x.Id == cachedList[0].ConversationId);
             if (conversation != null)
             {
                 conversation.CreationDate = DateTime.Now;
                 _context.Conversations.Update(conversation);
             }
-            await _context.SaveChangesAsync();
+            var isSaved =  await _context.SaveChangesAsync() > 0;
 
             cachedList.Clear();
             _memoryCache.Set(uId, cachedList);
+            return isSaved;
         }
-        return true;
+        return false;
     }
     public async Task<int> StartConversation(string senderId, string receiverId)
     {

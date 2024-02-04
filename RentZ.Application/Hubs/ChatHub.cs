@@ -46,19 +46,19 @@ public class ChatHub : Hub
         await Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId));
     }
 
-    public async Task Save(string message)
+    public async Task Save()
     {
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
 
         var isSaved = await _messagesService.SaveMessages(id);
-        await Clients.All.SendAsync("Save", isSaved);
+        await Clients.Users(id!).SendAsync("Save", isSaved);
     }
     
     public async Task ChatHistory(int pageIndex, int pageSize, int conversationId)
     {
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
 
-        var messages = await _messagesService.GetDbMessages(pageIndex, pageSize, conversationId);
-        await Clients.Users(id!).SendAsync("History", messages);
+        var history = await _messagesService.GetDbMessages(pageIndex, pageSize, conversationId);
+        await Clients.Users(id!).SendAsync("History", history);
     }
 }
