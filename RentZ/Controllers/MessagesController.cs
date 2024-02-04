@@ -38,6 +38,7 @@ public class MessagesController : Controller
 
         await _messagesService.SetTempMessages(new MessageDto
         {
+            SendAt = DateTime.Now,
             ConversationId = conversationId,
             Content = message,
         }, senderId!, receiverId);
