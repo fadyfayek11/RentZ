@@ -131,6 +131,7 @@ public class MessagesService : IMessagesService
 
     public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId)
     {
+        //var conversations = await _context.Conversations.Where(x=>x.)
         throw new NotImplementedException();
     }
 }
