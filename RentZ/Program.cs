@@ -1,19 +1,22 @@
 using System.Text;
 using System.Threading.RateLimiting;
-using AspNetCoreRateLimit;
 using ExtCore.FileStorage;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RentZ.API.Controllers;
 using RentZ.Application.Configurations;
+using RentZ.Application.Hubs;
 using RentZ.Domain.Entities;
 using RentZ.DTO.JWT;
 using RentZ.Infrastructure.Context;
+using IUserIdProvider = Microsoft.AspNetCore.SignalR.IUserIdProvider;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -104,6 +107,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RootAdminOnly", policy => policy.RequireRole("RootAdmin"));
     options.AddPolicy("ClientOnly", policy => policy.RequireRole("Client"));
 });
+
 builder.Services.AddAuthentication(options =>
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -121,8 +125,24 @@ builder.Services.AddAuthentication(options =>
 		ValidAudience = builder.Configuration["JwtSettings:Audience"],
 		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
 	};
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken)
+                && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
-
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
 builder.Services.ServiceConfiguration();
 builder.Services.AddFluentValidationRulesToSwagger();
 
@@ -139,6 +159,7 @@ var app = builder.Build();
 //	app.UseSwagger();
 //	app.UseSwaggerUI();
 //}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
@@ -149,5 +170,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("chatHub");
+
+//app.MapPost("Message/user", async (
+//    string userId,
+//    string content,
+//    IHubContext<ChatHub, IChatHub> context) =>
+//{
+//    await context.Clients.User(userId).Message(content);
+
+//    return Results.NoContent();
+//});
 
 app.Run();

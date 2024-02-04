@@ -11,6 +11,7 @@ using RentZ.DTO.Lookups;
 using RentZ.DTO.Response;
 using RentZ.DTO.User.Security;
 using RentZ.Infrastructure.Context;
+using System.Security.Claims;
 
 namespace RentZ.Application.Services.User.Security
 {
@@ -86,7 +87,8 @@ namespace RentZ.Application.Services.User.Security
             if (!userInRole.Succeeded)
 	            return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.InternalServerError, Message = "Something went wrong while add user to role" };
 
-			var newClient = new Client
+            await _userManager.AddClaimAsync(newUser, new Claim(ClaimTypes.Sid, newUser.Id.ToString()));
+            var newClient = new Client
             {
                 Id = newUser.Id,
                 IsOwner = register.IsOwner,
