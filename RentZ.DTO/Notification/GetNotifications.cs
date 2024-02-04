@@ -1,5 +1,4 @@
-﻿#nullable disable
-using RentZ.DTO.Enums;
+﻿using RentZ.DTO.Enums;
 
 namespace RentZ.DTO.Notification;
 
@@ -22,8 +21,7 @@ public class AddNotification
     public string Content { get; set; }
 
     public int LinkId { get; set; }
-    public bool IsRead { get; set; }
     public string ReceiverId { get; set; }
-    public string SenderId { get; set; }
+    public string? SenderId { get; set; }
 
 }

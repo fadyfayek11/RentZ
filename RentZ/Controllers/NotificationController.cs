@@ -56,4 +56,18 @@ public class NotificationController : Controller
         if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
         return new OkObjectResult(response);
     }
+    
+    [Authorize]
+    [HttpPost]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<bool?>>))]
+    public async Task<IActionResult> Notification(AddNotification request)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+        request.SenderId = uId;
+
+        var response = await _notificationService.AddNotification(request);
+
+        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+        return new OkObjectResult(response);
+    }
 }

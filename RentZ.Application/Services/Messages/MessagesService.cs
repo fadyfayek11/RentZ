@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Caching.Memory;
 using RentZ.Application.Services.Notification;
 using RentZ.Domain.Entities;
+using RentZ.DTO.Enums;
+using RentZ.DTO.Notification;
 using RentZ.Infrastructure.Context;
 
 namespace RentZ.Application.Services.Messages;
@@ -18,7 +20,7 @@ public class MessagesService : IMessagesService
         _notificationService = notificationService;
     }
 
-    public void SetTempMessages(Message message, string uId)
+    public async Task SetTempMessages(Message message, string uId)
     {
         if (!_memoryCache.TryGetValue(uId, out List<Message>? cachedList))
         {
@@ -26,7 +28,15 @@ public class MessagesService : IMessagesService
         }
 
         cachedList?.Add(message);
-
+        await _notificationService.AddNotification(new AddNotification
+        {
+            Type = NotificationTypes.Message,
+            Title = "Message",
+            Content = "",
+            LinkId = message.ConversationId,
+            ReceiverId = message.Conversation.ReceiverId.ToString(),
+            SenderId = uId
+        });
         _memoryCache.Set(uId, cachedList);
     }
     public async Task<List<Message>?> GetDbMessages(int pageIndex, int pageSize, int conversationId)
@@ -67,6 +77,16 @@ public class MessagesService : IMessagesService
         {
             SenderId = Guid.Parse(senderId),
             ReceiverId = Guid.Parse(receiverId),
+        });
+
+        await _notificationService.AddNotification(new AddNotification
+        {
+            Type = NotificationTypes.Message,
+            Title = "Message",
+            Content = "",
+            LinkId = conversation.Entity.Id,
+            ReceiverId = receiverId,
+            SenderId = senderId
         });
         await _context.SaveChangesAsync();
 

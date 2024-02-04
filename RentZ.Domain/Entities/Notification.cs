@@ -25,6 +25,6 @@ public class Notification
     [ForeignKey(nameof(Sender))]
     public Guid SenderId { get; set; }
 
-    public virtual Client Sender { get; set; } = null!;
+    public virtual User Sender { get; set; } = null!;
     public virtual Client Receiver { get; set; } = null!;
 }
