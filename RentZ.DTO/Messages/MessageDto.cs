@@ -3,6 +3,7 @@
 public class MessageDto
 {
     public int Id { get; set; }
+    public int ConversationId { get; set; }
     public DateTime SendAt { get; set; }
     public string Content { get; set; }
 

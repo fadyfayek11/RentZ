@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using RentZ.Application.Services.Messages;
 using RentZ.Domain.Entities;
+using RentZ.DTO.Messages;
 
 namespace RentZ.Application.Hubs;
 
@@ -37,11 +38,11 @@ public class ChatHub : Hub
 
         conversationId = conversationId == 0 ? await _messagesService.StartConversation(senderId,receiverId) : conversationId;
        
-        _messagesService.SetTempMessages(new Message
+        await _messagesService.SetTempMessages(new MessageDto
         {
             ConversationId = conversationId,
             Content = message,
-        }, senderId!);
+        }, senderId!, receiverId);
 
         await Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId));
     }

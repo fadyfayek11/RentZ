@@ -17,7 +17,7 @@ public class NotificationService : INotificationService
     }
     public async Task<BaseResponse<int?>> NotificationCount(string userId)
     {
-        var notificationCount = await _context.Notifications.CountAsync(x => x.ReceiverId == Guid.Parse(userId));
+        var notificationCount = await _context.Notifications.CountAsync(x => x.ReceiverId == Guid.Parse(userId) && !x.IsRead);
         return new BaseResponse<int?>() { Code = ErrorCode.Success, Message = "Getting notification Count", Data = notificationCount };
     }
 
