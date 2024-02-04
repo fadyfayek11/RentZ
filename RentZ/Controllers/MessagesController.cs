@@ -9,6 +9,7 @@ using RentZ.Application.Services.Messages;
 using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Messages;
+using RentZ.DTO.Property;
 
 namespace RentZ.API.Controllers;
 
@@ -27,7 +28,7 @@ public class MessagesController : Controller
 
     [Authorize]
     [HttpPost(nameof(Send))]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<List<Message>>))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<Message>>))]
     public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, string receiverId, string message)
     {
         var senderId = HttpContext.User.FindFirstValue("UserId");
@@ -45,7 +46,7 @@ public class MessagesController : Controller
         
         await _context.Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", listOfMessages);
         
-        return new OkObjectResult(new BaseResponse<List<MessageDto>>()
+        return new OkObjectResult(new BaseResponse<PagedResult<MessageDto>>()
             { Data = listOfMessages, Code = ErrorCode.Success }
         );
 

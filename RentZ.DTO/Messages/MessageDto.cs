@@ -13,3 +13,17 @@ public class MessageDto
     public string ReceiverId { get; set; }
     public string ReceiverName { get; set; }
 }
+
+public class ConversationDto
+{
+    public int Id { get; set; }
+    public DateTime SendAt { get; set; }
+
+    public string SenderId { get; set; }
+    public string SenderName { get; set; }
+    public string SenderImageUrl { get; set; }
+    
+    public string ReceiverId { get; set; }
+    public string ReceiverName { get; set; }
+    public string ReceiverImageUrl { get; set; }
+}

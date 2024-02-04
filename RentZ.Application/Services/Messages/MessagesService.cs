@@ -5,6 +5,8 @@ using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Messages;
 using RentZ.DTO.Notification;
+using RentZ.DTO.Property;
+using RentZ.DTO.Response;
 using RentZ.Infrastructure.Context;
 
 namespace RentZ.Application.Services.Messages;
@@ -40,28 +42,41 @@ public class MessagesService : IMessagesService
         });
         _memoryCache.Set(uId, cachedList);
     }
-    public async Task<List<MessageDto>?> GetDbMessages(int pageIndex, int pageSize, int conversationId)
+    public async Task<PagedResult<MessageDto>?> GetDbMessages(int pageIndex, int pageSize, int conversationId)
     {
-        var messages = await _context.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId);
-        return messages?.Messages?.Select(x=> new MessageDto
-            {
-                Id = x.Id,
-                ConversationId = x.ConversationId,
-                SendAt = x.SentAt,
-                Content = x.Content,
-                SenderId = x.Conversation.SenderId.ToString(),
-                SenderName = x.Conversation.Sender.User.DisplayName,
-                ReceiverId = x.Conversation.ReceiverId.ToString(),
-                ReceiverName = x.Conversation.Receiver.User.DisplayName,
-            })
-            .Skip((pageIndex - 1) * pageSize).Take(pageSize).OrderByDescending(x => x.SendAt).ToList();
+        var messages = await  _context.Conversations.Where(y => y.Id == conversationId)
+            .Select(z=>z.Messages
+                .Select(x => new MessageDto
+                {
+                    Id = x.Id,
+                    ConversationId = x.ConversationId,
+                    SendAt = x.SentAt,
+                    Content = x.Content,
+                    SenderId = x.Conversation.SenderId.ToString(),
+                    SenderName = x.Conversation.Sender.User.DisplayName,
+                    ReceiverId = x.Conversation.ReceiverId.ToString(),
+                    ReceiverName = x.Conversation.Receiver.User.DisplayName,
+                }).Skip((pageIndex - 1) * pageSize).Take(pageSize).OrderByDescending(x => x.SendAt).ToList()
+            ).FirstOrDefaultAsync();
+       
+        var totalCount = await _context.Conversations.Where(y => y.Id == conversationId)
+            .Select(z => z.Messages.Count).FirstOrDefaultAsync();
+
+        return new PagedResult<MessageDto>() { Items = messages, TotalCount =  totalCount };
     }
-    public async Task<List<MessageDto>?> GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId)
+    public async Task<PagedResult<MessageDto>?> GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId)
     {
         if (!_memoryCache.TryGetValue(uId, out List<MessageDto>? cachedList)) return await GetDbMessages(pageIndex, pageSize, conversationId);
-        if (cachedList != null) return cachedList.Concat(await GetDbMessages(pageIndex, pageSize,conversationId) ?? new List<MessageDto>()).ToList();
+        if (cachedList != null)
+        {
+            var dbMessages = await GetDbMessages(pageIndex, pageSize, conversationId);
+            var totalCount = cachedList.Count() + dbMessages?.TotalCount;
+            var totalMessages = cachedList.Concat(dbMessages?.Items ?? new List<MessageDto>());
 
-        return new List<MessageDto>();
+            return new PagedResult<MessageDto>() { Items = totalMessages.ToList(), TotalCount = totalCount ?? 0 };
+        }
+
+        return new PagedResult<MessageDto>();
     }
     public async Task<bool> SaveMessages(string uId)
     {
@@ -112,5 +127,10 @@ public class MessagesService : IMessagesService
         await _context.SaveChangesAsync();
 
         return conversation.Entity.Id;
+    }
+
+    public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId)
+    {
+        throw new NotImplementedException();
     }
 }
