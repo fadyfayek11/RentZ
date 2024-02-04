@@ -1,11 +1,8 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using RentZ.Application.Services.Messages;
 using RentZ.Domain.Entities;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace RentZ.Application.Hubs;
 
@@ -33,20 +30,19 @@ public class ChatHub : Hub
         await Clients.Caller.SendAsync("DisConnected", $"{id} has joined");
     }
 
-    public async Task Send(string receiverId, string message)
+    public async Task Send(int pageIndex, int pageSize,int conversationId, string receiverId, string message)
     {
         var senderId = Context.User.FindFirstValue("UserId");
 
 
-        _messagesService.SetMessage(new Message
+        conversationId = conversationId == 0 ? await _messagesService.StartConversation(senderId,receiverId) : conversationId;
+       
+        _messagesService.SetTempMessages(new Message
         {
-            SenderId = Guid.Parse(senderId!),
-            ReceiverId = Guid.Parse(receiverId),
+            ConversationId = conversationId,
             Content = message,
-            SentAt = DateTime.Now,
-            IsRead = false,
         }, senderId!);
 
-        await Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", message);
+        await Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId));
     }
 }

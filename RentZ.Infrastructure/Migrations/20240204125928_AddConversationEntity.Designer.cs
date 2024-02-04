@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RentZ.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using RentZ.Infrastructure.Context;
 namespace RentZ.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240204125928_AddConversationEntity")]
+    partial class AddConversationEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,7 +184,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("06f9a495-de69-4177-937f-c65ccb6a1f69"),
+                            UserId = new Guid("f2fa4c6e-8943-492f-bc30-2a8db4d22c9a"),
                             RoleId = new Guid("45ebc48e-b867-4847-a1e6-ba1f275fc406")
                         });
                 });
@@ -220,7 +223,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("06f9a495-de69-4177-937f-c65ccb6a1f69"),
+                            Id = new Guid("f2fa4c6e-8943-492f-bc30-2a8db4d22c9a"),
                             IsRoot = true
                         });
                 });
@@ -298,9 +301,6 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
 
                     b.Property<Guid>("ReceiverId")
                         .HasColumnType("uniqueidentifier");
@@ -415,6 +415,9 @@ namespace RentZ.Infrastructure.Migrations
 
                     b.Property<int>("ConversationId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("SentAt")
                         .HasColumnType("datetime2");
@@ -671,16 +674,16 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("06f9a495-de69-4177-937f-c65ccb6a1f69"),
+                            Id = new Guid("f2fa4c6e-8943-492f-bc30-2a8db4d22c9a"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1771bc81-06dc-420c-b39e-fccc63260366",
+                            ConcurrencyStamp = "0f732f13-95c3-4b8d-92a8-38d3b792c6cf",
                             Email = "admin@rentz.com",
                             EmailConfirmed = true,
                             IsActive = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@RENTZ.COM",
                             NormalizedUserName = "ADMIN@RENTZ.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEEJ9yF65N6sFR+EhfSpPidJlVWVfMzv2JvTvYpXJMVTK5DOJZXVtSEzswSe5KI0FzA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBf8pwe1cqJUwTpnehIe6K2beUar6jF0rI6qp6abNlfQGOQUzv2HCZ1tSpk81i+qgw==",
                             PhoneNumberConfirmed = false,
                             TwoFactorEnabled = false,
                             UserName = "admin@rentz.com"

@@ -29,6 +29,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
 	public DbSet<FeedBack> FeedBack { get; set; }
 	public DbSet<Notification> Notifications { get; set; }
 	public DbSet<Message> Messages { get; set; }
+	public DbSet<Conversation> Conversations { get; set; }
 
 
 	protected override void OnModelCreating(ModelBuilder builder)

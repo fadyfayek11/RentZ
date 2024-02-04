@@ -26,21 +26,20 @@ public class MessagesController : Controller
     [Authorize]
     [HttpPost(nameof(Send))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
-    public async Task<IActionResult> Send(string receiverId, string message)
+    public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, string receiverId, string message)
     {
         var senderId = HttpContext.User.FindFirstValue("UserId");
-        
-       
-        _messagesService.SetMessage(new Message
+
+
+        conversationId = conversationId == 0 ? await _messagesService.StartConversation(senderId, receiverId) : conversationId;
+
+        _messagesService.SetTempMessages(new Message
         {
-            SenderId = Guid.Parse(senderId!),
-            ReceiverId = Guid.Parse(receiverId),
+            ConversationId = conversationId,
             Content = message,
-            SentAt = DateTime.Now,
-            IsRead = false,
-        },senderId!);
-        await _context.Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", message);
-       
+        }, senderId!);
+
+        await _context.Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId));
         return Ok();
     }
 }
