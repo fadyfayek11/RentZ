@@ -17,13 +17,13 @@ public class NotificationService : INotificationService
     }
     public async Task<BaseResponse<int?>> NotificationCount(string userId)
     {
-        var notificationCount = await _context.Notifications.CountAsync(x => x.ClientId == Guid.Parse(userId));
+        var notificationCount = await _context.Notifications.CountAsync(x => x.ReceiverId == Guid.Parse(userId));
         return new BaseResponse<int?>() { Code = ErrorCode.Success, Message = "Getting notification Count", Data = notificationCount };
     }
 
     public async Task<BaseResponse<bool?>> ReadNotification(int id, string userId)
     {
-        var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == id && x.ClientId == Guid.Parse(userId));
+        var notification = await _context.Notifications.FirstOrDefaultAsync(x => x.Id == id && x.ReceiverId == Guid.Parse(userId));
        
         if (notification is null) return new BaseResponse<bool?>() { Code = ErrorCode.BadRequest, Message = "Can't find it", Data = false };
 
@@ -35,10 +35,42 @@ public class NotificationService : INotificationService
         return new BaseResponse<bool?>() { Code = ErrorCode.Success, Message = "Notification read successfully", Data = true };
     }
 
+    public async Task<BaseResponse<bool?>> AddNotification(AddNotification request)
+    {
+        if (request.Type == NotificationTypes.Message)
+        {
+            var getLastNotification =
+                await _context.Notifications.FirstOrDefaultAsync(x => x.ReceiverId == Guid.Parse(request.ReceiverId) && x.SenderId == Guid.Parse(request.SenderId) && !x.IsRead);
+            
+            if (getLastNotification is not null)
+            {
+                return new BaseResponse<bool?>() { Code = ErrorCode.Success, Message = "Notification added successfully", Data = true };
+            }
+
+            request.Content = await _context.Users.Where(x => x.Id == Guid.Parse(request.SenderId))
+                .Select(x => x.DisplayName).FirstOrDefaultAsync();
+        }
+        var notification = new Domain.Entities.Notification
+        {
+            Type = request.Type,
+            Title = request.Title,
+            Content = request.Content,
+            LinkId = request.LinkId,
+            CreatedAt = DateTime.Now,
+            IsRead = false,
+            ReceiverId = Guid.Parse(request.ReceiverId),
+            SenderId = Guid.Parse(request.SenderId),
+        };
+        await _context.Notifications.AddAsync(notification);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool?>() { Code = ErrorCode.Success, Message = "Notification added successfully", Data = true };
+    }
+
     public async Task<BaseResponse<PagedResult<GetNotifications?>>> NotificationsList(Pagination pagination, string uId)
     {
         var notifications = await _context.Notifications
-            .Where(x => x.ClientId == Guid.Parse(uId))
+            .Where(x => x.ReceiverId == Guid.Parse(uId))
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
             .Take(pagination.PageSize).OrderByDescending(x => x.CreatedAt).ToListAsync();
 

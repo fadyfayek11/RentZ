@@ -8,6 +8,7 @@ public interface INotificationService
 {
     Task<BaseResponse<int?>> NotificationCount(string userId);
     Task<BaseResponse<bool?>> ReadNotification(int id, string userId);
+    Task<BaseResponse<bool?>> AddNotification(AddNotification request);
     Task<BaseResponse<PagedResult<GetNotifications?>>> NotificationsList(Pagination pagination, string uId);
 
 }

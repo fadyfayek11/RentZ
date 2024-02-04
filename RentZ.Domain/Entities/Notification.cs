@@ -19,7 +19,12 @@ public class Notification
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public bool IsRead { get; set; } = false;
 
-    [ForeignKey(nameof(Client))]
-    public Guid? ClientId { get; set; }
-    public virtual Client? Client { get; set; }
+    [ForeignKey(nameof(Receiver))]
+    public Guid ReceiverId { get; set; }
+    
+    [ForeignKey(nameof(Sender))]
+    public Guid SenderId { get; set; }
+
+    public virtual Client Sender { get; set; } = null!;
+    public virtual Client Receiver { get; set; } = null!;
 }

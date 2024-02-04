@@ -4,5 +4,6 @@ public enum NotificationTypes
 {
     Approved,
     Declined,
-    Informative
+    Informative,
+    Message
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using RentZ.Application.Services.Notification;
 using RentZ.Domain.Entities;
 using RentZ.Infrastructure.Context;
 
@@ -9,10 +10,12 @@ public class MessagesService : IMessagesService
 {
     private readonly ApplicationDbContext _context;
     private readonly IMemoryCache _memoryCache;
-    public MessagesService(ApplicationDbContext context, IMemoryCache memoryCache)
+    private readonly INotificationService _notificationService;
+    public MessagesService(ApplicationDbContext context, IMemoryCache memoryCache, INotificationService notificationService)
     {
         _context = context;
         _memoryCache = memoryCache;
+        _notificationService = notificationService;
     }
 
     public void SetTempMessages(Message message, string uId)
@@ -26,13 +29,11 @@ public class MessagesService : IMessagesService
 
         _memoryCache.Set(uId, cachedList);
     }
-
     public async Task<List<Message>?> GetDbMessages(int pageIndex, int pageSize, int conversationId)
     {
         var messages = await _context.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId);
         return messages?.Messages.Skip((pageIndex - 1) * pageSize).Take(pageSize).OrderByDescending(x => x.SentAt).ToList();
     }
-
     public async Task<List<Message>?> GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId)
     {
         if (!_memoryCache.TryGetValue(uId, out List<Message>? cachedList)) return await GetDbMessages(pageIndex, pageSize, conversationId);
@@ -40,7 +41,6 @@ public class MessagesService : IMessagesService
 
         return new List<Message>();
     }
-
     public async Task<bool> SaveMessages(string uId)
     {
         if (_memoryCache.TryGetValue(uId, out List<Message>? cachedList))
