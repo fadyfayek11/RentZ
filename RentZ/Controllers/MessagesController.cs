@@ -40,6 +40,7 @@ public class MessagesController : Controller
             IsRead = false,
         },senderId!);
         await _context.Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", message);
+       
         return Ok();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Hosting;
 using RentZ.Domain.Entities;
 using RentZ.Infrastructure.Context;
 
