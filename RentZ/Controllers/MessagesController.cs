@@ -41,6 +41,8 @@ public class MessagesController : Controller
             SendAt = DateTime.Now,
             ConversationId = conversationId,
             Content = message,
+            SenderId = senderId!,
+            ReceiverId = receiverId,
         }, senderId!, receiverId);
 
         var listOfMessages = await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId);

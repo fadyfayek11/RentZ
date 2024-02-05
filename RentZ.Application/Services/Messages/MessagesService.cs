@@ -30,7 +30,10 @@ public class MessagesService : IMessagesService
             cachedList = new List<MessageDto>();
         }
 
+        message.SenderName = await _context.Users.Where(x => x.Id.ToString() == uId).Select(x=>x.DisplayName).FirstOrDefaultAsync() ?? "";
+        message.ReceiverName = await _context.Users.Where(x => x.Id.ToString() == receiverId).Select(x=>x.DisplayName).FirstOrDefaultAsync() ?? "";
         cachedList?.Add(message);
+        
         await _notificationService.AddNotification(new AddNotification
         {
             Type = NotificationTypes.Message,
