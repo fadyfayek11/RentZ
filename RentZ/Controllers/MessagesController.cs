@@ -14,7 +14,7 @@ using RentZ.DTO.Property;
 namespace RentZ.API.Controllers;
 
 
-[Route("api/[controller]")]
+[Route("api/")]
 [ApiController]
 public class MessagesController : Controller
 {
@@ -27,7 +27,7 @@ public class MessagesController : Controller
     }
 
     [Authorize]
-    [HttpPost(nameof(Send))]
+    [HttpPost("Messages/Send", Name = "Send")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<Message>>))]
     public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, string receiverId, string message)
     {
@@ -56,9 +56,9 @@ public class MessagesController : Controller
     }
     
     [Authorize]
-    [HttpPost(nameof(Conversations))]
+    [HttpGet(nameof(Conversations))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<ConversationDto>>))]
-    public async Task<IActionResult> Conversations(Pagination pagination)
+    public async Task<IActionResult> Conversations([FromQuery]Pagination pagination)
     {
         var uId = HttpContext.User.FindFirstValue("UserId");
 
@@ -69,4 +69,22 @@ public class MessagesController : Controller
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
 
     }
+    
+    [Authorize]
+    [HttpPatch("Conversations/Read", Name = "Read")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+    public async Task<IActionResult> ReadConversations(int conversationId)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+
+        var response = await _messagesService.ReadConversation(conversationId, uId);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+
+    }
+
+
 }

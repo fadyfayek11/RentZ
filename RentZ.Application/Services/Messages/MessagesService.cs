@@ -144,7 +144,8 @@ public class MessagesService : IMessagesService
 
     public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId, HttpContext context)
     {
-        var conversations =  _context.Conversations.Where(x => (x.SenderId.ToString() == senderId || x.Receiver.ToString() == senderId));
+        var conversations =  _context.Conversations.Where(x => (x.SenderId.ToString() == senderId ||
+                                                                x.Receiver.ToString() == senderId) && !x.IsRead);
         
         var conversationsCount = conversations.Count();
         var response = await conversations
@@ -164,6 +165,25 @@ public class MessagesService : IMessagesService
 
         return new BaseResponse<PagedResult<ConversationDto?>> { Code = ErrorCode.Success, Message = "Get user Conversation done successfully", Data = new PagedResult<ConversationDto?>() { Items = response, TotalCount = conversationsCount } };
     }
+
+    public async Task<BaseResponse<bool?>> ReadConversation(int conversationId, string uId)
+    {
+        var conversation = await _context.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId && 
+            (x.SenderId.ToString() == uId || x.ReceiverId.ToString() == uId));
+        if (conversation is null)
+        {
+            return new BaseResponse<bool?>()
+                { Code = ErrorCode.BadRequest, Message = "Can't get the conversation", Data = false };
+        }
+        
+        conversation.IsRead = true;
+        _context.Conversations.Update(conversation);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool?>()
+            { Code = ErrorCode.Success, Message = "You read the conversation successfully", Data = true };
+    }
+
     private string GetProfileImageUrl(string uId, HttpContext context)
     {
         var request = context.Request;
@@ -172,8 +192,6 @@ public class MessagesService : IMessagesService
 
         var host = request.Host.Value;
 
-        var url = $"{scheme}://{host}/api/User/Profile?uId={uId}";
-
-        return url;
+        return $"{scheme}://{host}/api/User/Profile?uId={uId}";
     }
 }
