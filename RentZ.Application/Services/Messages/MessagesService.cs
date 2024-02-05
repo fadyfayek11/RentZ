@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using RentZ.Application.Services.Notification;
 using RentZ.Domain.Entities;
@@ -141,9 +142,38 @@ public class MessagesService : IMessagesService
         return conversation.Entity.Id;
     }
 
-    public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId)
+    public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId, HttpContext context)
     {
-        //var conversations = await _context.Conversations.Where(x=>x.)
-        throw new NotImplementedException();
+        var conversations =  _context.Conversations.Where(x => (x.SenderId.ToString() == senderId || x.Receiver.ToString() == senderId));
+        
+        var conversationsCount = conversations.Count();
+        var response = await conversations
+            .Select(x=> new ConversationDto
+            {
+                Id = x.Id,
+                SendAt = x.CreationDate,
+                SenderId = x.SenderId.ToString(),
+                SenderName = x.Sender.User.DisplayName,
+                SenderImageUrl = GetProfileImageUrl(x.SenderId.ToString(), context),
+                ReceiverId = x.ReceiverId.ToString(),
+                ReceiverName = GetProfileImageUrl(x.ReceiverId.ToString(), context),
+                ReceiverImageUrl = x.Receiver.User.DisplayName
+            })
+            .Skip((pagination.PageIndex - 1) * pagination.PageSize)
+            .Take(pagination.PageSize).OrderByDescending(x => x.SendAt).ToListAsync();
+
+        return new BaseResponse<PagedResult<ConversationDto?>> { Code = ErrorCode.Success, Message = "Get user Conversation done successfully", Data = new PagedResult<ConversationDto?>() { Items = response, TotalCount = conversationsCount } };
+    }
+    private string GetProfileImageUrl(string uId, HttpContext context)
+    {
+        var request = context.Request;
+
+        var scheme = request.Scheme;
+
+        var host = request.Host.Value;
+
+        var url = $"{scheme}://{host}/api/User/Profile?uId={uId}";
+
+        return url;
     }
 }

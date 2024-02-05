@@ -1,4 +1,5 @@
-﻿using RentZ.Domain.Entities;
+﻿using Microsoft.AspNetCore.Http;
+using RentZ.Domain.Entities;
 using RentZ.DTO.Messages;
 using RentZ.DTO.Property;
 using RentZ.DTO.Response;
@@ -12,6 +13,6 @@ public interface IMessagesService
     Task<PagedResult<MessageDto>?> GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId);
     Task<bool> SaveMessages(string uId);
     Task<int> StartConversation(string senderId, string receiverId);
-    Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string uId);
+    Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string uId, HttpContext context);
 
 }

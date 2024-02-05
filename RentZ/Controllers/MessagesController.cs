@@ -54,4 +54,19 @@ public class MessagesController : Controller
         );
 
     }
+    
+    [Authorize]
+    [HttpPost(nameof(Conversations))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<ConversationDto>>))]
+    public async Task<IActionResult> Conversations(Pagination pagination)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+
+        var response = await _messagesService.Conversations(pagination, uId, HttpContext);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+
+    }
 }
