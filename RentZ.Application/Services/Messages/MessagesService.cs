@@ -144,8 +144,8 @@ public class MessagesService : IMessagesService
 
     public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId, HttpContext context)
     {
-        var conversations =  _context.Conversations.Where(x => (x.SenderId.ToString() == senderId ||
-                                                                x.Receiver.ToString() == senderId) && !x.IsRead);
+        var conversations =  _context.Conversations.Where(x => 
+            (x.SenderId == Guid.Parse(senderId) || x.ReceiverId == Guid.Parse(senderId)) && !x.IsRead);
         
         var conversationsCount = conversations.Count();
         var response = await conversations
@@ -184,7 +184,7 @@ public class MessagesService : IMessagesService
             { Code = ErrorCode.Success, Message = "You read the conversation successfully", Data = true };
     }
 
-    private string GetProfileImageUrl(string uId, HttpContext context)
+    private static string GetProfileImageUrl(string uId, HttpContext context)
     {
         var request = context.Request;
 
