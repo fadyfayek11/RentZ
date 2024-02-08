@@ -26,7 +26,9 @@ public class ChatHub : Hub
     public override async Task OnDisconnectedAsync(Exception exception)
     {
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
-        await Clients.Caller.SendAsync("DisConnected", $"{id} has left");
+        var isSaved = await _messagesService.SaveMessages(id);
+
+        await Clients.Caller.SendAsync("DisConnected", $"{id} has left and messages saved: {isSaved}");
     }
 
     public async Task Send(int pageIndex, int pageSize,int conversationId, string receiverId, string message)

@@ -45,6 +45,7 @@ public class MessagesController : Controller
             ReceiverId = receiverId,
         }, senderId!, receiverId);
 
+        await _messagesService.SaveMessages(senderId);
         var listOfMessages = await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId);
         
         await _context.Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", listOfMessages);

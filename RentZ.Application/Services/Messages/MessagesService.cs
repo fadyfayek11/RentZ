@@ -145,7 +145,7 @@ public class MessagesService : IMessagesService
     public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId, HttpContext context)
     {
         var conversations =  _context.Conversations.Where(x => 
-            (x.SenderId == Guid.Parse(senderId) || x.ReceiverId == Guid.Parse(senderId)) && !x.IsRead);
+            (x.SenderId == Guid.Parse(senderId) || x.ReceiverId == Guid.Parse(senderId)));
         
         var conversationsCount = conversations.Count();
         var response = await conversations
@@ -157,8 +157,8 @@ public class MessagesService : IMessagesService
                 SenderName = x.Sender.User.DisplayName,
                 SenderImageUrl = GetProfileImageUrl(x.SenderId.ToString(), context),
                 ReceiverId = x.ReceiverId.ToString(),
-                ReceiverName = GetProfileImageUrl(x.ReceiverId.ToString(), context),
-                ReceiverImageUrl = x.Receiver.User.DisplayName,
+                ReceiverName = x.Receiver.User.DisplayName,
+                ReceiverImageUrl = GetProfileImageUrl(x.ReceiverId.ToString(), context),
                 IsRead = x.IsRead
             })
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
@@ -183,6 +183,11 @@ public class MessagesService : IMessagesService
 
         return new BaseResponse<bool?>()
             { Code = ErrorCode.Success, Message = "You read the conversation successfully", Data = true };
+    }
+
+    public Task<BaseResponse<bool?>> UnReadConversation(int conversationId, string uId)
+    {
+        throw new NotImplementedException();
     }
 
     private static string GetProfileImageUrl(string uId, HttpContext context)

@@ -15,4 +15,5 @@ public interface IMessagesService
     Task<int> StartConversation(string senderId, string receiverId);
     Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string uId, HttpContext context);
     Task<BaseResponse<bool?>> ReadConversation(int conversationId, string uId);
+    Task<BaseResponse<bool?>> UnReadConversation(int conversationId, string uId);
 }
