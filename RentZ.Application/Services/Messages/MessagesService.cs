@@ -158,7 +158,8 @@ public class MessagesService : IMessagesService
                 SenderImageUrl = GetProfileImageUrl(x.SenderId.ToString(), context),
                 ReceiverId = x.ReceiverId.ToString(),
                 ReceiverName = GetProfileImageUrl(x.ReceiverId.ToString(), context),
-                ReceiverImageUrl = x.Receiver.User.DisplayName
+                ReceiverImageUrl = x.Receiver.User.DisplayName,
+                IsRead = x.IsRead
             })
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
             .Take(pagination.PageSize).OrderByDescending(x => x.SendAt).ToListAsync();

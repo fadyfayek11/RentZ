@@ -26,4 +26,6 @@ public class ConversationDto
     public string ReceiverId { get; set; }
     public string ReceiverName { get; set; }
     public string ReceiverImageUrl { get; set; }
+
+    public bool IsRead { get; set; }
 }
