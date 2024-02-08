@@ -12,9 +12,17 @@ public class Message
     [ForeignKey(nameof(Conversation))]
     public int ConversationId { get; set; }
 
+    [ForeignKey(nameof(Sender))]
+    public Guid SenderId { get; set; }
+
+    [ForeignKey(nameof(Receiver))]
+    public Guid ReceiverId { get; set; }
+
     public string Content { get; set; }
     public DateTime SentAt { get; set; } = DateTime.Now;
 
     public virtual Conversation Conversation { get; set; } = null!;
 
+    public virtual Client Sender { get; set; } = null!;
+    public virtual Client Receiver { get; set; } = null!;
 }

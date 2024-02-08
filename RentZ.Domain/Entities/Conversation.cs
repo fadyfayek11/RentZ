@@ -15,7 +15,8 @@ public class Conversation
     public Guid ReceiverId { get; set; }
 
     public DateTime CreationDate { get; set; } = DateTime.Now;
-    public bool IsRead { get; set; }
+    public bool IsReadBySender { get; set; }
+    public bool IsReadByReceiver { get; set; }
 
     public virtual Client Sender { get; set; } = null!;
     public virtual Client Receiver { get; set; } = null!;

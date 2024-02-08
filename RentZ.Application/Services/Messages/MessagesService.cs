@@ -56,11 +56,11 @@ public class MessagesService : IMessagesService
                     ConversationId = x.ConversationId,
                     SendAt = x.SentAt,
                     Content = x.Content,
-                    SenderId = x.Conversation.SenderId.ToString(),
-                    SenderName = x.Conversation.Sender.User.DisplayName,
-                    ReceiverId = x.Conversation.ReceiverId.ToString(),
-                    ReceiverName = x.Conversation.Receiver.User.DisplayName,
-                }).Skip((pageIndex - 1) * pageSize).Take(pageSize).OrderBy(x => x.SendAt).ToList()
+                    SenderId = x.SenderId.ToString(),
+                    SenderName = x.Sender.User.DisplayName,
+                    ReceiverId = x.ReceiverId.ToString(),
+                    ReceiverName = x.Receiver.User.DisplayName,
+                }).Skip((pageIndex - 1) * pageSize).Take(pageSize).OrderByDescending(x => x.SendAt).ToList()
             ).FirstOrDefaultAsync();
        
         var totalCount = await _context.Conversations.Where(y => y.Id == conversationId)
@@ -77,7 +77,7 @@ public class MessagesService : IMessagesService
             var totalCount = cachedList.Count() + dbMessages?.TotalCount;
             var totalMessages = cachedList.Concat(dbMessages?.Items ?? new List<MessageDto>());
 
-            return new PagedResult<MessageDto>() { Items = totalMessages.ToList(), TotalCount = totalCount ?? 0 };
+            return new PagedResult<MessageDto>() { Items = totalMessages.OrderByDescending(x=>x.SendAt).ToList(), TotalCount = totalCount ?? 0 };
         }
 
         return new PagedResult<MessageDto>();
@@ -92,7 +92,9 @@ public class MessagesService : IMessagesService
             {
                 ConversationId = x.ConversationId,
                 Content = x.Content,
-                SentAt = DateTime.Now,
+                SentAt = x.SendAt,
+                SenderId = Guid.Parse(x.SenderId),
+                ReceiverId = Guid.Parse(x.ReceiverId),
             }).ToList();
 
             await _context.Messages.AddRangeAsync(messagesEntity);
@@ -111,6 +113,7 @@ public class MessagesService : IMessagesService
         }
         return false;
     }
+
     public async Task<int> StartConversation(string senderId, string receiverId)
     {
         var conversationExist = await _context.Conversations.FirstOrDefaultAsync(x =>
@@ -126,6 +129,8 @@ public class MessagesService : IMessagesService
         {
             SenderId = Guid.Parse(senderId),
             ReceiverId = Guid.Parse(receiverId),
+            IsReadBySender = true,
+            IsReadByReceiver = false
         });
 
         await _notificationService.AddNotification(new AddNotification
@@ -159,7 +164,8 @@ public class MessagesService : IMessagesService
                 ReceiverId = x.ReceiverId.ToString(),
                 ReceiverName = x.Receiver.User.DisplayName,
                 ReceiverImageUrl = GetProfileImageUrl(x.ReceiverId.ToString(), context),
-                IsRead = x.IsRead
+                IsReadBySender = x.IsReadBySender,
+                IsReadByReceiver = x.IsReadByReceiver
             })
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
             .Take(pagination.PageSize).OrderByDescending(x => x.SendAt).ToListAsync();
@@ -176,8 +182,17 @@ public class MessagesService : IMessagesService
             return new BaseResponse<bool?>()
                 { Code = ErrorCode.BadRequest, Message = "Can't get the conversation", Data = false };
         }
+        var isSender = conversation.SenderId.ToString() == uId;
         
-        conversation.IsRead = true;
+        if (isSender)
+        {
+            conversation.IsReadBySender = true;
+        }
+        else
+        {
+            conversation.IsReadByReceiver = true;
+        }
+
         _context.Conversations.Update(conversation);
         await _context.SaveChangesAsync();
 
