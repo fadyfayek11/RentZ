@@ -48,8 +48,8 @@ public class MessagesService : IMessagesService
     }
     public async Task<PagedResult<MessageDto>?> GetDbMessages(int pageIndex, int pageSize, int conversationId)
     {
-        var messages = await  _context.Conversations.Where(y => y.Id == conversationId)
-            .Select(z=>z.Messages
+        var messages = await  _context.Conversations.Include(x=>x.Messages).Where(y => y.Id == conversationId)
+            .Select(z=> z.Messages
                 .Select(x => new MessageDto
                 {
                     Id = x.Id,

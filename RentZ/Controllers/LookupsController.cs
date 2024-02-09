@@ -17,19 +17,13 @@ public class LookupsController : Controller
 
     [HttpGet(nameof(Cities))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponse>))]
-    public async Task<IActionResult> Cities([FromQuery]LookupRequest lookup, [FromQuery]int governorateId)
+    public async Task<IActionResult> Cities([FromQuery]LookupRequest lookup)
     {
-	    var response = await _lookupService.GetCities(governorateId, lookup);
+	    var response = await _lookupService.GetCities(lookup);
 	    return new OkObjectResult(response);
 	} 
     
-    [HttpGet(nameof(Governorates))]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponse>))]
-    public async Task<IActionResult> Governorates([FromQuery]LookupRequest lookup)
-    {
-	    var response = await _lookupService.GetGovernorates(lookup);
-	    return new OkObjectResult(response);
-    }
+  
     
     [HttpGet(nameof(Utilities))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponse>))]

@@ -25,7 +25,6 @@ public sealed class ApplicationDbContext : IdentityDbContext<User,IdentityRole<G
 	public DbSet<OtpSetup> OtpSetups { get; set; }
 	public DbSet<Client> Clients { get; set; }
 	public DbSet<City> City { get; set; }
-	public DbSet<Governorate> Governorate { get; set; }
 	public DbSet<FeedBack> FeedBack { get; set; }
 	public DbSet<Notification> Notifications { get; set; }
 	public DbSet<Message> Messages { get; set; }

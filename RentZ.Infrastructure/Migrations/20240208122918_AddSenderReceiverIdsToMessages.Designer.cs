@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RentZ.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using RentZ.Infrastructure.Context;
 namespace RentZ.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240208122918_AddSenderReceiverIdsToMessages")]
+    partial class AddSenderReceiverIdsToMessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,7 +184,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("6c3a7a80-0ea1-4f1e-a14d-986774987fcc"),
+                            UserId = new Guid("cd990e28-e9f5-4ba6-a739-d1c31e2b5f0c"),
                             RoleId = new Guid("45ebc48e-b867-4847-a1e6-ba1f275fc406")
                         });
                 });
@@ -220,7 +223,7 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6c3a7a80-0ea1-4f1e-a14d-986774987fcc"),
+                            Id = new Guid("cd990e28-e9f5-4ba6-a739-d1c31e2b5f0c"),
                             IsRoot = true
                         });
                 });
@@ -233,16 +236,24 @@ namespace RentZ.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("GovernorateId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NameEn")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Popular")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ViewOrder")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GovernorateId");
 
                     b.ToTable("City");
                 });
@@ -352,6 +363,25 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("FeedBack");
+                });
+
+            modelBuilder.Entity("RentZ.Domain.Entities.Governorate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NameEn")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Governorate");
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Media", b =>
@@ -662,16 +692,16 @@ namespace RentZ.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6c3a7a80-0ea1-4f1e-a14d-986774987fcc"),
+                            Id = new Guid("cd990e28-e9f5-4ba6-a739-d1c31e2b5f0c"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "afb3a08c-3e36-468f-86cb-238f46c73a24",
+                            ConcurrencyStamp = "78a77a46-fca4-4c2b-86c6-2257b8e7b261",
                             Email = "admin@rentz.com",
                             EmailConfirmed = true,
                             IsActive = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@RENTZ.COM",
                             NormalizedUserName = "ADMIN@RENTZ.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEECcaWzhHnWVDN1w7d4Wd4FO+tPPyozc4N3q66awBrLtE24dWBXx2thj9KOFtxUvJg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEEFVFJnRW7rY5JS3xk1HqTLzWiGLP6W/7vidugXLx1KT9kr2qHQT/id+ZCA886iElQ==",
                             PhoneNumberConfirmed = false,
                             TwoFactorEnabled = false,
                             UserName = "admin@rentz.com"
@@ -760,6 +790,17 @@ namespace RentZ.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RentZ.Domain.Entities.City", b =>
+                {
+                    b.HasOne("RentZ.Domain.Entities.Governorate", "Governorate")
+                        .WithMany()
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Governorate");
                 });
 
             modelBuilder.Entity("RentZ.Domain.Entities.Client", b =>

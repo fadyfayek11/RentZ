@@ -88,7 +88,7 @@ public class PropertyService : IPropertyService
         var property = await _context.Properties.Include(property => property.Client).ThenInclude(client => client.User)
             .Include(property => property.PropertyMedia).Include(property => property.PropertyUtilities)!
             .ThenInclude(propertyUtility => propertyUtility.Utility).Include(property => property.City)
-            .ThenInclude(city => city.Governorate).Include(property => property.FavProperties)
+            .Include(property => property.FavProperties)
             .FirstOrDefaultAsync(x=>x.Id == filters.PropId);
 
         if(property is null)
