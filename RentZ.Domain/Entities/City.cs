@@ -7,5 +7,6 @@ public class City
 	public string Name { get; set; }
 	public string NameEn { get; set; }
 	public int ViewOrder { get; set; }
+	public bool IsActive { get; set; }
 }
 

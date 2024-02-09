@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Lookups;
 using RentZ.DTO.Response;
@@ -25,7 +26,7 @@ public class LookupService : ILookupService
 
 		if (!string.IsNullOrEmpty(lookup.Name))
 		{
-			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
+			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name)).OrderBy(x => x.ViewOrder);
 		}
 
         var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
@@ -41,9 +42,18 @@ public class LookupService : ILookupService
         return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
     }
 
-    public Task<BaseResponse<bool>> AddCity(int governorateId, LookupRequest lookup)
+    public async Task<BaseResponse<bool>> AddCity(AddLookup lookup)
     {
-        throw new NotImplementedException();
+        await _context.City.AddAsync(new City
+        {
+            Name = lookup.Name,
+            NameEn = lookup.NameEn,
+            ViewOrder = lookup.OrderId,
+            IsActive = true
+        });
+
+        await _context.SaveChangesAsync();
+        return new BaseResponse<bool>() { Code = ErrorCode.Success, Data = true, Errors = null, Message = "Add new city" };
     }
 
     public async Task<BaseResponse<List<LookupResponse>>> GetPropertyUtilities(LookupRequest lookup)
@@ -73,8 +83,16 @@ public class LookupService : ILookupService
         return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = utilities, Errors = null, Message = "Get all governorates" };
     }
 
-    public Task<BaseResponse<bool>> AddPropertyUtilities(LookupRequest lookup)
+    public async Task<BaseResponse<bool>> AddPropertyUtilities(AddLookup lookup)
     {
-        throw new NotImplementedException();
+        await _context.Utilities.AddAsync(new Utility()
+        {
+            Name = lookup.Name,
+            NameEn = lookup.NameEn,
+            IsActive = true
+        });
+
+        await _context.SaveChangesAsync();
+        return new BaseResponse<bool>() { Code = ErrorCode.Success, Data = true, Errors = null, Message = "Add new city" };
     }
 }
