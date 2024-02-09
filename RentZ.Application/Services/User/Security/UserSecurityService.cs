@@ -377,7 +377,6 @@ namespace RentZ.Application.Services.User.Security
                     {
                         using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
                         {
-                            // Write the serialized JSON to the CryptoStream
                             swEncrypt.Write(jsonString);
                         }
                     }

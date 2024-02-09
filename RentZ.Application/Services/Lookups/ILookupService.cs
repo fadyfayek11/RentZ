@@ -7,6 +7,8 @@ public interface ILookupService
 {
 	Task<BaseResponse<List<LookupResponse>>> GetCities(LookupRequest lookup);
 	Task<BaseResponse<bool>> AddCity(AddLookup lookup);
+	Task<BaseResponse<bool>> CityActivation(int lookupId);
 	Task<BaseResponse<List<LookupResponse>>> GetPropertyUtilities(LookupRequest lookup);
-	Task<BaseResponse<bool>> AddPropertyUtilities(AddLookup lookup);
+	Task<BaseResponse<bool>> AddUtility(AddLookup lookup);
+	Task<BaseResponse<bool>> UtilityActivation(int lookupId);
 }
