@@ -145,7 +145,8 @@ builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
 builder.Services.ServiceConfiguration();
 builder.Services.AddFluentValidationRulesToSwagger();
-
+// 6. Add CORS policy
+builder.Services.AddCors();
 builder.Services.Configure<FileStorageOptions>(options =>
 {
     options.RootPath = $"{builder.Environment.ContentRootPath}\\Documents\\";
@@ -168,7 +169,10 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseCors(policy =>
+    policy.WithOrigins("localhost:4200").AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowAnyOrigin());
 app.MapControllers();
 app.MapHub<ChatHub>("chatHub");
 
