@@ -12,6 +12,9 @@ using RentZ.DTO.Response;
 using RentZ.DTO.User.Security;
 using RentZ.Infrastructure.Context;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace RentZ.Application.Services.User.Security
 {
@@ -21,7 +24,8 @@ namespace RentZ.Application.Services.User.Security
         private readonly IJwtService _jwtService;
         private readonly IFileManager _fileManager;
         private readonly UserManager<Domain.Entities.User> _userManager;
-		public UserSecurityService(IJwtService jwtService, ApplicationDbContext context, UserManager<Domain.Entities.User> userManager, IFileManager fileManager)
+        private readonly byte[] _encryptionKey = Encoding.UTF8.GetBytes("9B31C3F0A4E525CCD6AD1D24FBCB438E106E53E2391FC179");
+        public UserSecurityService(IJwtService jwtService, ApplicationDbContext context, UserManager<Domain.Entities.User> userManager, IFileManager fileManager)
         {
 	        _jwtService = jwtService;
 	        _context = context;
@@ -355,6 +359,33 @@ namespace RentZ.Application.Services.User.Security
 	        await _context.SaveChangesAsync();
 
 			return new BaseResponse<bool?>() { Code = ErrorCode.Success, Message = user.IsActive? "Activate user account done" : "Deactivate user account done", Data = user.IsActive };
+        }
+        public BaseResponse<string?> Encrypt(Domain.Entities.User user)
+        {
+            var jsonString = JsonConvert.SerializeObject(user);
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = _encryptionKey;
+                aes.IV = new byte[16]; // Initialization Vector
+
+                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                using (MemoryStream msEncrypt = new MemoryStream())
+                {
+                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                        {
+                            // Write the serialized JSON to the CryptoStream
+                            swEncrypt.Write(jsonString);
+                        }
+                    }
+
+                    var result = Convert.ToBase64String(msEncrypt.ToArray());
+                    return new BaseResponse<string?>() {  Code = ErrorCode.Success, Data = result, Message = "User encrypted data"};
+                }
+            }
         }
         public async Task<BaseResponse<IFileProxy?>> Profile(string userId)
         {

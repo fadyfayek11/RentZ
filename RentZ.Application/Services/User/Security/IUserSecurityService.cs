@@ -24,5 +24,7 @@ namespace RentZ.Application.Services.User.Security
         Task<BaseResponse<string?>> UpdateProfileImage(string userId, IFormFile image, HttpContext context);
         Task<BaseResponse<GenerateTokenResponseDto?>> ChangePhoneNumber(string userId, string newNumber, HttpContext context);
         Task<BaseResponse<bool?>> AccountActivity(string userId);
+        BaseResponse<string?> Encrypt(Domain.Entities.User user);
+
     }
 }
