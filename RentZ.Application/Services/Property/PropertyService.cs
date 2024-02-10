@@ -206,6 +206,14 @@ public class PropertyService : IPropertyService
                 Id = c.CityId,
                 Value = client?.FavLang == Lang.ar ? c.City.Name : c.City.NameEn,
             }).FirstOrDefault();
+            x.Owner = propertiesList?.Where(c => c.Id == x.Id).Select(c => new OwnerDetails()
+            {
+                UId = c.Client.Id,
+                DisplayName = c.Client.User.DisplayName,
+                PhoneNumber = c.Client.User.PhoneNumber,
+                Email = c.Client.User.Email,
+                ImageUrl = GetUserImageUrl(c.Client.Id.ToString(), context)
+            }).FirstOrDefault();
             return x;
         }).ToList();
 

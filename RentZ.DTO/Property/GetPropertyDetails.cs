@@ -158,4 +158,5 @@ public class GetProperties
     public LookupResponse City { get; set; }
     public Gender? Gender { get; set; }
     public string CoverImageUrl { get; set; }
+    public OwnerDetails Owner { get; set; }
 }
