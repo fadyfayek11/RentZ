@@ -57,18 +57,16 @@ public class MessagesService : IMessagesService
        
         var totalCount = await _context.Conversations.Where(y => y.Id == conversationId)
             .Select(z => z.Messages.Count).FirstOrDefaultAsync();
-
+        
         if (!_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList))
         {
             cachedList = new List<MessageDto>();
-            cachedList.AddRange(messages);
+        }
 
-            _memoryCache.Set(conversationId, cachedList);
-        }
-        else
-        {
-            cachedList?.AddRange(messages);
-        }
+        cachedList?.AddRange(messages);
+        cachedList = cachedList?.GroupBy(x=>x.Id).Select(x=>x.First()).ToList();
+
+        _memoryCache.Set(conversationId, cachedList);
 
         return new PagedResult<MessageDto>() { Items = messages, TotalCount =  totalCount };
     }
