@@ -34,7 +34,7 @@ public class MessagesController : Controller
         var senderId = HttpContext.User.FindFirstValue("UserId");
 
 
-        conversationId = conversationId == 0 ? await _messagesService.StartConversation(senderId, receiverId) : conversationId;
+        conversationId = conversationId == 0 ? await _messagesService.StartConversation(propId, senderId, receiverId) : conversationId;
 
         await _messagesService.SetTempMessages(new MessageDto
         {
@@ -43,9 +43,9 @@ public class MessagesController : Controller
             Content = message,
             SenderId = senderId!,
             ReceiverId = receiverId,
-        }, senderId!, receiverId);
+        }, conversationId, senderId!, receiverId);
 
-        await _messagesService.SaveMessages(senderId);
+        await _messagesService.SaveMessages(conversationId);
         var listOfMessages = await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId);
         
         await _context.Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", listOfMessages);
@@ -86,6 +86,5 @@ public class MessagesController : Controller
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
 
     }
-
 
 }

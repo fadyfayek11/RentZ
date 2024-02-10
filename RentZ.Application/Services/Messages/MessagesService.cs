@@ -24,9 +24,9 @@ public class MessagesService : IMessagesService
         _notificationService = notificationService;
     }
 
-    public async Task SetTempMessages(MessageDto message, string uId, string receiverId)
+    public async Task SetTempMessages(MessageDto message, int conversationId, string uId, string receiverId)
     {
-        if (!_memoryCache.TryGetValue(uId, out List<MessageDto>? cachedList))
+        if (!_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList))
         {
             cachedList = new List<MessageDto>();
         }
@@ -35,18 +35,10 @@ public class MessagesService : IMessagesService
         message.ReceiverName = await _context.Users.Where(x => x.Id.ToString() == receiverId).Select(x=>x.DisplayName).FirstOrDefaultAsync() ?? "";
         cachedList?.Add(message);
         
-        await _notificationService.AddNotification(new AddNotification
-        {
-            Type = NotificationTypes.Message,
-            Title = "Message",
-            Content = "",
-            LinkId = message.ConversationId,
-            ReceiverId = receiverId,
-            SenderId = uId
-        });
-        _memoryCache.Set(uId, cachedList);
+        
+        _memoryCache.Set(conversationId, cachedList);
     }
-    public async Task<PagedResult<MessageDto>?> GetDbMessages(int pageIndex, int pageSize, int conversationId)
+    public async Task<PagedResult<MessageDto>?> GetDbMessages(int pageIndex, int pageSize, string uId, int conversationId)
     {
         var messages = await  _context.Conversations.Include(x=>x.Messages).Where(y => y.Id == conversationId)
             .Select(z=> z.Messages
@@ -66,27 +58,37 @@ public class MessagesService : IMessagesService
         var totalCount = await _context.Conversations.Where(y => y.Id == conversationId)
             .Select(z => z.Messages.Count).FirstOrDefaultAsync();
 
+        if (!_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList))
+        {
+            cachedList = new List<MessageDto>();
+            cachedList.AddRange(messages);
+
+            _memoryCache.Set(conversationId, cachedList);
+        }
+        else
+        {
+            cachedList?.AddRange(messages);
+        }
+
         return new PagedResult<MessageDto>() { Items = messages, TotalCount =  totalCount };
     }
     public async Task<PagedResult<MessageDto>?> GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId)
     {
-        if (!_memoryCache.TryGetValue(uId, out List<MessageDto>? cachedList)) return await GetDbMessages(pageIndex, pageSize, conversationId);
+        if (!_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList)) return await GetDbMessages(pageIndex, pageSize, uId, conversationId);
+        
         if (cachedList != null)
         {
-            var dbMessages = await GetDbMessages(pageIndex, pageSize, conversationId);
-            var totalCount = cachedList.Count() + dbMessages?.TotalCount;
-            var totalMessages = cachedList.Concat(dbMessages?.Items ?? new List<MessageDto>());
-
-            return new PagedResult<MessageDto>() { Items = totalMessages.OrderByDescending(x=>x.SendAt).ToList(), TotalCount = totalCount ?? 0 };
+            var totalCount = cachedList.Count();
+            return new PagedResult<MessageDto>() { Items = cachedList.OrderByDescending(x=>x.SendAt).ToList(), TotalCount = totalCount };
         }
 
         return new PagedResult<MessageDto>();
     }
-    public async Task<bool> SaveMessages(string uId)
+    public async Task<bool> SaveMessages(int conversationId)
     {
-        if (_memoryCache.TryGetValue(uId, out List<MessageDto>? cachedList))
+        if (_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList))
         {
-            if (cachedList == null) return true;
+            if (!cachedList.Any()) return true;
             
             var messagesEntity = cachedList.Select(x => new Message
             {
@@ -108,7 +110,7 @@ public class MessagesService : IMessagesService
             var isSaved =  await _context.SaveChangesAsync() > 0;
 
             cachedList.Clear();
-            _memoryCache.Set(uId, cachedList);
+            _memoryCache.Set(conversationId, cachedList);
             return isSaved;
         }
         return false;

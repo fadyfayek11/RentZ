@@ -32,17 +32,19 @@ public class ChatHub : Hub
     public override async Task OnDisconnectedAsync(Exception exception)
     {
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
-        var isSaved = await _messagesService.SaveMessages(id);
+
+        var chatId = int.TryParse(_httpContextAccessor.HttpContext.Items["ChatId"].ToString(), out var chat) ? chat : 0;
+        var isSaved = await _messagesService.SaveMessages(chatId);
 
         await Clients.Caller.SendAsync("DisConnected", $"{id} has left and messages saved: {isSaved}");
     }
 
-    public async Task Send(int pageIndex, int pageSize,int conversationId, string receiverId, string message)
+    public async Task Send(int pageIndex, int pageSize, int propId, int conversationId, string receiverId, string message)
     {
         var senderId = Context.User.FindFirstValue("UserId");
 
 
-        conversationId = conversationId == 0 ? await _messagesService.StartConversation(senderId,receiverId) : conversationId;
+        conversationId = conversationId == 0 ? await _messagesService.StartConversation(propId, senderId, receiverId) : conversationId;
        
         await _messagesService.SetTempMessages(new MessageDto
         {
@@ -51,7 +53,7 @@ public class ChatHub : Hub
             Content = message,
             SenderId = senderId,
             ReceiverId = receiverId
-        }, senderId!, receiverId);
+        }, conversationId, senderId!, receiverId);
 
         await Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId));
     }
@@ -59,8 +61,9 @@ public class ChatHub : Hub
     public async Task Save()
     {
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
+        var chatId = int.TryParse(_httpContextAccessor.HttpContext.Items["ChatId"].ToString(), out var chat) ? chat : 0;
 
-        var isSaved = await _messagesService.SaveMessages(id);
+        var isSaved = await _messagesService.SaveMessages(chatId);
         await Clients.Users(id!).SendAsync("Save", isSaved);
     }
     
@@ -68,7 +71,7 @@ public class ChatHub : Hub
     {
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
 
-        var history = await _messagesService.GetDbMessages(pageIndex, pageSize, conversationId);
+        var history = await _messagesService.GetDbMessages(pageIndex, pageSize, id, conversationId);
         await Clients.Users(id!).SendAsync("History", history);
     }
 }
