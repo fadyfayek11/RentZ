@@ -135,6 +135,8 @@ builder.Services.AddAuthentication(options =>
                 && path.StartsWithSegments("/chatHub"))
             {
                 context.Token = accessToken;
+
+                context.HttpContext.Items["ChatId"] = context.Request.Query["chat_id"];
             }
             return Task.CompletedTask;
         }
@@ -145,6 +147,8 @@ builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
 builder.Services.ServiceConfiguration();
 builder.Services.AddFluentValidationRulesToSwagger();
+builder.Services.AddHttpContextAccessor();
+
 // 6. Add CORS policy
 builder.Services.AddCors();
 builder.Services.Configure<FileStorageOptions>(options =>
@@ -175,15 +179,5 @@ app.UseCors(policy =>
                 .AllowAnyOrigin());
 app.MapControllers();
 app.MapHub<ChatHub>("chatHub");
-
-//app.MapPost("Message/user", async (
-//    string userId,
-//    string content,
-//    IHubContext<ChatHub, IChatHub> context) =>
-//{
-//    await context.Clients.User(userId).Message(content);
-
-//    return Results.NoContent();
-//});
 
 app.Run();
