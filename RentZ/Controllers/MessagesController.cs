@@ -29,7 +29,7 @@ public class MessagesController : Controller
     [Authorize]
     [HttpPost("Messages/Send", Name = "Send")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<Message>>))]
-    public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, string receiverId, string message)
+    public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, int propId, string receiverId, string message)
     {
         var senderId = HttpContext.User.FindFirstValue("UserId");
 

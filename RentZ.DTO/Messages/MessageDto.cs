@@ -17,6 +17,7 @@ public class MessageDto
 public class ConversationDto
 {
     public int Id { get; set; }
+    public int PropId { get; set; }
     public DateTime SendAt { get; set; }
 
     public string SenderId { get; set; }
@@ -28,5 +29,7 @@ public class ConversationDto
     public string ReceiverImageUrl { get; set; }
 
     public bool IsReadBySender { get; set; }
+    public bool IsSenderOnline { get; set; }
     public bool IsReadByReceiver { get; set; }
+    public bool IsReceiverOnline { get; set; }
 }

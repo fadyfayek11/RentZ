@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using RentZ.Application.Services.Messages;
 using RentZ.Domain.Entities;
@@ -11,14 +12,19 @@ namespace RentZ.Application.Hubs;
 public class ChatHub : Hub
 {
     private readonly IMessagesService _messagesService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ChatHub(IMessagesService messagesService)
+    public ChatHub(IMessagesService messagesService, IHttpContextAccessor httpContextAccessor)
     {
         _messagesService = messagesService;
+        _httpContextAccessor = httpContextAccessor;
     }
+
     public override async Task OnConnectedAsync()
     {
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
+        
+        var chatId = int.TryParse(_httpContextAccessor.HttpContext.Items["ChatId"].ToString(), out var chat) ? chat : 0;
 
         await Clients.Caller.SendAsync("Connected", $"{id} has joined");
     }

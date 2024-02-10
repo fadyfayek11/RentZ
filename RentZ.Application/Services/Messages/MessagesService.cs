@@ -114,7 +114,7 @@ public class MessagesService : IMessagesService
         return false;
     }
 
-    public async Task<int> StartConversation(string senderId, string receiverId)
+    public async Task<int> StartConversation(int propId, string senderId, string receiverId)
     {
         var conversationExist = await _context.Conversations.FirstOrDefaultAsync(x =>
             (x.SenderId.ToString() == senderId || x.SenderId.ToString() == receiverId) &&
@@ -127,45 +127,41 @@ public class MessagesService : IMessagesService
 
         var conversation = await _context.Conversations.AddAsync(new Conversation
         {
+            PropId = propId,
             SenderId = Guid.Parse(senderId),
             ReceiverId = Guid.Parse(receiverId),
             IsReadBySender = true,
             IsReadByReceiver = false
         });
 
-        await _notificationService.AddNotification(new AddNotification
-        {
-            Type = NotificationTypes.Message,
-            Title = "Message",
-            Content = "",
-            LinkId = conversation.Entity.Id,
-            ReceiverId = receiverId,
-            SenderId = senderId
-        });
         await _context.SaveChangesAsync();
 
         return conversation.Entity.Id;
     }
 
-    public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string senderId, HttpContext context)
+    public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string uId, HttpContext context)
     {
         var conversations =  _context.Conversations.Where(x => 
-            (x.SenderId == Guid.Parse(senderId) || x.ReceiverId == Guid.Parse(senderId)));
+            (x.SenderId == Guid.Parse(uId) || x.ReceiverId == Guid.Parse(uId)));
+        
         
         var conversationsCount = conversations.Count();
         var response = await conversations
             .Select(x=> new ConversationDto
             {
                 Id = x.Id,
+                PropId = x.PropId,
                 SendAt = x.CreationDate,
-                SenderId = x.SenderId.ToString(),
-                SenderName = x.Sender.User.DisplayName,
-                SenderImageUrl = GetProfileImageUrl(x.SenderId.ToString(), context),
-                ReceiverId = x.ReceiverId.ToString(),
-                ReceiverName = x.Receiver.User.DisplayName,
-                ReceiverImageUrl = GetProfileImageUrl(x.ReceiverId.ToString(), context),
+                SenderId = uId != x.SenderId.ToString() ? x.SenderId.ToString() : x.ReceiverId.ToString(),
+                SenderName = uId != x.SenderId.ToString() ? x.Sender.User.DisplayName : x.Receiver.User.DisplayName,
+                SenderImageUrl = uId != x.SenderId.ToString() ? GetProfileImageUrl(x.SenderId.ToString(), context) : GetProfileImageUrl(x.ReceiverId.ToString(), context),
+                ReceiverId = uId != x.SenderId.ToString() ? x.ReceiverId.ToString() : x.SenderId.ToString(),
+                ReceiverName = uId != x.SenderId.ToString() ? x.Receiver.User.DisplayName : x.Sender.User.DisplayName,
+                ReceiverImageUrl = uId != x.SenderId.ToString() ? GetProfileImageUrl(x.ReceiverId.ToString(), context) : GetProfileImageUrl(x.SenderId.ToString(), context),
                 IsReadBySender = x.IsReadBySender,
-                IsReadByReceiver = x.IsReadByReceiver
+                IsSenderOnline = x.IsSenderOnline,
+                IsReadByReceiver = x.IsReadByReceiver,
+                IsReceiverOnline = x.IsReceiverOnline
             })
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
             .Take(pagination.PageSize).OrderByDescending(x => x.SendAt).ToListAsync();

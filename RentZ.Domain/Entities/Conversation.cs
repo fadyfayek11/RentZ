@@ -16,7 +16,10 @@ public class Conversation
 
     public DateTime CreationDate { get; set; } = DateTime.Now;
     public bool IsReadBySender { get; set; }
+    public bool IsSenderOnline { get; set; }
     public bool IsReadByReceiver { get; set; }
+    public bool IsReceiverOnline { get; set; }
+    public int PropId { get; set; }
 
     public virtual Client Sender { get; set; } = null!;
     public virtual Client Receiver { get; set; } = null!;
