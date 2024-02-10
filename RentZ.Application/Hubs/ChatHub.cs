@@ -55,7 +55,7 @@ public class ChatHub : Hub
             ReceiverId = receiverId
         }, conversationId, senderId!, receiverId);
 
-        await Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", await _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId));
+        await Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send",  _messagesService.GetTempMessages(pageIndex, pageSize, senderId, conversationId));
     }
 
     public async Task Save()

@@ -72,11 +72,11 @@ public class MessagesService : IMessagesService
 
         return new PagedResult<MessageDto>() { Items = messages, TotalCount =  totalCount };
     }
-    public async Task<PagedResult<MessageDto>?> GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId)
+    public PagedResult<MessageDto>? GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId)
     {
-        if (!_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList)) return await GetDbMessages(pageIndex, pageSize, uId, conversationId);
+        if (!_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList)) return new PagedResult<MessageDto>() ;
         
-        if (cachedList != null)
+        if (cachedList is not null && cachedList.Any())
         {
             var totalCount = cachedList.Count();
             return new PagedResult<MessageDto>() { Items = cachedList.OrderByDescending(x=>x.SendAt).ToList(), TotalCount = totalCount };
@@ -90,7 +90,7 @@ public class MessagesService : IMessagesService
         {
             if (!cachedList.Any()) return true;
             
-            var messagesEntity = cachedList.Select(x => new Message
+            var messagesEntity = cachedList.Where(x=>x.Id == 0).Select(x => new Message
             {
                 ConversationId = x.ConversationId,
                 Content = x.Content,
