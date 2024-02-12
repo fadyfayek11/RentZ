@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RentZ.Application.Services.Notification;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Feedback;
+using RentZ.DTO.Notification;
 using RentZ.DTO.Property;
 using RentZ.DTO.Response;
 using RentZ.Infrastructure.Context;
@@ -10,10 +12,12 @@ namespace RentZ.Application.Services.Admin;
 public class AdminServices : IAdminServices
 {
     private readonly ApplicationDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public AdminServices(ApplicationDbContext context)
+    public AdminServices(ApplicationDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<BaseResponse<bool>> PropertyStatus(PropertyChangeStatus request, string adminId)
@@ -27,7 +31,16 @@ public class AdminServices : IAdminServices
         _context.Properties.Update(property);
         await _context.SaveChangesAsync();
 
-        //TODO:NOTIFICATION
+        await _notificationService.AddNotification(new AddNotification
+        {
+            Type = (NotificationTypes)request.Status,
+            Title = request.Status.ToString(),
+            Content = null,
+            LinkId = request.PropId,
+            ReceiverId = property.OwnerId.ToString(),
+            SenderId = adminId
+        });
+
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Property status changes successfully", Data = true };
     }
 

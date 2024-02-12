@@ -18,10 +18,10 @@ public class AddNotification
 {
     public NotificationTypes Type { get; set; }
     public string Title { get; set; }
-    public string Content { get; set; }
+    public string? Content { get; set; }
 
     public int LinkId { get; set; }
     public string ReceiverId { get; set; }
-    public string? SenderId { get; set; }
+    public string SenderId { get; set; }
 
 }
