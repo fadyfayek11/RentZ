@@ -27,35 +27,6 @@ public class LookupsController : Controller
 	    return new OkObjectResult(response);
 	}
 
-    [HttpGet("Admin/Cities")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponseAdmin>))]
-    public async Task<IActionResult> CitiesForAdmin([FromQuery]LookupRequest lookup)
-    {
-	    var response = await _lookupService.GetAdminCities(lookup);
-	    return new OkObjectResult(response);
-	}
-
-    [Authorize]
-    [HttpPatch(nameof(CityActivation))]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
-    public async Task<IActionResult> CityActivation(int cityId)
-    {
-        var response = await _lookupService.CityActivation(cityId);
-
-        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
-        return new OkObjectResult(response);
-    } 
-    
-    [Authorize]
-    [HttpPost(nameof(City))]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
-    public async Task<IActionResult> City(AddLookup request)
-    {
-        var response = await _lookupService.AddCity(request);
-
-        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
-        return new OkObjectResult(response);
-    }
 
     [HttpGet(nameof(Utilities))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponse>))]
@@ -63,37 +34,5 @@ public class LookupsController : Controller
     {
 	    var response = await _lookupService.GetUtilities(lookup);
 	    return new OkObjectResult(response);
-    }
-
-
-    [HttpGet("Admin/Utilities")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponseAdmin>))]
-    public async Task<IActionResult> UtilitiesForAdmin([FromQuery]LookupRequest lookup)
-    {
-	    var response = await _lookupService.GetAdminUtilities(lookup);
-	    return new OkObjectResult(response);
-    }
-
-    [Authorize]
-    [HttpPatch(nameof(UtilityActivation))]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
-    public async Task<IActionResult> UtilityActivation(int utilityId)
-    {
-        var response = await _lookupService.UtilityActivation(utilityId);
-
-        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
-        return new OkObjectResult(response);
-    }
-
-
-    [Authorize]
-    [HttpPost(nameof(Utility))]
-    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
-    public async Task<IActionResult> Utility(AddLookup request)
-    {
-        var response = await _lookupService.AddUtility(request);
-
-        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
-        return new OkObjectResult(response);
     }
 }

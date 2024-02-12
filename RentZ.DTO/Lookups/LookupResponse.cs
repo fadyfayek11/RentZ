@@ -11,4 +11,5 @@ public class LookupResponseAdmin
     public int? Id { get; set; }
     public string Value { get; set; }
     public string ValueEn { get; set; }
+    public int OrderId { get; set; }
 }

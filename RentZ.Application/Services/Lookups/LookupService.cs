@@ -61,13 +61,13 @@ public class LookupService : ILookupService
 			{
 				Id = x.Id,
 				ValueEn = x.NameEn,
-                Value =  x.Name
+                Value =  x.Name,
+                OrderId = x.ViewOrder
             })
-        .ToListAsync();
+            .ToListAsync();
 
         return new BaseResponse<List<LookupResponseAdmin>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
     }
-
     public async Task<BaseResponse<bool>> AddCity(AddLookup lookup)
     {
         await _context.City.AddAsync(new City
@@ -81,6 +81,35 @@ public class LookupService : ILookupService
         await _context.SaveChangesAsync();
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Data = true, Errors = null, Message = "Add new city" };
     }
+    public async Task<BaseResponse<bool>> UpdateCity(UpdateLookup lookup)
+    {
+        var city = await _context.City.FirstOrDefaultAsync(x => x.Id == lookup.Id);
+        if (city == null)
+        {
+            return new BaseResponse<bool>
+            {
+                Code = ErrorCode.BadRequest,
+                Message = "Can't get the city",
+                Data = false,
+                Errors = null
+            };
+        }
+
+        city.Name = string.IsNullOrEmpty(lookup.Name) ? city.Name : lookup.Name;
+        city.NameEn = string.IsNullOrEmpty(lookup.NameEn) ? city.NameEn : lookup.Name;
+        city.ViewOrder = lookup.OrderId == 0 ? city.ViewOrder : lookup.OrderId;
+
+        _context.City.Update(city);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool>
+        {
+            Code = ErrorCode.BadRequest,
+            Message = "City updated successfully",
+            Data = true,
+            Errors = null
+        };
+    }
     public async Task<BaseResponse<bool>> CityActivation(int lookupId)
     {
         var city = await _context.City.FirstOrDefaultAsync(x => x.Id == lookupId);
@@ -93,7 +122,6 @@ public class LookupService : ILookupService
 
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = city.IsActive ? "Activate city done" : "Deactivate city done", Data = city.IsActive };
     }
-
     public async Task<BaseResponse<List<LookupResponse>>> GetUtilities(LookupRequest lookup)
     {
         var utilityQuery = _context.Utilities.AsQueryable();
@@ -140,13 +168,13 @@ public class LookupService : ILookupService
             {
                 Id = x.Id,
                 ValueEn = x.NameEn,
-                Value = x.Name
+                Value = x.Name,
+                OrderId = 0,
             })
             .ToListAsync();
 
         return new BaseResponse<List<LookupResponseAdmin>>() { Code = ErrorCode.Success, Data = utilities, Errors = null, Message = "Get all governorates" };
     }
-
     public async Task<BaseResponse<bool>> AddUtility(AddLookup lookup)
     {
         await _context.Utilities.AddAsync(new Utility()
@@ -158,6 +186,34 @@ public class LookupService : ILookupService
 
         await _context.SaveChangesAsync();
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Data = true, Errors = null, Message = "Add new Utility" };
+    }
+    public async Task<BaseResponse<bool>> UpdateUtility(UpdateLookup lookup)
+    {
+        var utility = await _context.Utilities.FirstOrDefaultAsync(x => x.Id == lookup.Id);
+        if (utility == null)
+        {
+            return new BaseResponse<bool>
+            {
+                Code = ErrorCode.BadRequest,
+                Message = "Can't get the utility",
+                Data = false,
+                Errors = null
+            };
+        }
+
+        utility.Name = string.IsNullOrEmpty(lookup.Name) ? utility.Name : lookup.Name;
+        utility.NameEn = string.IsNullOrEmpty(lookup.NameEn) ? utility.NameEn : lookup.Name;
+
+        _context.Utilities.Update(utility);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool>
+        {
+            Code = ErrorCode.BadRequest,
+            Message = "utility updated successfully",
+            Data = true,
+            Errors = null
+        };
     }
     public async Task<BaseResponse<bool>> UtilityActivation(int lookupId)
     {
