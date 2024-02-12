@@ -27,6 +27,14 @@ public class LookupsController : Controller
 	    return new OkObjectResult(response);
 	}
 
+    [HttpGet("Admin/Cities")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponseAdmin>))]
+    public async Task<IActionResult> CitiesForAdmin([FromQuery]LookupRequest lookup)
+    {
+	    var response = await _lookupService.GetAdminCities(lookup);
+	    return new OkObjectResult(response);
+	}
+
     [Authorize]
     [HttpPatch(nameof(CityActivation))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
@@ -53,7 +61,16 @@ public class LookupsController : Controller
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponse>))]
     public async Task<IActionResult> Utilities([FromQuery]LookupRequest lookup)
     {
-	    var response = await _lookupService.GetPropertyUtilities(lookup);
+	    var response = await _lookupService.GetUtilities(lookup);
+	    return new OkObjectResult(response);
+    }
+
+
+    [HttpGet("Admin/Utilities")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(List<LookupResponseAdmin>))]
+    public async Task<IActionResult> UtilitiesForAdmin([FromQuery]LookupRequest lookup)
+    {
+	    var response = await _lookupService.GetAdminUtilities(lookup);
 	    return new OkObjectResult(response);
     }
 

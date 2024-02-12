@@ -17,6 +17,32 @@ public class LookupService : ILookupService
 
     public async Task<BaseResponse<List<LookupResponse>>> GetCities(LookupRequest lookup)
     {
+        var cityQuery = _context.City.AsQueryable();
+
+        if (lookup.Id != 0)
+        {
+            cityQuery = cityQuery.Where(x => x.Id == lookup.Id);
+        }
+
+        if (!string.IsNullOrEmpty(lookup.Name))
+        {
+            cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name)).OrderBy(x => x.ViewOrder);
+        }
+
+        var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
+
+        var cities = await cityQuery
+            .Select(x => new LookupResponse
+            {
+                Id = x.Id,
+                Value = isEnum && langValue == Lang.en ? x.NameEn : x.Name,
+            })
+            .ToListAsync();
+
+        return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
+    }
+    public async Task<BaseResponse<List<LookupResponseAdmin>>> GetAdminCities(LookupRequest lookup)
+    {
 		var cityQuery = _context.City.AsQueryable();
 
         if (lookup.Id != 0)
@@ -29,17 +55,17 @@ public class LookupService : ILookupService
 			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name)).OrderBy(x => x.ViewOrder);
 		}
 
-        var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
 
         var cities = await cityQuery
-			.Select(x => new LookupResponse
+			.Select(x => new LookupResponseAdmin()
 			{
 				Id = x.Id,
-				Value = isEnum && langValue == Lang.en ? x.NameEn : x.Name,
+				ValueEn = x.NameEn,
+                Value =  x.Name
             })
         .ToListAsync();
 
-        return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
+        return new BaseResponse<List<LookupResponseAdmin>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
     }
 
     public async Task<BaseResponse<bool>> AddCity(AddLookup lookup)
@@ -55,7 +81,6 @@ public class LookupService : ILookupService
         await _context.SaveChangesAsync();
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Data = true, Errors = null, Message = "Add new city" };
     }
-
     public async Task<BaseResponse<bool>> CityActivation(int lookupId)
     {
         var city = await _context.City.FirstOrDefaultAsync(x => x.Id == lookupId);
@@ -69,7 +94,7 @@ public class LookupService : ILookupService
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = city.IsActive ? "Activate city done" : "Deactivate city done", Data = city.IsActive };
     }
 
-    public async Task<BaseResponse<List<LookupResponse>>> GetPropertyUtilities(LookupRequest lookup)
+    public async Task<BaseResponse<List<LookupResponse>>> GetUtilities(LookupRequest lookup)
     {
         var utilityQuery = _context.Utilities.AsQueryable();
 
@@ -95,6 +120,32 @@ public class LookupService : ILookupService
 
         return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = utilities, Errors = null, Message = "Get all governorates" };
     }
+    public async Task<BaseResponse<List<LookupResponseAdmin>>> GetAdminUtilities(LookupRequest lookup)
+    {
+        var utilityQuery = _context.Utilities.AsQueryable();
+
+        if (lookup.Id != 0)
+        {
+            utilityQuery = utilityQuery.Where(x => x.Id == lookup.Id);
+        }
+
+        if (!string.IsNullOrEmpty(lookup.Name))
+        {
+            utilityQuery = utilityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
+        }
+
+
+        var utilities = await utilityQuery
+            .Select(x => new LookupResponseAdmin
+            {
+                Id = x.Id,
+                ValueEn = x.NameEn,
+                Value = x.Name
+            })
+            .ToListAsync();
+
+        return new BaseResponse<List<LookupResponseAdmin>>() { Code = ErrorCode.Success, Data = utilities, Errors = null, Message = "Get all governorates" };
+    }
 
     public async Task<BaseResponse<bool>> AddUtility(AddLookup lookup)
     {
@@ -108,7 +159,6 @@ public class LookupService : ILookupService
         await _context.SaveChangesAsync();
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Data = true, Errors = null, Message = "Add new Utility" };
     }
-
     public async Task<BaseResponse<bool>> UtilityActivation(int lookupId)
     {
         var utility = await _context.Utilities.FirstOrDefaultAsync(x => x.Id == lookupId);
