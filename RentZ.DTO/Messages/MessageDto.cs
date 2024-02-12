@@ -20,6 +20,8 @@ public class ConversationDto
     public int PropId { get; set; }
     public DateTime SendAt { get; set; }
 
+    public string OwnerId { get; set; }
+
     public string SenderId { get; set; }
     public string SenderName { get; set; }
     public string SenderImageUrl { get; set; }

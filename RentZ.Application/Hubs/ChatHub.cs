@@ -25,8 +25,9 @@ public class ChatHub : Hub
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
         
         var chatId = int.TryParse(_httpContextAccessor.HttpContext.Items["ChatId"].ToString(), out var chat) ? chat : 0;
+        var joined = await _messagesService.JoinConversation(chatId, id);
 
-        await Clients.Caller.SendAsync("Connected", $"{id} has joined");
+        await Clients.Caller.SendAsync("Connected", $"{id} has joined : {joined}");
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
@@ -34,9 +35,11 @@ public class ChatHub : Hub
         var id = Context.User?.Identities.ElementAt(0).Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
 
         var chatId = int.TryParse(_httpContextAccessor.HttpContext.Items["ChatId"].ToString(), out var chat) ? chat : 0;
-        var isSaved = await _messagesService.SaveMessages(chatId);
+       
+        var isSavedMessages = await _messagesService.SaveMessages(chatId);
+        var isUserLeft = await _messagesService.LeftConversation(chatId, id);
 
-        await Clients.Caller.SendAsync("DisConnected", $"{id} has left and messages saved: {isSaved}");
+        await Clients.Caller.SendAsync("DisConnected", $"{id} has left and messages saved: {isSavedMessages}");
     }
 
     public async Task Send(int pageIndex, int pageSize, int propId, int conversationId, string receiverId, string message)

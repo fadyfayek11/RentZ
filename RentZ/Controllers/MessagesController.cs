@@ -33,8 +33,13 @@ public class MessagesController : Controller
     {
         var senderId = HttpContext.User.FindFirstValue("UserId");
 
+        var existConversationId = await _messagesService.ConversationExist(senderId, receiverId);
+        if (existConversationId > 0)
+        {
+            return new BadRequestObjectResult(new { chatId = existConversationId});
+        }
 
-        conversationId = conversationId == 0 ? await _messagesService.StartConversation(propId, senderId, receiverId) : conversationId;
+        conversationId = await _messagesService.StartConversation(propId, senderId, receiverId);
 
         await _messagesService.SetTempMessages(new MessageDto
         {

@@ -85,11 +85,11 @@ namespace RentZ.Application.Services.User.Security
            
             var result = await _userManager.CreateAsync(newUser, register.Password);
             if(!result.Succeeded)
-                return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.InternalServerError, Message = "Something went wrong while saving the data" };
+                return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.BadRequest, Message = "Something went wrong while saving the data" };
 
             var userInRole = await _userManager.AddToRoleAsync(newUser, "Client");
             if (!userInRole.Succeeded)
-	            return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.InternalServerError, Message = "Something went wrong while add user to role" };
+	            return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.BadRequest, Message = "Something went wrong while add user to role" };
 
             await _userManager.AddClaimAsync(newUser, new Claim(ClaimTypes.Sid, newUser.Id.ToString()));
             var newClient = new Client
@@ -110,7 +110,7 @@ namespace RentZ.Application.Services.User.Security
 
             if (!savedSuccessfully)
             {
-                return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.InternalServerError, Message = "Something went wrong while saving the data" };
+                return new BaseResponse<GenerateTokenResponseDto>() { Code = ErrorCode.BadRequest, Message = "Something went wrong while saving the data" };
             }
 
             var (successSetOtp, tokenResult) = await SetOtp(newUser, context);

@@ -36,20 +36,20 @@ public class UserController : Controller
 
 	[HttpPost(nameof(ValidatePhoneNumber))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
-	public async Task<IActionResult> ValidatePhoneNumber([FromBody] string phoneNumber)
+	public async Task<IActionResult> ValidatePhoneNumber([FromBody] ValidateMobile request)
 	{
-		var response = await _validations.IsPhoneNumberExist(phoneNumber);
-		if (response) return new BadRequestObjectResult(response);
+		var response = await _validations.IsPhoneNumberExist(request.Mobile);
+		if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 
 		return new OkObjectResult(response);
 	}
     
     [HttpPost(nameof(ValidateEmail))]
 	[SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
-	public async Task<IActionResult> ValidateEmail([FromBody] string email)
+	public async Task<IActionResult> ValidateEmail([FromBody] ValidateEmail request)
 	{
-		var response = await _validations.IsEmailExist(email);
-		if (response) return new BadRequestObjectResult(response);
+		var response = await _validations.IsEmailExist(request.Email);
+		if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 
 		return new OkObjectResult(response);
 	}

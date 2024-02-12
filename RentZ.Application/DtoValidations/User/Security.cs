@@ -45,6 +45,7 @@ public class RegistrationValidation : AbstractValidator<Registration>
     //}
     private async Task<bool> BeAValidNumber(string phoneNumber, CancellationToken cancellationToken)
     {
-       return  await _validations.IsPhoneNumberExist(phoneNumber);
+       var res  =  await _validations.IsPhoneNumberExist(phoneNumber);
+       return res.Data;
     }
 }

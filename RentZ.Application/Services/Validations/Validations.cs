@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RentZ.DTO.Enums;
+using RentZ.DTO.Response;
 using RentZ.Infrastructure.Context;
 
 namespace RentZ.Application.Services.Validations;
@@ -12,18 +14,30 @@ public class Validations : IValidations
         _context = context;
     }
 
-    public async Task<bool> IsPhoneNumberExist(string phoneNumber)
+    public async Task<BaseResponse<bool>> IsPhoneNumberExist(string phoneNumber)
     {
-	    return await _context.Users.AnyAsync(x => x.PhoneNumber == phoneNumber);
+	    var isExistMobile =  await _context.Users.AnyAsync(x => x.PhoneNumber == phoneNumber);
+        
+        return new BaseResponse<bool>
+        {
+            Code = ErrorCode.Success,
+            Message = $"Is mobile exist {isExistMobile}",
+            Data = isExistMobile,
+            Errors = null
+        };
     }
 
-    public async Task<bool> IsEmailExist(string email)
+    public async Task<BaseResponse<bool>> IsEmailExist(string email)
     {
-        return await _context.Users.AnyAsync(x => x.Email == email);
+        var isExistEmail = await _context.Users.AnyAsync(x => x.Email == email);
+
+        return new BaseResponse<bool>
+        {
+            Code = ErrorCode.Success,
+            Message = $"Is email exist {isExistEmail}",
+            Data = isExistEmail,
+            Errors = null
+        };
     }
 
-    public async Task<bool> IsCityExist(int cityId)
-    {
-        return await _context.City.AnyAsync(x => x.Id == cityId);
-    }
 }
