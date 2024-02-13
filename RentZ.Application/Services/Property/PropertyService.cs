@@ -159,7 +159,7 @@ public class PropertyService : IPropertyService
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
-            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.PriceFrom >= filters.PriceFrom && p.PriceTo <= filters.PriceTo)) &&
+            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.PriceFrom >= filters.PriceFrom || p.PriceTo >= filters.PriceTo)) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
             (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.DateTo <= filters.AvailableDateTo && p.DateFrom >= filters.AvailableDateFrom)) &&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
@@ -234,7 +234,7 @@ public class PropertyService : IPropertyService
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
-            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.PriceFrom >= filters.PriceFrom && p.PriceTo <= filters.PriceTo)) &&
+            (!filters.PriceFrom.HasValue || !filters.PriceTo.HasValue || (p.PriceFrom >= filters.PriceFrom || p.PriceTo >= filters.PriceTo)) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
             (!filters.AvailableDateFrom.HasValue || !filters.AvailableDateTo.HasValue || (p.DateTo <= filters.AvailableDateTo && p.DateFrom >= filters.AvailableDateFrom)) &&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
