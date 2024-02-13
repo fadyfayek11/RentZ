@@ -24,7 +24,7 @@ public class FeedbackController : Controller
     [EnableRateLimiting("limitDay")]
     [Authorize(Roles = "Client")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
-    public async Task<IActionResult> FeedBack([FromForm] AddingFeedback feedback)
+    public async Task<IActionResult> FeedBack(AddingFeedback feedback)
     {
         var uId = HttpContext.User.FindFirstValue("UserId");
 
