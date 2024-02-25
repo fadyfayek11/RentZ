@@ -29,11 +29,17 @@ public class MessagesController : Controller
     [Authorize]
     [HttpPost("Messages/Send", Name = "Send")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<Message>>))]
-    public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, int propId, string receiverId, string message)
+    public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, int propId, string receiverId, string message, bool isRequest = false)
     {
         var senderId = HttpContext.User.FindFirstValue("UserId");
 
-        var existConversationId = await _messagesService.ConversationExist(senderId, receiverId);
+        var userHasProp = _messagesService.UserHasProp(senderId);
+        if (isRequest && !userHasProp)
+        {
+            return new BadRequestObjectResult(new { chatId = 0 });
+        }
+
+        var existConversationId = await _messagesService.ConversationExist(senderId, receiverId, propId);
         if (existConversationId > 0)
         {
             return new BadRequestObjectResult(new { chatId = existConversationId});

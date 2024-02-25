@@ -12,9 +12,10 @@ public interface IMessagesService
     PagedResult<MessageDto>? GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId);
     Task<bool> SaveMessages(int conversationId);
     Task<int> StartConversation(int propId, string senderId, string receiverId);
-    Task<int> ConversationExist(string senderId, string receiverId);
+    Task<int> ConversationExist(string senderId, string receiverId, int propId);
     Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string uId, HttpContext context);
     Task<BaseResponse<bool?>> ReadConversation(int conversationId, string uId);
     Task<bool> JoinConversation(int conversationId, string uId);
     Task<bool> LeftConversation(int conversationId, string uId);
+    bool UserHasProp(string uId);
 }

@@ -156,7 +156,7 @@ public class MessagesService : IMessagesService
 
     public async Task<int> StartConversation(int propId, string senderId, string receiverId)
     {
-        var conversationId = await ConversationExist(senderId, receiverId);
+        var conversationId = await ConversationExist(senderId, receiverId, propId);
 
         if (conversationId > 0)
         {
@@ -177,11 +177,11 @@ public class MessagesService : IMessagesService
         return conversation.Entity.Id;
     }
 
-    public async Task<int> ConversationExist(string senderId, string receiverId)
+    public async Task<int> ConversationExist(string senderId, string receiverId, int propId)
     {
         var conversationExist = await _context.Conversations.FirstOrDefaultAsync(x =>
             (x.SenderId.ToString() == senderId || x.SenderId.ToString() == receiverId) &&
-            (x.ReceiverId.ToString() == senderId || x.ReceiverId.ToString() == receiverId));
+            (x.ReceiverId.ToString() == senderId || x.ReceiverId.ToString() == receiverId) && x.PropId == propId);
         return conversationExist?.Id ?? 0; 
     }
 
@@ -299,5 +299,10 @@ public class MessagesService : IMessagesService
         var host = request.Host.Value;
 
         return $"{scheme}://{host}/api/User/Profile?uId={uId}";
+    }
+
+    public bool UserHasProp(string uId)
+    {
+        return _context.Properties.Any(x => x.OwnerId.ToString() == uId && x.IsActive);
     }
 }
