@@ -134,9 +134,10 @@ public class PropertyService : IPropertyService
         var userId = context.User.FindFirstValue("UserId") ?? "";
         var client = await _context.Clients.Where(x => x.Id == Guid.Parse(userId)).FirstOrDefaultAsync();
 
+        var clientHasProp = client?.Properties?.FirstOrDefault(x => (x.PropertyType is PropertyType.Exchange or PropertyType.Advertising) && x.IsActive);
+
         if (filters.PropertyType == PropertyType.Exchange)
         {
-            var clientHasProp = client?.Properties?.FirstOrDefault(x => (x.PropertyType is PropertyType.Exchange or PropertyType.Advertising) && x.IsActive);
             if (clientHasProp is null)
             {
                 return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.BadRequest, Message = "User hasn't any property yet", Data = new PagedResult<GetProperties?>() { Items = new List<GetProperties>(), TotalCount = 0 } };
@@ -167,7 +168,11 @@ public class PropertyService : IPropertyService
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
         );
 
-        if (filters.PropertyType is null)
+        if (filters.PropertyType is null && clientHasProp is null)
+        {
+            properties = properties.Where(property => property.PropertyType == PropertyType.Advertising);
+        }        
+        else if (filters.PropertyType is null)
         {
             properties = properties.Where(property => property.PropertyType == PropertyType.Advertising || property.PropertyType == PropertyType.Exchange);
         }
