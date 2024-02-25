@@ -303,6 +303,6 @@ public class MessagesService : IMessagesService
 
     public bool UserHasProp(string uId)
     {
-        return _context.Properties.Any(x => x.OwnerId.ToString() == uId && x.IsActive);
+        return _context.Properties.Any(x => x.OwnerId.ToString() == uId && x.IsActive && x.Status == PropertyStatus.Approved);
     }
 }
