@@ -182,7 +182,7 @@ public class MessagesService : IMessagesService
         var conversationExist = await _context.Conversations.FirstOrDefaultAsync(x =>
             (x.SenderId.ToString() == senderId || x.SenderId.ToString() == receiverId) &&
             (x.ReceiverId.ToString() == senderId || x.ReceiverId.ToString() == receiverId) && x.PropId == propId);
-        return conversationExist?.Id ?? 0; 
+        return conversationExist?.Id ?? 0;
     }
 
     public async Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string uId, HttpContext context)
@@ -209,8 +209,9 @@ public class MessagesService : IMessagesService
                 IsReadByReceiver = uId != x.SenderId.ToString() ? x.IsReadByReceiver : x.IsReadBySender,
                 IsReceiverOnline = uId != x.SenderId.ToString() ? x.IsReceiverOnline : x.IsSenderOnline
             })
+            .OrderByDescending(x => x.SendAt)
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
-            .Take(pagination.PageSize).OrderByDescending(x => x.SendAt).ToListAsync();
+            .Take(pagination.PageSize).ToListAsync();
 
         return new BaseResponse<PagedResult<ConversationDto?>> { Code = ErrorCode.Success, Message = "Get user Conversation done successfully", Data = new PagedResult<ConversationDto?>() { Items = response, TotalCount = conversationsCount } };
     }
