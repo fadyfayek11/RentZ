@@ -15,6 +15,7 @@ public interface IMessagesService
     Task<int> ConversationExist(string senderId, string receiverId, int propId);
     Task<BaseResponse<PagedResult<ConversationDto?>>> Conversations(Pagination pagination, string uId, HttpContext context);
     Task<BaseResponse<bool?>> ReadConversation(int conversationId, string uId);
+    Task<BaseResponse<bool?>> RemoveConversation(int conversationId, string uId);
     Task<bool> JoinConversation(int conversationId, string uId);
     Task<bool> LeftConversation(int conversationId, string uId);
     bool UserHasProp(string uId);

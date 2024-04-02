@@ -1,4 +1,6 @@
-﻿namespace RentZ.DTO.Messages;
+﻿using RentZ.DTO.Enums;
+
+namespace RentZ.DTO.Messages;
 
 public class MessageDto
 {
@@ -18,6 +20,8 @@ public class ConversationDto
 {
     public int Id { get; set; }
     public int PropId { get; set; }
+    public PropertyType PropertyType { get; set; }
+    public string PropertyName { get; set; }
     public DateTime SendAt { get; set; }
 
     public string OwnerId { get; set; }

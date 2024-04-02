@@ -91,5 +91,22 @@ public class MessagesController : Controller
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
 
     }
+    
+    
+    [Authorize]
+    [HttpDelete("Conversations/Remove", Name = "Remove")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool>))]
+    public async Task<IActionResult> RemoveConversations(int conversationId)
+    {
+        var uId = HttpContext.User.FindFirstValue("UserId");
+
+        var response = await _messagesService.RemoveConversation(conversationId, uId);
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+
+    }
 
 }

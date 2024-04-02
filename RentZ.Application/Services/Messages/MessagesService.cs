@@ -196,6 +196,8 @@ public class MessagesService : IMessagesService
             {
                 Id = x.Id,
                 PropId = x.PropId,
+                PropertyName = x.Property.Name ?? $"#{x.PropId}",
+                PropertyType = x.Property.PropertyType,
                 OwnerId =  _context.Properties.Where(y => y.Id == x.PropId).Select(z=>z.OwnerId).FirstOrDefault().ToString(),
                 SendAt = x.CreationDate,
                 SenderId = uId != x.SenderId.ToString() ? x.SenderId.ToString() : x.ReceiverId.ToString(),
@@ -207,7 +209,7 @@ public class MessagesService : IMessagesService
                 IsReadBySender = uId != x.SenderId.ToString() ? x.IsReadBySender : x.IsReadByReceiver,
                 IsSenderOnline = uId != x.SenderId.ToString() ? x.IsSenderOnline : x.IsReceiverOnline,
                 IsReadByReceiver = uId != x.SenderId.ToString() ? x.IsReadByReceiver : x.IsReadBySender,
-                IsReceiverOnline = uId != x.SenderId.ToString() ? x.IsReceiverOnline : x.IsSenderOnline
+                IsReceiverOnline = uId != x.SenderId.ToString() ? x.IsReceiverOnline : x.IsSenderOnline,
             })
             .OrderByDescending(x => x.SendAt)
             .Skip((pagination.PageIndex - 1) * pagination.PageSize)
@@ -305,5 +307,22 @@ public class MessagesService : IMessagesService
     public bool UserHasProp(string uId)
     {
         return _context.Properties.Any(x => x.OwnerId.ToString() == uId && x.IsActive && x.Status == PropertyStatus.Approved);
+    }
+
+    public async Task<BaseResponse<bool?>> RemoveConversation(int conversationId, string uId)
+    {
+        var conversation = await _context.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId &&
+                   (x.SenderId.ToString() == uId || x.ReceiverId.ToString() == uId));
+        if (conversation is null)
+        {
+            return new BaseResponse<bool?>()
+            { Code = ErrorCode.BadRequest, Message = "Can't get the conversation", Data = false };
+        }
+      
+        _context.Conversations.Remove(conversation);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool?>()
+        { Code = ErrorCode.Success, Message = "You removed the conversation successfully", Data = true };
     }
 }

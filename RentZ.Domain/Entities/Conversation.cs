@@ -19,10 +19,13 @@ public class Conversation
     public bool IsSenderOnline { get; set; }
     public bool IsReadByReceiver { get; set; }
     public bool IsReceiverOnline { get; set; }
+
+    [ForeignKey(nameof(Property))]
     public int PropId { get; set; }
 
     public virtual Client Sender { get; set; } = null!;
     public virtual Client Receiver { get; set; } = null!;
+    public virtual Property Property { get; set; } = null!;
 
     public virtual ICollection<Message> Messages { get; set; } = null!;
 }
