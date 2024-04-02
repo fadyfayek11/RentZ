@@ -134,7 +134,7 @@ public class PropertyService : IPropertyService
         var userId = context.User.FindFirstValue("UserId") ?? "";
         var client = await _context.Clients.Where(x => x.Id == Guid.Parse(userId)).FirstOrDefaultAsync();
 
-        var clientHasProp = client?.Properties?.FirstOrDefault(x => (x.PropertyType is PropertyType.Exchange or PropertyType.Advertising) && x.IsActive && x.Status == PropertyStatus.Approved);
+        var clientHasProp = client?.Properties?.FirstOrDefault(x => (x.PropertyType is PropertyType.Exchange or PropertyType.Advertising) && x.IsActive);
 
         if (filters.PropertyType == PropertyType.Exchange)
         {
