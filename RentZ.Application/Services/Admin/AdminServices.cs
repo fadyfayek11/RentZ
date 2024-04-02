@@ -31,15 +31,19 @@ public class AdminServices : IAdminServices
         _context.Properties.Update(property);
         await _context.SaveChangesAsync();
 
-        await _notificationService.AddNotification(new AddNotification
+        if ((NotificationTypes)request.Status != 0)
         {
-            Type = (NotificationTypes)request.Status,
-            Title = request.Status.ToString(),
-            Content = null,
-            LinkId = request.PropId,
-            ReceiverId = property.OwnerId.ToString(),
-            SenderId = adminId
-        });
+            await _notificationService.AddNotification(new AddNotification
+            {
+                Type = (NotificationTypes)request.Status,
+                Title = request.Status.ToString(),
+                Content = null,
+                LinkId = request.PropId,
+                ReceiverId = property.OwnerId.ToString(),
+                SenderId = adminId
+            });
+        }
+        
 
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Property status changes successfully", Data = true };
     }
