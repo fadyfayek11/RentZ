@@ -29,15 +29,9 @@ public class MessagesController : Controller
     [Authorize]
     [HttpPost("Messages/Send", Name = "Send")]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<Message>>))]
-    public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, int propId, string receiverId, string message, bool isRequest = false)
+    public async Task<IActionResult> Send(int pageIndex, int pageSize, int conversationId, int propId, string receiverId, string message)
     {
         var senderId = HttpContext.User.FindFirstValue("UserId");
-
-        var userHasProp = _messagesService.UserHasProp(senderId);
-        if (isRequest && !userHasProp)
-        {
-            return new BadRequestObjectResult(new { chatId = 0 });
-        }
 
         var existConversationId = await _messagesService.ConversationExist(senderId, receiverId, propId);
         if (existConversationId > 0)
