@@ -12,4 +12,5 @@ public class LookupResponseAdmin
     public string Value { get; set; }
     public string ValueEn { get; set; }
     public int OrderId { get; set; }
+    public bool IsActive { get; set; }
 }

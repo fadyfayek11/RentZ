@@ -62,7 +62,8 @@ public class LookupService : ILookupService
 				Id = x.Id,
 				ValueEn = x.NameEn,
                 Value =  x.Name,
-                OrderId = x.ViewOrder
+                OrderId = x.ViewOrder,
+                IsActive = x.IsActive
             })
             .ToListAsync();
 
@@ -170,6 +171,7 @@ public class LookupService : ILookupService
                 ValueEn = x.NameEn,
                 Value = x.Name,
                 OrderId = 0,
+                IsActive = x.IsActive
             })
             .ToListAsync();
 
