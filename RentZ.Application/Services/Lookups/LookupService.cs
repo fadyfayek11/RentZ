@@ -52,9 +52,10 @@ public class LookupService : ILookupService
 
 		if (!string.IsNullOrEmpty(lookup.Name))
 		{
-			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name)).OrderBy(x => x.ViewOrder);
+			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
 		}
 
+        cityQuery = cityQuery.Where(x=>x.IsActive == lookup.IsActive).OrderBy(x => x.ViewOrder); 
 
         var cities = await cityQuery
 			.Select(x => new LookupResponseAdmin()
@@ -162,6 +163,7 @@ public class LookupService : ILookupService
         {
             utilityQuery = utilityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
         }
+        utilityQuery = utilityQuery.Where(x => x.IsActive == lookup.IsActive);
 
 
         var utilities = await utilityQuery
@@ -170,7 +172,6 @@ public class LookupService : ILookupService
                 Id = x.Id,
                 ValueEn = x.NameEn,
                 Value = x.Name,
-                OrderId = 0,
                 IsActive = x.IsActive
             })
             .ToListAsync();
