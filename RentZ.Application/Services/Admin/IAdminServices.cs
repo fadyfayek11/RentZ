@@ -10,4 +10,5 @@ public interface IAdminServices
     Task<BaseResponse<bool>> PropertyStatus(PropertyChangeStatus status, string adminId);
     Task<BaseResponse<PagedResult<GettingFeedback?>>> FeedBacks(Pagination pagination);
     Task<BaseResponse<PagedResult<AdminUserData>>> GetUsers(RequestUsers usersRequest);
+    Task<BaseResponse<bool>> LockUserAccount(string userId);
 }

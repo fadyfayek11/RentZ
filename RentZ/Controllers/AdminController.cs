@@ -151,4 +151,13 @@ public class AdminController : Controller
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
 
+    [HttpPatch(nameof(Lock))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
+    public async Task<IActionResult> Lock(string userId)
+    {
+        var response = await _adminServices.LockUserAccount(userId);
+
+        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+        return new OkObjectResult(response);
+    }
 }

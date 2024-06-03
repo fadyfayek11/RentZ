@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RentZ.Application.Services.Notification;
+using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Feedback;
 using RentZ.DTO.Notification;
@@ -90,5 +93,19 @@ public class AdminServices : IAdminServices
             .Select(x=> new AdminUserData(x.Id.ToString(),x.User.DisplayName,x.User.Email,x.User.PhoneNumber,x.BirthDate,x.Gender.ToString(),x.User.IsActive)).ToListAsync();
 
         return new BaseResponse<PagedResult<AdminUserData>> { Code = ErrorCode.Success, Message = "Get all users details done successfully", Data = new PagedResult<AdminUserData>() { Items = results, TotalCount = count } };
+    }
+
+    public async Task<BaseResponse<bool>> LockUserAccount(string userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id.ToString() == userId);
+        if (user == null) return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "Fail to find user", Data = false };
+
+        
+        user.IsActive = !user.IsActive;
+
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = user.IsActive ? "Activate user done" : "Deactivate user done", Data = user.IsActive };
     }
 }
