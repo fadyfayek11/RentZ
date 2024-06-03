@@ -1,4 +1,6 @@
 ﻿using Azure.Core;
+using ClosedXML.Excel;
+using ExtCore.FileStorage.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RentZ.Application.Services.Notification;
@@ -74,7 +76,12 @@ public class AdminServices : IAdminServices
 
     public async Task<BaseResponse<PagedResult<AdminUserData>>> GetUsers(RequestUsers usersRequest)
     {
-        var users = _context.Clients.Where(x=>x.User.IsActive == usersRequest.IsActive).AsQueryable();
+        var users = _context.Clients.AsQueryable();
+
+        if (usersRequest.IsActive.HasValue)
+        {
+            users = users.Where(x => x.User.IsActive == usersRequest.IsActive);
+        }
 
         if (!string.IsNullOrEmpty(usersRequest.UserId))
         {
@@ -108,4 +115,50 @@ public class AdminServices : IAdminServices
 
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = user.IsActive ? "Activate user done" : "Deactivate user done", Data = user.IsActive };
     }
+
+    public byte[] ExportUsersData(PagedResult<AdminUserData> users)
+    {
+        using (var workbook = new XLWorkbook())
+        {
+            var worksheet = workbook.Worksheets.Add("Admin Users");
+
+            // Add header row
+            worksheet.Cell(1, 1).Value = "UserId";
+            worksheet.Cell(1, 2).Value = "DisplayName";
+            worksheet.Cell(1, 3).Value = "Email";
+            worksheet.Cell(1, 4).Value = "PhoneNumber";
+            worksheet.Cell(1, 5).Value = "BirthDate";
+            worksheet.Cell(1, 6).Value = "Gender";
+            worksheet.Cell(1, 7).Value = "IsActive";
+
+            var headerRange = worksheet.Range(1, 1, 1, 7);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            // Add data rows
+            for (int i = 0; i < users.TotalCount; i++)
+            {
+                var user = users.Items[i];
+                worksheet.Cell(i + 2, 1).Value = user.UserId;
+                worksheet.Cell(i + 2, 2).Value = user.DisplayName;
+                worksheet.Cell(i + 2, 3).Value = user.Email;
+                worksheet.Cell(i + 2, 4).Value = user.PhoneNumber;
+                worksheet.Cell(i + 2, 5).Value = user.BirthDate.ToShortDateString();
+                worksheet.Cell(i + 2, 6).Value = user.Gender;
+                worksheet.Cell(i + 2, 7).Value = user.IsActive;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using (var stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+
+                return stream.ToArray();
+            }
+        }
+    }
+
 }

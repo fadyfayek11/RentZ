@@ -10,6 +10,7 @@ using RentZ.DTO.Feedback;
 using RentZ.DTO.Lookups;
 using RentZ.Application.Services.Lookups;
 using RentZ.DTO.User.Security;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace RentZ.API.Controllers;
 
@@ -145,6 +146,13 @@ public class AdminController : Controller
     {
 
         var response = await _adminServices.GetUsers(request);
+
+        if (request.ExportData)
+        {
+            var fileContent = _adminServices.ExportUsersData(response.Data);
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Clients.xlsx");
+        }
+
         if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
         if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
 

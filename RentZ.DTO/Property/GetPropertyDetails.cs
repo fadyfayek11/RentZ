@@ -110,7 +110,8 @@ public class Pagination
 public class RequestUsers
 {
     public string UserId { get; set; }
-    public bool IsActive{ get; set; }
+    public bool? IsActive{ get; set; }
+    public bool ExportData{ get; set; }
     public string SearchKey{ get; set; }
     public Pagination Pagination { get; set; } = new Pagination();
 
