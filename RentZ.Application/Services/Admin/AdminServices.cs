@@ -5,6 +5,7 @@ using RentZ.DTO.Feedback;
 using RentZ.DTO.Notification;
 using RentZ.DTO.Property;
 using RentZ.DTO.Response;
+using RentZ.DTO.User.Security;
 using RentZ.Infrastructure.Context;
 
 namespace RentZ.Application.Services.Admin;
@@ -66,5 +67,28 @@ public class AdminServices : IAdminServices
             OwnerPhoneNumber = x.Client.User.PhoneNumber,
         }).ToList();
         return new BaseResponse<PagedResult<GettingFeedback?>>() { Code = ErrorCode.Success, Message = "Getting list of feedback", Data = new PagedResult<GettingFeedback?>(){ Items = response, TotalCount = totalCount } };
+    }
+
+    public async Task<BaseResponse<PagedResult<AdminUserData>>> GetUsers(RequestUsers usersRequest)
+    {
+        var users = _context.Clients.Where(x=>x.User.IsActive == usersRequest.IsActive).AsQueryable();
+
+        if (!string.IsNullOrEmpty(usersRequest.UserId))
+        {
+            users = users.Where(x => x.Id.ToString() == usersRequest.UserId);
+        }
+        
+        if (!string.IsNullOrEmpty(usersRequest.SearchKey))
+        {
+            users = users.Where(x => x.User.Email.Contains(usersRequest.SearchKey) ||
+                                     x.User.DisplayName.Contains(usersRequest.SearchKey) ||
+                                     x.User.PhoneNumber.Contains(usersRequest.SearchKey));
+        }
+        var count = users.Count();
+        var results = await users.Skip((usersRequest.Pagination.PageIndex - 1) * usersRequest.Pagination.PageSize)
+            .Take(usersRequest.Pagination.PageSize).OrderBy(x => x.User.DisplayName)
+            .Select(x=> new AdminUserData(x.Id.ToString(),x.User.DisplayName,x.User.Email,x.User.PhoneNumber,x.BirthDate,x.Gender.ToString(),x.User.IsActive)).ToListAsync();
+
+        return new BaseResponse<PagedResult<AdminUserData>> { Code = ErrorCode.Success, Message = "Get all users details done successfully", Data = new PagedResult<AdminUserData>() { Items = results, TotalCount = count } };
     }
 }

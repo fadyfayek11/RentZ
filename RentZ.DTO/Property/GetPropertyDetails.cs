@@ -107,6 +107,14 @@ public class Pagination
     public int PageSize { get; set; } = 10;
 }
 
+public class RequestUsers
+{
+    public string UserId { get; set; }
+    public bool IsActive{ get; set; }
+    public string SearchKey{ get; set; }
+    public Pagination Pagination { get; set; } = new Pagination();
+
+}
 public class FindProperty 
 {
     public int PropId { get; set; }

@@ -9,6 +9,7 @@ using RentZ.DTO.Property;
 using RentZ.DTO.Feedback;
 using RentZ.DTO.Lookups;
 using RentZ.Application.Services.Lookups;
+using RentZ.DTO.User.Security;
 
 namespace RentZ.API.Controllers;
 
@@ -136,6 +137,18 @@ public class AdminController : Controller
 
         if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
         return new OkObjectResult(response);
+    }
+
+    [HttpGet(nameof(Clients))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<AdminUserData?>>))]
+    public async Task<IActionResult> Clients([FromQuery] RequestUsers request)
+    {
+
+        var response = await _adminServices.GetUsers(request);
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
 
 }
