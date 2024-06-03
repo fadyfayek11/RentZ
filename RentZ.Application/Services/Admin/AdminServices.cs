@@ -123,13 +123,13 @@ public class AdminServices : IAdminServices
             var worksheet = workbook.Worksheets.Add("Admin Users");
 
             // Add header row
-            worksheet.Cell(1, 1).Value = "UserId";
-            worksheet.Cell(1, 2).Value = "DisplayName";
+            worksheet.Cell(1, 1).Value = "User Id";
+            worksheet.Cell(1, 2).Value = "Display Name";
             worksheet.Cell(1, 3).Value = "Email";
             worksheet.Cell(1, 4).Value = "PhoneNumber";
             worksheet.Cell(1, 5).Value = "BirthDate";
             worksheet.Cell(1, 6).Value = "Gender";
-            worksheet.Cell(1, 7).Value = "IsActive";
+            worksheet.Cell(1, 7).Value = "Is Active User";
 
             var headerRange = worksheet.Range(1, 1, 1, 7);
             headerRange.Style.Font.Bold = true;
