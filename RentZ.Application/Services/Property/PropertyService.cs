@@ -89,6 +89,7 @@ public class PropertyService : IPropertyService
             .Include(property => property.PropertyMedia).Include(property => property.PropertyUtilities)!
             .ThenInclude(propertyUtility => propertyUtility.Utility).Include(property => property.City)
             .Include(property => property.FavProperties)
+            .Include(x=>x.Admin)
             .FirstOrDefaultAsync(x=>x.Id == filters.PropId);
 
         if(property is null)
@@ -96,6 +97,8 @@ public class PropertyService : IPropertyService
 
         var propDetails = Mapping.Mapper.Map<GetPropertyDetails>(property);
         var isEnum = Enum.TryParse(filters.Lang, out Lang langValue);
+
+        propDetails.LastModifiedBy = property.Admin?.User.Email ?? "";
 
         var userId = context.User.FindFirstValue("UserId") ?? "";
         var isLogInUser = !string.IsNullOrEmpty(userId);

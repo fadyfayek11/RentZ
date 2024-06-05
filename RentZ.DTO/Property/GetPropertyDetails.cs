@@ -34,6 +34,7 @@ public class GetPropertyDetails
     public List<LookupResponse> PropertyUtilities { get; set; }
     public List<PropMedia> ImagesUrls { get; set; }
     public OwnerDetails Owner { get; set; }
+    public string LastModifiedBy { get; set; }
 }
 
 public class OwnerDetails
