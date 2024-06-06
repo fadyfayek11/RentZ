@@ -140,6 +140,44 @@ public class AdminController : Controller
         return new OkObjectResult(response);
     }
 
+    [Authorize(Roles = "RootAdmin")]
+    [HttpPost(nameof(SubAdmin))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<AdminData?>))]
+    public async Task<IActionResult> SubAdmin(SetAdminData request)
+    {
+        var response = await _adminServices.AddAdmin(request);
+
+        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+        return new OkObjectResult(response);
+    }
+
+    [Authorize(Roles = "RootAdmin")]
+    [HttpGet(nameof(SubAdmins))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<AdminData?>>))]
+    public async Task<IActionResult> SubAdmins([FromQuery] RequestAdmin request)
+    {
+
+        var response = await _adminServices.GetAdmins(request);
+
+
+        if (response.Code == ErrorCode.Success) return new OkObjectResult(response);
+        if (response.Code == ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+
+        return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+
+    [Authorize(Roles = "RootAdmin")]
+    [HttpPut(nameof(Update))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<bool?>))]
+    public async Task<IActionResult> Update(UpdateAdminData request)
+    {
+        var response = await _adminServices.EditAdmin(request);
+
+        if (response.Code is ErrorCode.BadRequest) return new BadRequestObjectResult(response);
+        if (response.Code is ErrorCode.InternalServerError) return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
+
+        return new OkObjectResult(response);
+    }
     [HttpGet(nameof(Clients))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<PagedResult<AdminUserData?>>))]
     public async Task<IActionResult> Clients([FromQuery] RequestUsers request)

@@ -1,10 +1,7 @@
-﻿using Azure.Core;
-using ClosedXML.Excel;
-using ExtCore.FileStorage.Abstractions;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using RentZ.Application.Services.Notification;
-using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
 using RentZ.DTO.Feedback;
 using RentZ.DTO.Notification;
@@ -19,11 +16,13 @@ public class AdminServices : IAdminServices
 {
     private readonly ApplicationDbContext _context;
     private readonly INotificationService _notificationService;
+    private readonly UserManager<Domain.Entities.User> _userManager;
 
-    public AdminServices(ApplicationDbContext context, INotificationService notificationService)
+    public AdminServices(ApplicationDbContext context, INotificationService notificationService, UserManager<Domain.Entities.User> userManager)
     {
         _context = context;
         _notificationService = notificationService;
+        _userManager = userManager;
     }
 
     public async Task<BaseResponse<bool>> PropertyStatus(PropertyChangeStatus request, string adminId)
@@ -102,6 +101,33 @@ public class AdminServices : IAdminServices
         return new BaseResponse<PagedResult<AdminUserData>> { Code = ErrorCode.Success, Message = "Get all users details done successfully", Data = new PagedResult<AdminUserData>() { Items = results, TotalCount = count } };
     }
 
+    public async Task<BaseResponse<PagedResult<AdminData>>> GetAdmins(RequestAdmin usersRequest)
+    {
+        var admins = _context.Admins.Where(x=>!x.IsRoot).AsQueryable();
+
+        if (usersRequest.IsActive.HasValue)
+        {
+            admins = admins.Where(x => x.User.IsActive == usersRequest.IsActive);
+        }
+
+        if (!string.IsNullOrEmpty(usersRequest.UserId))
+        {
+            admins = admins.Where(x => x.Id.ToString() == usersRequest.UserId);
+        }
+
+        if (!string.IsNullOrEmpty(usersRequest.SearchKey))
+        {
+            admins = admins.Where(x => x.User.Email.Contains(usersRequest.SearchKey) ||
+                                       x.User.PhoneNumber.Contains(usersRequest.SearchKey));
+        }
+        var count = admins.Count();
+        var results = await admins.Skip((usersRequest.Pagination.PageIndex - 1) * usersRequest.Pagination.PageSize)
+            .Take(usersRequest.Pagination.PageSize).OrderBy(x => x.User.DisplayName)
+            .Select(x => new AdminData(x.Id.ToString(), x.User.Email, x.User.PhoneNumber, x.User.IsActive)).ToListAsync();
+
+        return new BaseResponse<PagedResult<AdminData>> { Code = ErrorCode.Success, Message = "Get all admins details done successfully", Data = new PagedResult<AdminData>() { Items = results, TotalCount = count } };
+    }
+
     public async Task<BaseResponse<bool>> LockUserAccount(string userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id.ToString() == userId);
@@ -114,6 +140,28 @@ public class AdminServices : IAdminServices
         await _context.SaveChangesAsync();
 
         return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = user.IsActive ? "Activate user done" : "Deactivate user done", Data = user.IsActive };
+    }
+
+    public async Task<BaseResponse<AdminData?>> AddAdmin(SetAdminData adminData)
+    {
+        var user = new Domain.Entities.User()
+        {
+            UserName = adminData.Email,
+            Email = adminData.Email,
+            PhoneNumber = adminData.PhoneNumber,
+            IsActive = true
+        };
+        var result = await _userManager.CreateAsync(user, adminData.Password);
+
+        if (!result.Succeeded)
+        {
+            return new BaseResponse<AdminData?>() { Code = ErrorCode.BadRequest, Message = "something went wrong, may there is the same email or phone number exist", Data = null };
+        }
+        await _userManager.AddToRoleAsync(user, "Admin");
+        await _context.Admins.AddAsync(new Domain.Entities.Admin() { Id = user.Id, User = user, IsRoot = false});
+        await _context.SaveChangesAsync();
+
+        return new BaseResponse<AdminData?>() { Code = ErrorCode.Success, Message = "New Admin created successfully", Data = new AdminData(user.Id.ToString(), user.Email, user.PhoneNumber, user.IsActive) };
     }
 
     public byte[] ExportUsersData(PagedResult<AdminUserData> users)
@@ -161,4 +209,30 @@ public class AdminServices : IAdminServices
         }
     }
 
+    public async Task<BaseResponse<bool>> EditAdmin(UpdateAdminData adminData)
+    {
+        var user = await _userManager.FindByIdAsync(adminData.UserId);
+        if (user == null)
+        {
+            return new BaseResponse<bool>() { Code = ErrorCode.BadRequest, Message = "can't found the admin", Data = false };
+        }
+
+        user.UserName = adminData.Email ?? user.Email;
+        user.Email = adminData.Email ?? user.Email;
+        user.PhoneNumber = adminData.PhoneNumber ?? user.PhoneNumber;
+        user.IsActive = adminData.IsActive ?? user.IsActive;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return new BaseResponse<bool>() { Code = ErrorCode.InternalServerError, Message = "something went wrong while trying to update the admin data", Data = false };
+        }
+
+        if (!string.IsNullOrEmpty(adminData.Password))
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            await _userManager.ResetPasswordAsync(user, token, adminData.Password);
+        }
+        return new BaseResponse<bool>() { Code = ErrorCode.Success, Message = "Update admin data done successfully", Data = true };
+    }
 }

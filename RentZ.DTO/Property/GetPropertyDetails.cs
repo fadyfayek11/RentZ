@@ -117,6 +117,14 @@ public class RequestUsers
     public Pagination Pagination { get; set; } = new Pagination();
 
 }
+public class RequestAdmin
+{
+    public string UserId { get; set; }
+    public bool? IsActive{ get; set; }
+    public string SearchKey{ get; set; }
+    public Pagination Pagination { get; set; } = new Pagination();
+
+}
 public class FindProperty 
 {
     public int PropId { get; set; }
