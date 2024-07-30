@@ -222,8 +222,9 @@ public class AdminServices : IAdminServices
         user.PhoneNumber = adminData.PhoneNumber ?? user.PhoneNumber;
         user.IsActive = adminData.IsActive ?? user.IsActive;
 
-        var updateResult = await _userManager.UpdateAsync(user);
-        if (!updateResult.Succeeded)
+        _context.Users.Update(user);
+        var updateResult = await _context.SaveChangesAsync();
+        if (updateResult < 0)
         {
             return new BaseResponse<bool>() { Code = ErrorCode.InternalServerError, Message = "something went wrong while trying to update the admin data", Data = false };
         }

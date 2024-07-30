@@ -150,17 +150,7 @@ builder.Services.AddFluentValidationRulesToSwagger();
 builder.Services.AddHttpContextAccessor();
 
 // 6. Add CORS policy
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
-        });
-});
-
+builder.Services.AddCors();
 builder.Services.Configure<FileStorageOptions>(options =>
 {
     options.RootPath = $"{builder.Environment.ContentRootPath}\\Documents\\";
@@ -183,9 +173,12 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("AllowAllOrigins");
-
+app.UseCors(policy =>
+    policy.WithOrigins("localhost:4200",
+    "https://www.berveh.com/", "http://www.berveh.com/", "https://www.berveh.com/RentzAdmin",
+    "https://41.196.0.80/", "http://41.196.0.80/").AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowAnyOrigin());
 app.MapControllers();
 app.MapHub<ChatHub>("chatHub");
 
