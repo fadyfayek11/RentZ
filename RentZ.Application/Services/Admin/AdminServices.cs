@@ -94,6 +94,15 @@ public class AdminServices : IAdminServices
                                      x.User.PhoneNumber.Contains(usersRequest.SearchKey));
         }
         var count = users.Count();
+
+        if (usersRequest.ExportData)
+        {
+            var exportResult = await users.Take(count).OrderBy(x => x.User.DisplayName)
+                .Select(x => new AdminUserData(x.Id.ToString(), x.User.DisplayName, x.User.Email, x.User.PhoneNumber, x.BirthDate, x.Gender.ToString(), x.User.IsActive)).ToListAsync();
+            
+            return new BaseResponse<PagedResult<AdminUserData>> { Code = ErrorCode.Success, Message = "Get all users details done successfully", Data = new PagedResult<AdminUserData>() { Items = exportResult, TotalCount = count } };
+        }
+
         var results = await users.Skip((usersRequest.Pagination.PageIndex - 1) * usersRequest.Pagination.PageSize)
             .Take(usersRequest.Pagination.PageSize).OrderBy(x => x.User.DisplayName)
             .Select(x=> new AdminUserData(x.Id.ToString(),x.User.DisplayName,x.User.Email,x.User.PhoneNumber,x.BirthDate,x.Gender.ToString(),x.User.IsActive)).ToListAsync();

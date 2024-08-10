@@ -106,7 +106,7 @@ public class LookupService : ILookupService
 
         return new BaseResponse<bool>
         {
-            Code = ErrorCode.BadRequest,
+            Code = ErrorCode.Success,
             Message = "City updated successfully",
             Data = true,
             Errors = null
@@ -212,7 +212,7 @@ public class LookupService : ILookupService
 
         return new BaseResponse<bool>
         {
-            Code = ErrorCode.BadRequest,
+            Code = ErrorCode.Success,
             Message = "utility updated successfully",
             Data = true,
             Errors = null
