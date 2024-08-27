@@ -55,7 +55,7 @@ public class LookupService : ILookupService
 			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
 		}
 
-        cityQuery = cityQuery.Where(x=>x.IsActive == lookup.IsActive).OrderBy(x => x.ViewOrder); 
+        cityQuery = cityQuery.Where(x=>x.IsActive == lookup.IsActive).OrderBy(x => x.Name); 
 
         var cities = await cityQuery
 			.Select(x => new LookupResponseAdmin()
@@ -98,7 +98,7 @@ public class LookupService : ILookupService
         }
 
         city.Name = string.IsNullOrEmpty(lookup.Name) ? city.Name : lookup.Name;
-        city.NameEn = string.IsNullOrEmpty(lookup.NameEn) ? city.NameEn : lookup.Name;
+        city.NameEn = string.IsNullOrEmpty(lookup.NameEn) ? city.NameEn : lookup.NameEn;
         city.ViewOrder = lookup.OrderId == 0 ? city.ViewOrder : lookup.OrderId;
 
         _context.City.Update(city);
@@ -205,7 +205,7 @@ public class LookupService : ILookupService
         }
 
         utility.Name = string.IsNullOrEmpty(lookup.Name) ? utility.Name : lookup.Name;
-        utility.NameEn = string.IsNullOrEmpty(lookup.NameEn) ? utility.NameEn : lookup.Name;
+        utility.NameEn = string.IsNullOrEmpty(lookup.NameEn) ? utility.NameEn : lookup.NameEn;
 
         _context.Utilities.Update(utility);
         await _context.SaveChangesAsync();

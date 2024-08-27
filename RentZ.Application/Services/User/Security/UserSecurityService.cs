@@ -407,7 +407,7 @@ namespace RentZ.Application.Services.User.Security
 
             var host = request.Host.Value;
 
-            var url = $"{scheme}://{host}/api/User/Profile?uId={uId}";
+            var url = $"{scheme}://{host}/RentzApi/api/User/Profile?uId={uId}";
 
             return url;
         }

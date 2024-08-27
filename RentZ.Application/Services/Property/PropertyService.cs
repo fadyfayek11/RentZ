@@ -134,21 +134,37 @@ public class PropertyService : IPropertyService
 
     public async Task<BaseResponse<PagedResult<GetProperties?>>> GetProperties(HttpContext context, PropertyFilter filters)
     {
+        var isAdmin = context.User.IsInRole("Admin") ||
+            context.User.IsInRole("RootAdmin");
+
         var userId = context.User.FindFirstValue("UserId") ?? "";
+        var properties = _context.Properties.AsQueryable();
         var client = await _context.Clients.Where(x => x.Id == Guid.Parse(userId)).FirstOrDefaultAsync();
 
-        var clientHasProp = client?.Properties?.FirstOrDefault(x => (x.PropertyType is PropertyType.Exchange or PropertyType.Advertising) && x.IsActive);
-
-        if (filters.PropertyType == PropertyType.Exchange)
+        if (!isAdmin)
         {
-            if (clientHasProp is null)
+
+            var clientHasProp = client?.Properties?.FirstOrDefault(x => (x.PropertyType is PropertyType.Exchange or PropertyType.Advertising) && x.IsActive);
+
+            if (filters.PropertyType == PropertyType.Exchange)
             {
-                return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.BadRequest, Message = "User hasn't any property yet", Data = new PagedResult<GetProperties?>() { Items = new List<GetProperties>(), TotalCount = 0 } };
+                if (clientHasProp is null)
+                {
+                    return new BaseResponse<PagedResult<GetProperties?>> { Code = ErrorCode.BadRequest, Message = "User hasn't any property yet", Data = new PagedResult<GetProperties?>() { Items = new List<GetProperties?>(), TotalCount = 0 } };
+                }
+            }
+            if (filters.PropertyType is null && clientHasProp is null)
+            {
+                properties = properties.Where(property => property.PropertyType == PropertyType.Advertising);
+            }
+            else if (filters.PropertyType is null)
+            {
+                properties = properties.Where(property => property.PropertyType == PropertyType.Advertising || property.PropertyType == PropertyType.Exchange);
             }
         }
+       
 
 
-        var properties = _context.Properties.AsQueryable();
 
         properties = properties.Where(p => p.IsActive == filters.IsActive && 
             (!filters.PropertyType.HasValue || p.PropertyType == filters.PropertyType) &&
@@ -171,11 +187,9 @@ public class PropertyService : IPropertyService
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
         );
 
-        if (filters.PropertyType is null && clientHasProp is null)
-        {
-            properties = properties.Where(property => property.PropertyType == PropertyType.Advertising);
-        }        
-        else if (filters.PropertyType is null)
+
+
+        if (filters.PropertyType is null && isAdmin)
         {
             properties = properties.Where(property => property.PropertyType == PropertyType.Advertising || property.PropertyType == PropertyType.Exchange);
         }
@@ -364,7 +378,7 @@ public class PropertyService : IPropertyService
 
         var host = request.Host.Value;
 
-        var url = $"{scheme}://{host}/api/Property/Image?PropId={propId}&ImageId={imageId}";
+        var url = $"{scheme}://{host}/RentzApi/api/Property/Image?PropId={propId}&ImageId={imageId}";
 
         return url;
     }
@@ -376,7 +390,7 @@ public class PropertyService : IPropertyService
 
         var host = request.Host.Value;
 
-        var url = $"{scheme}://{host}/api/User/Profile?uId={uId}";
+        var url = $"{scheme}://{host}/RentzApi/api/User/Profile?uId={uId}";
 
         return url;
     }

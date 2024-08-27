@@ -301,7 +301,7 @@ public class MessagesService : IMessagesService
 
         var host = request.Host.Value;
 
-        return $"{scheme}://{host}/api/User/Profile?uId={uId}";
+        return $"{scheme}://{host}/RentzApi/api/User/Profile?uId={uId}";
     }
 
     public bool UserHasProp(string uId)
