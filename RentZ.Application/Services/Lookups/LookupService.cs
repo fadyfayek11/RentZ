@@ -26,7 +26,7 @@ public class LookupService : ILookupService
 
         if (!string.IsNullOrEmpty(lookup.Name))
         {
-            cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name)).OrderBy(x => x.ViewOrder);
+            cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
         }
 
         var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
@@ -37,6 +37,7 @@ public class LookupService : ILookupService
                 Id = x.Id,
                 Value = isEnum && langValue == Lang.en ? x.NameEn : x.Name,
             })
+            .OrderBy(x=>x.Value)
             .ToListAsync();
 
         return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
@@ -55,7 +56,7 @@ public class LookupService : ILookupService
 			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
 		}
 
-        cityQuery = cityQuery.Where(x=>x.IsActive == lookup.IsActive).OrderBy(x => x.Name); 
+        cityQuery = cityQuery.Where(x=>x.IsActive == lookup.IsActive); 
 
         var cities = await cityQuery
 			.Select(x => new LookupResponseAdmin()
@@ -66,6 +67,7 @@ public class LookupService : ILookupService
                 OrderId = x.ViewOrder,
                 IsActive = x.IsActive
             })
+            .OrderBy(x => x.Value)
             .ToListAsync();
 
         return new BaseResponse<List<LookupResponseAdmin>>() { Code = ErrorCode.Success, Data = cities, Errors = null, Message = "Get all cities" };
@@ -146,6 +148,7 @@ public class LookupService : ILookupService
                 Id = x.Id,
                 Value = isEnum && langValue == Lang.en ? x.NameEn : x.Name,
             })
+            .OrderBy(x => x.Value)
             .ToListAsync();
 
         return new BaseResponse<List<LookupResponse>>() { Code = ErrorCode.Success, Data = utilities, Errors = null, Message = "Get all governorates" };
@@ -174,6 +177,7 @@ public class LookupService : ILookupService
                 Value = x.Name,
                 IsActive = x.IsActive
             })
+            .OrderBy(x => x.Value)
             .ToListAsync();
 
         return new BaseResponse<List<LookupResponseAdmin>>() { Code = ErrorCode.Success, Data = utilities, Errors = null, Message = "Get all governorates" };

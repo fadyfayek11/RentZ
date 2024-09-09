@@ -42,7 +42,7 @@ public class AdminServices : IAdminServices
             {
                 Type = (NotificationTypes)request.Status,
                 Title = request.Status.ToString(),
-                Content = null,
+                Content = request.RejectionNote,
                 LinkId = request.PropId,
                 ReceiverId = property.OwnerId.ToString(),
                 SenderId = adminId
