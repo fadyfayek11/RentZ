@@ -21,7 +21,7 @@ public class LookupService : ILookupService
 
         if (lookup.Id != 0)
         {
-            cityQuery = cityQuery.Where(x => x.Id == lookup.Id);
+            cityQuery = cityQuery.Where(x => x.Id == lookup.Id && x.IsActive);
         }
 
         if (!string.IsNullOrEmpty(lookup.Name))
@@ -48,7 +48,7 @@ public class LookupService : ILookupService
 
         if (lookup.Id != 0)
 		{
-			cityQuery = cityQuery.Where(x => x.Id == lookup.Id);
+			cityQuery = cityQuery.Where(x => x.Id == lookup.Id && x.IsActive);
 		}
 
 		if (!string.IsNullOrEmpty(lookup.Name))

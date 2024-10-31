@@ -393,7 +393,11 @@ namespace RentZ.Application.Services.User.Security
                 return new BaseResponse<IFileProxy?>() { Code = ErrorCode.BadRequest, Message = "Fail to get user profile pic", Data = null };
 
             if (string.IsNullOrEmpty(client.ProfileImage))
-	            return new BaseResponse<IFileProxy?>() { Code = ErrorCode.InternalServerError, Message = "User hadn't set a pic yet", Data = null };
+            {
+                var defaultImage = await _fileManager.FileProxy<Domain.Entities.User>("defaultImage.jpg", "");
+                var defaultContentType = _fileManager.GetContentType(defaultImage.Filename);
+                return new BaseResponse<IFileProxy?>() { Code = ErrorCode.Success, Message = defaultContentType, Data = defaultImage };
+            }
 
 			var fileImage = await _fileManager.FileProxy<Domain.Entities.User>(client.ProfileImage, userId);
             var contentType = _fileManager.GetContentType(fileImage.Filename);
