@@ -30,8 +30,8 @@ public class Property
     public PropertyStatus Status { get; set; }
     public PropertyType PropertyType { get; set; }
     public PropertyCategory PropertyCategory { get; set; }
-    public DateTime DateFrom { get; set; }
-    public DateTime DateTo { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
 
     [ForeignKey(nameof(Admin))]
     public Guid? ApprovedBy { get; set; }

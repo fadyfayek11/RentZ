@@ -26,8 +26,8 @@ public class AddingProperty
     public Gender? Gender { get; set; }
     public int? AgeFrom { get; set; }
     public int? AgeTo { get; set; }
-    public DateTime DateFrom { get; set; }
-    public DateTime DateTo { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
     public List<int>? PropertyUtilities { get; set; }
     public List<IFormFile> Images { get; set; }
 }

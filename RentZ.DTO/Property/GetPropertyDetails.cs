@@ -28,8 +28,8 @@ public class GetPropertyDetails
     public int Views { get; set; }
     public PropertyStatus Status { get; set; }
     public bool IsActive { get; set; }
-    public DateTime DateFrom { get; set; }
-    public DateTime DateTo { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
     public DateTime CreatedDate { get; set; }
     public List<LookupResponse> PropertyUtilities { get; set; }
     public List<PropMedia> ImagesUrls { get; set; }

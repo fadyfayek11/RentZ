@@ -9,11 +9,8 @@ COPY ["RentZ.DAL/RentZ.DAL.csproj", "RentZ.DAL/"]
 COPY ["RentZ.Application/RentZ.Application.csproj", "RentZ.Application/"]
 COPY ["RentZ.Infrastructure/RentZ.Infrastructure.csproj", "RentZ.Infrastructure/"]
 COPY ["RentZ/RentZ.API.csproj", "RentZ.API/"]
-COPY ["RentZ.Domain/RentZ.Domain.csproj", "RentZ.Domain/"]
 COPY ["RentZ.DTO/RentZ.DTO.csproj", "RentZ.DTO/"]
-RUN dotnet restore "RentZ.API/RentZ.API.csproj"
-
-COPY . .
+RUN dotnet restore "RentZ.API/RentZ.API.csproj"  
 
 # Build the project
 WORKDIR "/src/."

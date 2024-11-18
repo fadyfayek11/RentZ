@@ -161,6 +161,8 @@ public class PropertyService : IPropertyService
             {
                 properties = properties.Where(property => property.PropertyType == PropertyType.Advertising || property.PropertyType == PropertyType.Exchange);
             }
+
+           
         }
        
 
@@ -179,8 +181,6 @@ public class PropertyService : IPropertyService
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
-            (!filters.PriceFrom.HasValue || p.PriceFrom >= filters.PriceFrom) &&
-            (!filters.PriceTo.HasValue || p.PriceTo <= filters.PriceTo) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
             (!filters.AvailableDateFrom.HasValue || p.DateFrom >= filters.AvailableDateFrom) &&
             (!filters.AvailableDateTo.HasValue || p.DateTo <= filters.AvailableDateTo) &&
@@ -189,11 +189,21 @@ public class PropertyService : IPropertyService
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
         );
 
-
-
+       
         if (filters.PropertyType is null && isAdmin)
         {
             properties = properties.Where(property => property.PropertyType == PropertyType.Advertising || property.PropertyType == PropertyType.Exchange || property.PropertyType == PropertyType.Request);
+        } 
+        
+        if (filters.PropertyType == PropertyType.Request)
+        {
+            properties = properties.Where(p => (!filters.PriceFrom.HasValue || p.PriceFrom >= filters.PriceFrom) &&
+                                               (!filters.PriceTo.HasValue || p.PriceTo <= filters.PriceTo));
+        }
+        else
+        {
+            properties = properties.Where(p => (!filters.PriceFrom.HasValue || p.PriceTo >= filters.PriceFrom) &&
+                                               (!filters.PriceTo.HasValue || p.PriceTo <= filters.PriceTo));
         }
 
         if (filters.PropertyUtilities is { Count: > 0 })
@@ -258,7 +268,7 @@ public class PropertyService : IPropertyService
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
-            (!filters.PriceFrom.HasValue || p.PriceFrom >= filters.PriceFrom) &&
+            (!filters.PriceFrom.HasValue || p.PriceTo >= filters.PriceFrom) &&
             (!filters.PriceTo.HasValue || p.PriceTo <= filters.PriceTo) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
             (!filters.AvailableDateFrom.HasValue || p.DateFrom >= filters.AvailableDateFrom) &&

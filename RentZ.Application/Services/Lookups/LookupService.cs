@@ -23,6 +23,7 @@ public class LookupService : ILookupService
         {
             cityQuery = cityQuery.Where(x => x.Id == lookup.Id && x.IsActive);
         }
+        cityQuery = cityQuery.Where(x => x.IsActive == lookup.IsActive);
 
         if (!string.IsNullOrEmpty(lookup.Name))
         {
@@ -132,13 +133,14 @@ public class LookupService : ILookupService
 
         if (lookup.Id != 0)
         {
-            utilityQuery = utilityQuery.Where(x => x.Id == lookup.Id);
+            utilityQuery = utilityQuery.Where(x => x.Id == lookup.Id && x.IsActive == lookup.IsActive);
         }
 
         if (!string.IsNullOrEmpty(lookup.Name))
         {
             utilityQuery = utilityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
         }
+        utilityQuery = utilityQuery.Where(x=>x.IsActive == lookup.IsActive);
 
         var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
 
