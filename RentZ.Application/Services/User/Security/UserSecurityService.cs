@@ -96,8 +96,6 @@ namespace RentZ.Application.Services.User.Security
             {
                 Id = newUser.Id,
                 IsOwner = register.IsOwner,
-                Gender = (Gender)Enum.Parse(typeof(Gender),register.Gender),
-                BirthDate = register.BirthDate,
                 ProfileImage = null,
                 FavLang = (Lang)Enum.Parse(typeof(Lang), register.FavLang),
                 Bio = null,
@@ -119,7 +117,7 @@ namespace RentZ.Application.Services.User.Security
         private GenerateTokenResponseDto GenerateToken(Domain.Entities.User user, Client client, HttpContext context)
         {
             var tokenResult = _jwtService.GenerateToken(new GenerateTokenRequestDto(user.Id.ToString(), user.DisplayName,
-                user.Email, GetProfileImageUrl(user.Id.ToString(), context), user.PhoneNumber, client.Gender,client.FavLang, client.IsOwner, user.IsActive, 
+                user.Email, GetProfileImageUrl(user.Id.ToString(), context), user.PhoneNumber, client.FavLang, client.IsOwner, user.IsActive, 
                 user.PhoneNumberConfirmed,Roles.Client));
             return tokenResult;
         }
@@ -251,9 +249,8 @@ namespace RentZ.Application.Services.User.Security
 
             var favLang = client.FavLang;
             var userDataResponse = new UserData(userId,!string.IsNullOrEmpty(client.ProfileImage) ?GetProfileImageUrl(userId, context) : null, client.User.DisplayName, client.User.Email, client.User.PhoneNumber,
-                favLang.ToString(), client.BirthDate,
-                new LookupResponse() { Id = client.CityId, Value = favLang == Lang.en? client.City?.NameEn : client.City?.Name },
-                client.Gender, client is { IsOwner: true }, client.User.IsActive, client.User.PhoneNumberConfirmed);
+                favLang.ToString(),
+                new LookupResponse() { Id = client.CityId, Value = favLang == Lang.en? client.City?.NameEn : client.City?.Name }, client is { IsOwner: true }, client.User.IsActive, client.User.PhoneNumberConfirmed);
            
             return new BaseResponse<UserData?>() { Code = ErrorCode.Success, Message = "get user data done successfully", Data = userDataResponse };
         }
@@ -270,8 +267,6 @@ namespace RentZ.Application.Services.User.Security
             user.DisplayName = userDate.DisplayName ?? user.DisplayName;
             user.Email = userDate.Email ?? user.Email;
             client.CityId = userDate.CityId ?? client.CityId;
-            client.BirthDate = userDate.BirthDate ?? client.BirthDate;
-            client.Gender = string.IsNullOrEmpty(userDate.Gender) ? client.Gender : (Gender)Enum.Parse(typeof(Gender),userDate.Gender);
 
 			var tokenResult = GenerateToken(user, client, context);
             bool successSetOtp = !string.IsNullOrEmpty(tokenResult.Token);

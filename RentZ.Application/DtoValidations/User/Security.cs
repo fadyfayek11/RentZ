@@ -25,15 +25,11 @@ public class RegistrationValidation : AbstractValidator<Registration>
             .NotEmpty().WithMessage("Email is required.")
             .EmailAddress().WithMessage("Invalid email address.");
 
-        RuleFor(registration => registration.BirthDate)
-            .NotEmpty().WithMessage("Birthdate is required.");
+       
 
         RuleFor(registration => registration.PhoneNumber)
             .NotEmpty().WithMessage("Phone number is required.")
             .MustAsync(BeAValidNumber).WithMessage("This phone number registered before.");
-
-		RuleFor(registration => registration.Gender)
-            .IsInEnum().WithMessage("Invalid gender.");
 
         RuleFor(registration => registration.FavLang)
             .IsInEnum().WithMessage("Invalid favorite language.");

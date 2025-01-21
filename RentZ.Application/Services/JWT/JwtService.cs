@@ -32,7 +32,6 @@ public class JwtService : IJwtService
             new Claim(JwtRegisteredClaimNames.Name, tokenRequest.DisplayName ?? ""),
             new Claim(JwtRegisteredClaimNames.Email, tokenRequest.UserEmail ?? ""),
             new Claim("PhoneNumber", tokenRequest.PhoneNumber ?? ""),
-            new Claim("Gender", tokenRequest.Gender.ToString() ?? ""),
             new Claim("FavLang", tokenRequest.FavLang.ToString() ?? ""),
             new Claim("IsOwner", tokenRequest.IsOwner.ToString() ?? ""),
             new Claim("IsActiveAcc", tokenRequest.IsActive.ToString() ?? ""),

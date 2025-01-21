@@ -3,7 +3,7 @@
 namespace RentZ.DTO.JWT;
 
 public record GenerateTokenRequestDto(string UserId, string? DisplayName, string? UserEmail, string? UserImage,
-	string? PhoneNumber, Gender? Gender, Lang? FavLang, bool? IsOwner, 
+	string? PhoneNumber, Lang? FavLang, bool? IsOwner, 
 	bool? IsActive, bool? IsOtpVerified, Roles? Role);
 
 public record GenerateTokenResponseDto(string Token, DateTime ExpiryDate);

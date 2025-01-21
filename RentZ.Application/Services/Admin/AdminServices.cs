@@ -98,14 +98,14 @@ public class AdminServices : IAdminServices
         if (usersRequest.ExportData)
         {
             var exportResult = await users.Take(count).OrderBy(x => x.User.DisplayName)
-                .Select(x => new AdminUserData(x.Id.ToString(), x.User.DisplayName, x.User.Email, x.User.PhoneNumber, x.BirthDate, x.Gender.ToString(), x.User.IsActive)).ToListAsync();
+                .Select(x => new AdminUserData(x.Id.ToString(), x.User.DisplayName, x.User.Email, x.User.PhoneNumber, x.User.IsActive)).ToListAsync();
             
             return new BaseResponse<PagedResult<AdminUserData>> { Code = ErrorCode.Success, Message = "Get all users details done successfully", Data = new PagedResult<AdminUserData>() { Items = exportResult, TotalCount = count } };
         }
 
         var results = await users.Skip((usersRequest.Pagination.PageIndex - 1) * usersRequest.Pagination.PageSize)
             .Take(usersRequest.Pagination.PageSize).OrderBy(x => x.User.DisplayName)
-            .Select(x=> new AdminUserData(x.Id.ToString(),x.User.DisplayName,x.User.Email,x.User.PhoneNumber,x.BirthDate,x.Gender.ToString(),x.User.IsActive)).ToListAsync();
+            .Select(x=> new AdminUserData(x.Id.ToString(),x.User.DisplayName,x.User.Email,x.User.PhoneNumber,x.User.IsActive)).ToListAsync();
 
         return new BaseResponse<PagedResult<AdminUserData>> { Code = ErrorCode.Success, Message = "Get all users details done successfully", Data = new PagedResult<AdminUserData>() { Items = results, TotalCount = count } };
     }
@@ -201,8 +201,6 @@ public class AdminServices : IAdminServices
                 worksheet.Cell(i + 2, 2).Value = user.DisplayName;
                 worksheet.Cell(i + 2, 3).Value = user.Email;
                 worksheet.Cell(i + 2, 4).Value = user.PhoneNumber;
-                worksheet.Cell(i + 2, 5).Value = user.BirthDate.ToShortDateString();
-                worksheet.Cell(i + 2, 6).Value = user.Gender;
                 worksheet.Cell(i + 2, 7).Value = user.IsActive;
             }
 

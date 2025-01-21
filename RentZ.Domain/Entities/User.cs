@@ -25,8 +25,6 @@ public class Client
     [Key]
     public Guid Id { get; set; }
     public bool IsOwner { get; set; } = false;
-    public Gender Gender { get; set; }
-    public DateTime BirthDate { get; set; }
     public string ProfileImage { get; set; }
     public Lang FavLang { get; set; }
     public string Bio { get; set; }

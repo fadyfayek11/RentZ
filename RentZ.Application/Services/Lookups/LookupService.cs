@@ -23,7 +23,7 @@ public class LookupService : ILookupService
         {
             cityQuery = cityQuery.Where(x => x.Id == lookup.Id && x.IsActive);
         }
-        cityQuery = cityQuery.Where(x => x.IsActive == lookup.IsActive);
+        cityQuery = cityQuery.Where(x => x.IsActive == (lookup.IsActive ?? true));
 
         if (!string.IsNullOrEmpty(lookup.Name))
         {
@@ -57,7 +57,7 @@ public class LookupService : ILookupService
 			cityQuery = cityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
 		}
 
-        cityQuery = cityQuery.Where(x=>x.IsActive == lookup.IsActive); 
+        cityQuery = cityQuery.Where(x=>x.IsActive == (lookup.IsActive ?? true)); 
 
         var cities = await cityQuery
 			.Select(x => new LookupResponseAdmin()
@@ -140,7 +140,7 @@ public class LookupService : ILookupService
         {
             utilityQuery = utilityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
         }
-        utilityQuery = utilityQuery.Where(x=>x.IsActive == lookup.IsActive);
+        utilityQuery = utilityQuery.Where(x=>x.IsActive == (lookup.IsActive ?? true));
 
         var isEnum = Enum.TryParse(lookup.Lang, out Lang langValue);
 
@@ -168,7 +168,7 @@ public class LookupService : ILookupService
         {
             utilityQuery = utilityQuery.Where(x => x.Name.Contains(lookup.Name) || x.NameEn.Contains(lookup.Name));
         }
-        utilityQuery = utilityQuery.Where(x => x.IsActive == lookup.IsActive);
+        utilityQuery = utilityQuery.Where(x => x.IsActive == (lookup.IsActive ?? true));
 
 
         var utilities = await utilityQuery

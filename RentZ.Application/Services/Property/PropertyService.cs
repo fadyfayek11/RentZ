@@ -182,8 +182,10 @@ public class PropertyService : IPropertyService
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
-            (!filters.AvailableDateFrom.HasValue || p.DateFrom >= filters.AvailableDateFrom) &&
-            (!filters.AvailableDateTo.HasValue || p.DateTo <= filters.AvailableDateTo) &&
+            //(
+            //    (!filters.AvailableDateFrom.HasValue || p.DateFrom >= filters.AvailableDateFrom) &&
+            //    (!filters.AvailableDateTo.HasValue || (p.DateTo.HasValue ? p.DateTo <= filters.AvailableDateTo : p.DateFrom <= filters.AvailableDateTo))
+            //)&&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
             (!filters.NumOfBathRooms.HasValue || p.NumOfBathRooms == filters.NumOfBathRooms) &&
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
@@ -268,11 +270,11 @@ public class PropertyService : IPropertyService
             (!filters.Gender.HasValue || p.Gender == filters.Gender) &&
             (!filters.Age.HasValue || (p.AgeFrom <= filters.Age && p.AgeTo >= filters.Age)) &&
             (!filters.NumOfRooms.HasValue || p.NumOfRooms == filters.NumOfRooms) &&
-            (!filters.PriceFrom.HasValue || p.PriceTo >= filters.PriceFrom) &&
-            (!filters.PriceTo.HasValue || p.PriceTo <= filters.PriceTo) &&
             (!filters.Area.HasValue || p.Area <= filters.Area) &&
-            (!filters.AvailableDateFrom.HasValue || p.DateFrom >= filters.AvailableDateFrom) &&
-            (!filters.AvailableDateTo.HasValue || p.DateTo <= filters.AvailableDateTo) &&
+            (
+                (!filters.AvailableDateFrom.HasValue || p.DateFrom >= filters.AvailableDateFrom) &&
+                (!filters.AvailableDateTo.HasValue || (p.DateTo.HasValue ? p.DateTo <= filters.AvailableDateTo : p.DateFrom <= filters.AvailableDateTo))
+            )&&
             (!filters.NumOfBeds.HasValue || p.NumOfBeds == filters.NumOfBeds) &&
             (!filters.NumOfBathRooms.HasValue || p.NumOfBathRooms == filters.NumOfBathRooms) &&
             (!filters.FurnishingType.HasValue || p.FurnishingType == filters.FurnishingType)
@@ -288,6 +290,8 @@ public class PropertyService : IPropertyService
         {
             properties = properties.Where(property =>  filters.PropertyCategories.Contains(property.PropertyCategory));
         }
+        properties = properties.Where(p => (!filters.PriceFrom.HasValue || p.PriceTo >= filters.PriceFrom) &&
+                                           (!filters.PriceTo.HasValue || p.PriceTo <= filters.PriceTo));
 
         var propertiesList = await properties.Skip((filters.Pagination.PageIndex-1) * filters.Pagination.PageSize).Take(filters.Pagination.PageSize).OrderByDescending(x => x.CreatedDate).Include(x=> x.City).ToListAsync();
 
