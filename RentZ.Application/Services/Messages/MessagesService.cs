@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using RentZ.Application.Mapper;
 using RentZ.Application.Services.Notification;
 using RentZ.Domain.Entities;
 using RentZ.DTO.Enums;
@@ -43,37 +45,40 @@ public class MessagesService : IMessagesService
         }
     }
    
-    public async Task<PagedResult<MessageDto>?> GetDbMessages(int pageIndex, int pageSize, string uId, int conversationId)
+    public async Task<PagedResult<MessageDtoResponse>?> GetDbMessages(int pageIndex, int pageSize, string uId, int conversationId)
     {
-        var messages = await  _context.Conversations.Include(x=>x.Messages).Where(y => y.Id == conversationId)
-            .Select(z=> z.Messages
-                .Select(x => new MessageDto
-                {
-                    Id = x.Id,
-                    ConversationId = x.ConversationId,
-                    SendAt = x.SentAt,
-                    Content = x.Content,
-                    SenderId = x.SenderId.ToString(),
-                    SenderName = x.Sender.User.DisplayName,
-                    ReceiverId = x.ReceiverId.ToString(),
-                    ReceiverName = x.Receiver.User.DisplayName,
-                }).OrderByDescending(x => x.SendAt).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList()
-            ).FirstOrDefaultAsync();
-       
+        var messages = await _context.Conversations
+            .Where(c => c.Id == conversationId)
+            .SelectMany(c => c.Messages) // Flattens Messages into a single collection
+            .OrderByDescending(m => m.SentAt)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .Select(m => new MessageDtoResponse()
+            {
+                Id = m.Id,
+                ConversationId = m.ConversationId,
+                SendAt = m.SentAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"), 
+                Content = m.Content,
+                SenderId = m.SenderId.ToString(),
+                SenderName = m.Sender.User.DisplayName,
+                ReceiverId = m.ReceiverId.ToString(),
+                ReceiverName = m.Receiver.User.DisplayName,
+            })
+            .ToListAsync();
+
         var totalCount = await _context.Conversations.Where(y => y.Id == conversationId)
             .Select(z => z.Messages.Count).FirstOrDefaultAsync();
-        
+
         if (!_memoryCache.TryGetValue(conversationId, out List<MessageDto>? cachedList))
         {
             cachedList = new List<MessageDto>();
         }
 
-        cachedList?.AddRange(messages);
-        cachedList = cachedList?.GroupBy(x=>x.Id).Select(x=>x.First()).ToList();
+        cachedList?.AddRange(messages.Select(message => Mapping.Mapper.Map<MessageDto>(message)));
+        cachedList = cachedList?.GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
         _memoryCache.Set(conversationId, cachedList);
-
-        return new PagedResult<MessageDto>() { Items = messages, TotalCount =  totalCount };
+        return new PagedResult<MessageDtoResponse>() { Items = messages, TotalCount = totalCount };
     }
    
     public PagedResult<MessageDto>? GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId)
@@ -99,12 +104,20 @@ public class MessagesService : IMessagesService
             {
                 ConversationId = x.ConversationId,
                 Content = x.Content,
-                SentAt = x.SendAt,
+                SentAt = DateTime.SpecifyKind(x.SendAt, DateTimeKind.Utc),
                 SenderId = Guid.Parse(x.SenderId),
                 ReceiverId = Guid.Parse(x.ReceiverId),
             }).ToList();
-
-            await _context.Messages.AddRangeAsync(messagesEntity);
+            try
+            {
+                await _context.Messages.AddRangeAsync(messagesEntity);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+           
 
             var conversation = await _context.Conversations.FirstOrDefaultAsync(x => x.Id == cachedList[0].ConversationId);
             if (conversation != null)
@@ -125,31 +138,41 @@ public class MessagesService : IMessagesService
 
                 _context.Conversations.Update(conversation);
             }
-            var isSaved =  await _context.SaveChangesAsync() > 0;
 
-            if (conversation is { IsReceiverOnline: false, IsSenderOnline: false })
+            try
             {
-                cachedList.Clear();
-                _memoryCache.Set(conversationId, cachedList);
+                var isSaved = await _context.SaveChangesAsync() > 0;
+                if (conversation is { IsReceiverOnline: false, IsSenderOnline: false })
+                {
+                    cachedList.Clear();
+                    _memoryCache.Set(conversationId, cachedList);
 
+                    return isSaved;
+                }
+
+                cachedList.RemoveRange(cachedList.Count() - messagesEntity.Count(), messagesEntity.Count());
+                cachedList.AddRange(messagesEntity.Select(x => new MessageDto
+                {
+                    Id = x.Id,
+                    ConversationId = x.ConversationId,
+                    SendAt = DateTime.SpecifyKind(x.SentAt, DateTimeKind.Utc),
+                    Content = x.Content,
+                    SenderId = x.SenderId.ToString(),
+                    SenderName = _context.Users.Where(z => z.Id == x.SenderId).Select(c => c.DisplayName).FirstOrDefault() ?? "",
+                    ReceiverId = x.ReceiverId.ToString(),
+                    ReceiverName = _context.Users.Where(z => z.Id == x.ReceiverId).Select(c => c.DisplayName).FirstOrDefault() ?? "",
+                }).ToList());
+
+                _memoryCache.Set(conversationId, cachedList);
                 return isSaved;
             }
-
-            cachedList.RemoveRange(cachedList.Count() - messagesEntity.Count(),messagesEntity.Count());
-            cachedList.AddRange(messagesEntity.Select(x=> new MessageDto
+            catch (Exception e)
             {
-                Id = x.Id,
-                ConversationId = x.ConversationId,
-                SendAt = x.SentAt,
-                Content = x.Content,
-                SenderId = x.SenderId.ToString(),
-                SenderName = _context.Users.Where(z => z.Id == x.SenderId).Select(c => c.DisplayName).FirstOrDefault() ?? "",
-                ReceiverId = x.ReceiverId.ToString(),
-                ReceiverName = _context.Users.Where(z => z.Id == x.ReceiverId).Select(c => c.DisplayName).FirstOrDefault() ?? "",
-            }).ToList());
+                Console.WriteLine(e);
+                throw;
+            }
 
-            _memoryCache.Set(conversationId, cachedList);
-            return isSaved;
+           
         }
         return false;
     }

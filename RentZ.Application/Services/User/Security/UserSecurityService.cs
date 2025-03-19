@@ -14,23 +14,27 @@ using RentZ.Infrastructure.Context;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using RentZ.Application.DtoValidations;
 
 namespace RentZ.Application.Services.User.Security
 {
     public class UserSecurityService : IUserSecurityService
     {
+        private readonly ILogger<UserSecurityService> _logger;
         private readonly ApplicationDbContext _context;
         private readonly IJwtService _jwtService;
         private readonly IFileManager _fileManager;
         private readonly UserManager<Domain.Entities.User> _userManager;
         private readonly byte[] _encryptionKey = Encoding.UTF8.GetBytes("9B31C3F0A4E525CCD6AD1D24FBCB438E106E53E2391FC179");
-        public UserSecurityService(IJwtService jwtService, ApplicationDbContext context, UserManager<Domain.Entities.User> userManager, IFileManager fileManager)
+        public UserSecurityService(IJwtService jwtService, ApplicationDbContext context, UserManager<Domain.Entities.User> userManager, IFileManager fileManager, ILogger<UserSecurityService> logger)
         {
 	        _jwtService = jwtService;
 	        _context = context;
             _userManager = userManager;
             _fileManager = fileManager;
+            _logger = logger;
         }
 
 		public async Task<BaseResponse<GenerateTokenResponseDto>> Login(Login login, HttpContext context)
@@ -148,21 +152,71 @@ namespace RentZ.Application.Services.User.Security
             var tokenResult = GenerateToken(user, client, context);
             return new BaseResponse<GenerateTokenResponseDto?>() { Code = ErrorCode.Success, Message = "Verification done successfully", Data = tokenResult };
         }
-        //private static string GenerateCode(int length = 4)
-        //{
-        //    var maxNumber = (int)Math.Pow(10, length) - 1;
-        //    var otp = new Random().Next(0, maxNumber);
+       
+        private static string GenerateCode(int length = 4)
+        {
+            var maxNumber = (int)Math.Pow(10, length) - 1;
+            var otp = new Random().Next(0, maxNumber);
 
-        //    var otpString = otp.ToString().PadLeft(length, '0');
+            var otpString = otp.ToString().PadLeft(length, '0');
 
-        //    return otpString;
-        //}
+            return otpString;
+        }
+        private async Task<bool> SendOtpViaOrangeApi(string phoneNumber, string otpCode)
+        {
+            var apiUrl = "https://marketingportal.access2arabia.com:7755/JSON/API/A2A/SendSMS";
+            var username = "Berveh24";
+            var password = "Berveh24@Orange227";
+            var senderId = "Berveh"; 
+
+            var smsText = $"Your OTP code is {otpCode}";
+
+            var requestBody = new
+            {
+                BankCode = username,
+                BankPWD = password,
+                SenderID = senderId,
+                MsgText = smsText,
+                MobileNo = phoneNumber
+            };
+
+            using (var httpClient = new HttpClient())
+            {
+                var json = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    var response = await httpClient.PostAsync(apiUrl, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<OrangeApiResponse>(responseContent);
+
+                        if (result.ErrorCode == 0)
+                        {
+                            return true;
+                        }
+
+                        _logger.LogError($"Orange API Error: {result.ErrorMessage}");
+                        return false;
+                    }
+
+                    _logger.LogError($"Orange API Request Failed: {response.StatusCode}");
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Exception while calling Orange API: {ex.Message}");
+                    return false;
+                }
+            }
+        }
         private async Task<(bool, GenerateTokenResponseDto)> SetOtp(Domain.Entities.User user, HttpContext context)
         {
             var userOtp = await _context.OtpSetups.FirstOrDefaultAsync(x => x.Id == user.Id);
 			
-            //var code = GenerateCode();
-			var code = "1234";
+            var code = GenerateCode();
 			if (userOtp == null)
             {
 	            await _context.OtpSetups.AddAsync(new OtpSetup()
@@ -181,13 +235,18 @@ namespace RentZ.Application.Services.User.Security
 			}
 
 			var client = await _context.Clients.FirstOrDefaultAsync(x => x.Id == user.Id);
-            if(client is null)
-                return (false, null)!;
+            if (client is not null)
+            {
+                var tokenResult = GenerateToken(user, client, context);
 
-			var tokenResult = GenerateToken(user, client, context);
+                var phone = user.PhoneNumber.Split('+')[1];
+                await SendOtpViaOrangeApi(phone, code);
 
-			//ToDo: making integration with orange to send otp sms
-			return (await _context.SaveChangesAsync() > 0, tokenResult);
+                return (await _context.SaveChangesAsync() > 0, tokenResult);
+            }
+            
+            
+            return (false, null)!;
         }
         public async Task<BaseResponse<bool>> ResendOtp(Guid userId, HttpContext context)
         {

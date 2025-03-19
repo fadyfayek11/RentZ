@@ -8,7 +8,7 @@ namespace RentZ.Application.Services.Messages;
 public interface IMessagesService
 {
     Task SetTempMessages(MessageDto request, int chatId, string uId, string receiverId);
-    Task<PagedResult<MessageDto>?> GetDbMessages(int pageIndex, int pageSize, string uId, int conversationId);
+    Task<PagedResult<MessageDtoResponse>?> GetDbMessages(int pageIndex, int pageSize, string uId, int conversationId);
     PagedResult<MessageDto>? GetTempMessages(int pageIndex, int pageSize, string uId, int conversationId);
     Task<bool> SaveMessages(int conversationId);
     Task<int> StartConversation(int propId, string senderId, string receiverId);

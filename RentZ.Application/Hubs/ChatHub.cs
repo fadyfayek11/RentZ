@@ -51,7 +51,7 @@ public class ChatHub : Hub
        
         await _messagesService.SetTempMessages(new MessageDto
         {
-            SendAt = DateTime.Now,
+            SendAt = DateTime.UtcNow,
             ConversationId = conversationId,
             Content = message,
             SenderId = senderId,

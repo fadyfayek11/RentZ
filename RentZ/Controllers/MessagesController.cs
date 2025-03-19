@@ -43,7 +43,7 @@ public class MessagesController : Controller
 
         await _messagesService.SetTempMessages(new MessageDto
         {
-            SendAt = DateTime.Now,
+            SendAt = DateTime.UtcNow,
             ConversationId = conversationId,
             Content = message,
             SenderId = senderId!,
@@ -55,7 +55,7 @@ public class MessagesController : Controller
         
         await _context.Clients.Users(senderId!, receiverId.ToLower()).SendAsync("Send", listOfMessages);
         
-        return new OkObjectResult(new BaseResponse<PagedResult<MessageDto>>()
+        return new OkObjectResult(new BaseResponse<PagedResult<MessageDtoResponse>>()
             { Data = listOfMessages, Code = ErrorCode.Success }
         );
 
