@@ -17,7 +17,6 @@ public class RegistrationValidation : AbstractValidator<Registration>
         RuleFor(registration => registration.Password)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(8).WithMessage("Password must be at least 8 characters long.")
-            .Matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).*$")
             .WithMessage("Password must contain at least one uppercase letter, one lowercase letter, and one digit.");
 
 
