@@ -55,6 +55,11 @@ public class PropertyService : IPropertyService
         propEntity.PropertyUtilities = propUtilities;
         propEntity.Status = prop.PropertyType == PropertyType.Request ? PropertyStatus.Approved : PropertyStatus.Pending;
 
+        if (prop is { PropertyType: PropertyType.Request, DateTo: null })
+        {
+            return new BaseResponse<GetPropertyDetails?>() { Code = ErrorCode.BadRequest, Message = "Validation Error, please set Date to", Data = null };
+        }
+
         await _context.Properties.AddAsync(propEntity);
         await _context.SaveChangesAsync();
 

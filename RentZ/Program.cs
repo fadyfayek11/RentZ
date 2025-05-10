@@ -34,8 +34,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 	{
 		options.SignIn.RequireConfirmedAccount = true;
-		options.User.RequireUniqueEmail = true; 
-	})
+		options.User.RequireUniqueEmail = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+    })
 	.AddEntityFrameworkStores<ApplicationDbContext>()
 	.AddDefaultTokenProviders();
 
