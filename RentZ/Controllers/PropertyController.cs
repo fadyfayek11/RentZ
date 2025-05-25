@@ -126,7 +126,7 @@ public class PropertyController : Controller
         return new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError };
     }
 
-    [EnableRateLimiting("fixed")]
+    [EnableRateLimiting("property-view")]
     [HttpPatch(nameof(View))]
     [SwaggerResponse(StatusCodes.Status200OK, "Success", typeof(BaseResponse<int>))]
     public async Task<IActionResult> View([FromQuery] FindProperty filter)

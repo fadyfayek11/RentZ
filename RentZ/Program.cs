@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RentZ.API.Controllers;
@@ -81,16 +82,26 @@ builder.Services.AddOptions();
 
 builder.Services.AddRateLimiter(rateLimiterOptions =>
 {
-    rateLimiterOptions.AddPolicy("fixed", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-        partitionKey: httpContext.Connection.Id,
-        factory: _ => new FixedWindowRateLimiterOptions()
-        {
-            PermitLimit = 1,
-            Window = TimeSpan.FromHours(1),
+    rateLimiterOptions.AddPolicy("property-view", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-        }));
-    
+        // Extract property ID from query string
+        var propertyId = httpContext.Request.Query["PropId"].ToString() ?? "none";
+
+        var partitionKey = $"{ip}:{propertyId}";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: partitionKey,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 1,
+                Window = TimeSpan.FromDays(1),
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            });
+    });
+
     rateLimiterOptions.AddPolicy("limitDay", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
         partitionKey: httpContext.Connection.Id,
@@ -173,16 +184,18 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
+app.UseCors(policy =>
+    policy.WithOrigins("localhost:4200",
+            "https://www.berveh.com/", "http://www.berveh.com/", "https://www.berveh.com/RentzAdmin",
+            "https://41.196.0.80/", "http://41.196.0.80/").AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowAnyOrigin());
+
 app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors(policy =>
-    policy.WithOrigins("localhost:4200",
-    "https://www.berveh.com/", "http://www.berveh.com/", "https://www.berveh.com/RentzAdmin",
-    "https://41.196.0.80/", "http://41.196.0.80/").AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowAnyOrigin());
+
 app.MapControllers();
 app.MapHub<ChatHub>("chatHub");
 
